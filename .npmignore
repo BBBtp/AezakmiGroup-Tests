@@ -1,0 +1,40 @@
+# Test results and reports
+test-results/
+playwright-report/
+reports/
+results.xml
+test-results.json
+
+# Node modules
+node_modules/
+
+# Auth files (should not be in package)
+.auth/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Support folder (if empty)
+support/
+
+# Тестовые данные с реальными паролями (не включать в пакет)
+fixtures/users.ts
+.env
+.env.local
+*.local.ts
+

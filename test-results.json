@@ -1,0 +1,725 @@
+{
+  "config": {
+    "configFile": "/Users/bogdan/crm-aezakmi-tests/playwright.config.ts",
+    "rootDir": "/Users/bogdan/crm-aezakmi-tests/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/bogdan/crm-aezakmi-tests/fixtures/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "results.xml"
+        }
+      ],
+      [
+        "line",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/bogdan/crm-aezakmi-tests/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "smoke",
+        "name": "smoke",
+        "testDir": "/Users/bogdan/crm-aezakmi-tests/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.smoke.spec.ts"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/bogdan/crm-aezakmi-tests/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "regression",
+        "name": "regression",
+        "testDir": "/Users/bogdan/crm-aezakmi-tests/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.regression.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "smoke/auth.smoke.spec.ts",
+      "file": "smoke/auth.smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Авторизация в CRM",
+          "file": "smoke/auth.smoke.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Страница авторизации доступна и загружается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6108,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:22.938Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-8a465511d71a024a6473",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 9,
+              "column": 9
+            },
+            {
+              "title": "Основные элементы страницы отображаются",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 5530,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем Title",
+                          "duration": 7
+                        },
+                        {
+                          "title": "Проверяем SubTitle",
+                          "duration": 31
+                        },
+                        {
+                          "title": "Проверяем текст в Title и SubTitle",
+                          "duration": 222
+                        },
+                        {
+                          "title": "Проверяем поле email",
+                          "duration": 307
+                        },
+                        {
+                          "title": "Проверяем поле password",
+                          "duration": 12
+                        },
+                        {
+                          "title": "Проверяем кнопку входа",
+                          "duration": 4
+                        },
+                        {
+                          "title": "Проверяем кнопку \"Забыли пароль\"",
+                          "duration": 16
+                        }
+                      ],
+                      "startTime": "2025-11-24T09:02:22.894Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-cb79399495f8e10a32fb",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 14,
+              "column": 9
+            },
+            {
+              "title": "Успешная авторизация администратора",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 5639,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:22.804Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-014628b2c0b5ea452a65",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 41,
+              "column": 9
+            },
+            {
+              "title": "Успешная авторизация обычного пользователя",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 5306,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:22.902Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-3adc527cb7fafdbf328f",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 46,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Forgot password\" открывает модальное окно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4120,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:28.743Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-869f22e427b78f866c7d",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 51,
+              "column": 9
+            },
+            {
+              "title": "Модальное окно восстановления пароля закрывается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 4411,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:29.131Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-609fab5c4cabbc96b6fc",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 57,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "smoke/kpi.smoke.spec.ts",
+      "file": "smoke/kpi.smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Страница KPI",
+          "file": "smoke/kpi.smoke.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Подзаголовок отображается корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 4191,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:29.157Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-0057afd006ac3840782e",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 9,
+              "column": 9
+            },
+            {
+              "title": "Кнопка настроек отображается и кликабельна",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6892,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:29.531Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-1398ee2f542b10b00c6e",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 14,
+              "column": 9
+            },
+            {
+              "title": "Основной контент рендерится, error-content скрыт",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 6439,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:33.050Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-5563d2de9a6497634cef",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 27,
+              "column": 9
+            },
+            {
+              "title": "При ошибке загрузки отображается error-content, main-content скрыт",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 13311,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:33.490Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-32e35dc76b40638f12e3",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 32,
+              "column": 9
+            },
+            {
+              "title": "Проверка отображения карточек KPI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 8013,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем карточку Total MRR",
+                          "duration": 67
+                        },
+                        {
+                          "title": "Проверяем карточку Average Score",
+                          "duration": 431
+                        },
+                        {
+                          "title": "Проверяем карточку Number of Apps",
+                          "duration": 100
+                        }
+                      ],
+                      "startTime": "2025-11-24T09:02:33.703Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-08eac5e963bbbcaae805",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 48,
+              "column": 9
+            },
+            {
+              "title": "Фильтры по месяцам видимы и работают",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4307,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем видимость фильтров по месяцам",
+                          "duration": 30
+                        },
+                        {
+                          "title": "Есть хотя бы один таб",
+                          "duration": 4
+                        },
+                        {
+                          "title": "Активный таб отображается",
+                          "duration": 10
+                        }
+                      ],
+                      "startTime": "2025-11-24T09:02:36.472Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-aab1bcc1b354f76583d8",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 62,
+              "column": 9
+            },
+            {
+              "title": "График производительности отображается и табы переключаются",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 6131,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-24T09:02:39.783Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-b212d86ef28938b3b0ef",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 80,
+              "column": 9
+            },
+            {
+              "title": "Top Employees отображается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5484,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Podium рендерится",
+                          "duration": 5
+                        },
+                        {
+                          "title": "Есть хотя бы один contender",
+                          "duration": 8
+                        }
+                      ],
+                      "startTime": "2025-11-24T09:02:40.808Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-78af2b5d120d99ca9107",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 94,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников отображается и можно открыть карточку сотрудника",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 7305,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Таблица отображается",
+                          "duration": 6
+                        },
+                        {
+                          "title": "Есть хотя бы одна строка",
+                          "duration": 8
+                        },
+                        {
+                          "title": "Кнопка Open открывает страницу сотрудника",
+                          "duration": 149
+                        }
+                      ],
+                      "startTime": "2025-11-24T09:02:41.950Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-dc9dbbf7125c91cbbf38",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 111,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-24T09:01:46.259Z",
+    "duration": 93070.493,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

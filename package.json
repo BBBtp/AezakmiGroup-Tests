@@ -1,0 +1,36 @@
+{
+  "name": "@crm/e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for CRM application",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --project=smoke",
+    "test:regression": "playwright test --project=regression",
+    "test:auth": "playwright test tests/regression/auth/",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright test && playwright show-report",
+    "test:types": "tsc --noEmit"
+  },
+  "files": [
+    "components/**/*",
+    "pages/**/*",
+    "fixtures/**/*",
+    "utils/**/*",
+    "tests/**/*",
+    "config/**/*",
+    "playwright.config.ts",
+    "tsconfig.json",
+    "package.json",
+    ".env.example"
+  ],
+  "keywords": ["e2e", "playwright", "testing", "crm"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.9.2",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.9.3"
+  }
+}

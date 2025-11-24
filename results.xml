@@ -1,0 +1,36 @@
+<testsuites id="" name="" tests="15" failures="0" skipped="0" errors="0" time="93.070493">
+<testsuite name="smoke/auth.smoke.spec.ts" timestamp="2025-11-24T09:02:21.126Z" hostname="smoke" tests="6" failures="0" skipped="0" time="31.114" errors="0">
+<testcase name="Авторизация в CRM › Страница авторизации доступна и загружается" classname="smoke/auth.smoke.spec.ts" time="6.108">
+</testcase>
+<testcase name="Авторизация в CRM › Основные элементы страницы отображаются" classname="smoke/auth.smoke.spec.ts" time="5.53">
+</testcase>
+<testcase name="Авторизация в CRM › Успешная авторизация администратора" classname="smoke/auth.smoke.spec.ts" time="5.639">
+</testcase>
+<testcase name="Авторизация в CRM › Успешная авторизация обычного пользователя" classname="smoke/auth.smoke.spec.ts" time="5.306">
+</testcase>
+<testcase name="Авторизация в CRM › Кнопка &quot;Forgot password&quot; открывает модальное окно" classname="smoke/auth.smoke.spec.ts" time="4.12">
+</testcase>
+<testcase name="Авторизация в CRM › Модальное окно восстановления пароля закрывается" classname="smoke/auth.smoke.spec.ts" time="4.411">
+</testcase>
+</testsuite>
+<testsuite name="smoke/kpi.smoke.spec.ts" timestamp="2025-11-24T09:02:21.126Z" hostname="smoke" tests="9" failures="0" skipped="0" time="62.073" errors="0">
+<testcase name="Страница KPI › Подзаголовок отображается корректно" classname="smoke/kpi.smoke.spec.ts" time="4.191">
+</testcase>
+<testcase name="Страница KPI › Кнопка настроек отображается и кликабельна" classname="smoke/kpi.smoke.spec.ts" time="6.892">
+</testcase>
+<testcase name="Страница KPI › Основной контент рендерится, error-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="6.439">
+</testcase>
+<testcase name="Страница KPI › При ошибке загрузки отображается error-content, main-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="13.311">
+</testcase>
+<testcase name="Страница KPI › Проверка отображения карточек KPI" classname="smoke/kpi.smoke.spec.ts" time="8.013">
+</testcase>
+<testcase name="Страница KPI › Фильтры по месяцам видимы и работают" classname="smoke/kpi.smoke.spec.ts" time="4.307">
+</testcase>
+<testcase name="Страница KPI › График производительности отображается и табы переключаются" classname="smoke/kpi.smoke.spec.ts" time="6.131">
+</testcase>
+<testcase name="Страница KPI › Top Employees отображается" classname="smoke/kpi.smoke.spec.ts" time="5.484">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников отображается и можно открыть карточку сотрудника" classname="smoke/kpi.smoke.spec.ts" time="7.305">
+</testcase>
+</testsuite>
+</testsuites>
