@@ -46,7 +46,7 @@ export default defineConfig({
     timeout: 10000
   },
 
-  globalSetup: require.resolve('./fixtures/global-setup.ts'),
+  globalSetup: './fixtures/global-setup.ts',
 
   projects: [
     {
