@@ -11,7 +11,6 @@ export class LoginFormComponent {
     submitButton: Locator;
     forgotPasswordButton: Locator;
     passwordVisibilityToggle: Locator;
-
     constructor(page: Page) {
         this.page = page;
         this.form = page.locator('[data-testid="login__form"]');

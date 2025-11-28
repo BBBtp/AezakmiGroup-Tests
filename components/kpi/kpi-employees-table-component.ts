@@ -11,21 +11,17 @@ export interface EmployeeData {
     lastModified: string;
 }
 
-
 export class KpiEmployeesTableComponent {
     readonly root: Locator;
     readonly rowsRoot: Locator;
     readonly header: Locator;
-
     constructor(page: Page) {
         this.root = page.locator('[data-testid="employees-table__main"]');
         this.rowsRoot = this.root.locator("tbody tr");
         this.header = this.root.locator("thead tr");
     }
-
     async verifyVisible() {
         await expect(this.root).toBeVisible();
-
         const rowCount = await this.getRowCount()
         const rows = await this.getRows()
         expect(rowCount).toBeGreaterThan(0);
@@ -38,7 +34,6 @@ export class KpiEmployeesTableComponent {
     async getRowCount() {
         return await this.rowsRoot.count();
     }
-
     async getRows() {
         const count = await this.getRowCount();
         const rows: EmployeeRowComponent[] = [];
@@ -47,7 +42,6 @@ export class KpiEmployeesTableComponent {
         }
         return rows;
     }
-
     async getHeaderCell(columnName: string) {
         const testIdMap: { [key: string]: string } = {
             'Score': 'employees-table__header-score',
@@ -57,7 +51,6 @@ export class KpiEmployeesTableComponent {
             'Number of apps': 'employees-table__header-numberOfApps',
             'Last modified': 'employees-table__header-lastModified'
         };
-
         const testId = testIdMap[columnName];
         if (!testId) {
             throw new Error(`Unknown column: ${columnName}`);
@@ -65,7 +58,6 @@ export class KpiEmployeesTableComponent {
 
         return this.header.locator(`[data-testid="${testId}"]`);
     }
-
     async sortBy(columnName: string) {
         const cell = await this.getHeaderCell(columnName);
         await cell.click();
@@ -73,7 +65,6 @@ export class KpiEmployeesTableComponent {
         await this.waitForTableStable();
         await this.verifyTableDataValid();
     }
-
     async waitForTableStable() {
         let previousRowCount = -1;
         await expect(async () => {
@@ -86,7 +77,6 @@ export class KpiEmployeesTableComponent {
             throw new Error('Table is still loading...');
         }).toPass({ timeout: 15000 });
     }
-
     async verifyTableDataValid() {
         const data = await this.getData();
         expect(data.length).toBeGreaterThan(0);
@@ -102,7 +92,6 @@ export class KpiEmployeesTableComponent {
         for (const row of rows) data.push(await row.extractData());
         return data;
     }
-
     async assertSortedBy(column: keyof EmployeeData, direction: "asc" | "desc") {
         const data = await this.getData();
         const values = data.map(d => d[column]);
@@ -135,6 +124,4 @@ export class KpiEmployeesTableComponent {
             }
         }
     }
-
-
 }

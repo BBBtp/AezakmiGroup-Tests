@@ -19,7 +19,6 @@ export class KpiPage extends BasePage {
     readonly topEmployees: KpiTopEmployeesComponent;
     readonly employeesTable: KpiEmployeesTableComponent;
     readonly filterForm: FilterFormComponent;
-
     readonly settingsButton: Locator;
     readonly subtitle: Locator;
     readonly errorContent: Locator;
@@ -30,7 +29,6 @@ export class KpiPage extends BasePage {
         super(page);
 
         this.root = page.locator('[data-testid="kpi"]');
-
         this.header = new KpiHeaderComponent(page);
         this.cards = new KpiCardGroupComponent(page);
         this.filters = new KpiMonthFiltersComponent(page);
@@ -38,7 +36,6 @@ export class KpiPage extends BasePage {
         this.topEmployees = new KpiTopEmployeesComponent(page);
         this.employeesTable = new KpiEmployeesTableComponent(page);
         this.filterForm = new FilterFormComponent(page, 'kpi-filter-form');
-
         this.settingsButton = page.locator('[data-testid="settings-button"]');
         this.subtitle = page.locator('[data-testid="subtitle"]');
         this.errorContent = page.locator('[data-testid="error-content"]');

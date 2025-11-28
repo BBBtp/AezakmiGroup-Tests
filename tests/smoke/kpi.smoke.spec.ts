@@ -6,6 +6,7 @@ test.describe('Страница KPI', () => {
     test.beforeEach(async ({ kpiPage }) => {
         await kpiPage.navigate();
     });
+
     test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
         await expect(kpiPage.subtitle).toBeVisible();
         await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
@@ -14,13 +15,10 @@ test.describe('Страница KPI', () => {
     test('Кнопка настроек отображается и кликабельна', async ({ kpiPage, page }) => {
         const btn = kpiPage.settingsButton;
         await expect(btn).toBeVisible();
-
         const errors: string[] = [];
         page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-
         await btn.click();
         await kpiPage.page.waitForURL(/\/kpi\/settings/);
-
         expect(errors.length).toBe(0);
     });
 
@@ -40,7 +38,6 @@ test.describe('Страница KPI', () => {
 
         await kpiPage.page.goto('/kpi');
         await kpiPage.page.waitForLoadState('networkidle');
-
         await expect(kpiPage.errorContent).toBeVisible();
         await expect(kpiPage.mainContent).toBeHidden();
     });
@@ -66,12 +63,10 @@ test.describe('Страница KPI', () => {
         await test.step('Проверяем видимость фильтров по месяцам', async () => {
             await filters.verifyVisible();
         });
-
         await test.step('Есть хотя бы один таб', async () => {
             const count = await filters.tabs.count();
             expect(count).toBeGreaterThan(0);
         });
-
         await test.step('Активный таб отображается', async () => {
             await expect(filters.activeTab).toBeVisible();
         });
@@ -83,10 +78,8 @@ test.describe('Страница KPI', () => {
 
         const errors: string[] = [];
         page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-
         await chart.mrrTab.click();
         expect(errors.length).toBe(0);
-
         await chart.scoreTab.click();
         expect(errors.length).toBe(0);
     });
@@ -96,11 +89,9 @@ test.describe('Страница KPI', () => {
 
         await expect(top.root).toBeVisible();
         await expect(top.title).toBeVisible();
-
         await test.step('Podium рендерится', async () => {
             await expect(top.podium).toBeVisible();
         });
-
         await test.step('Есть хотя бы один contender', async () => {
             const count = await top.getContendersCount();
             expect(count).toBeGreaterThan(0);
@@ -114,23 +105,18 @@ test.describe('Страница KPI', () => {
         await test.step('Таблица отображается', async () => {
             await expect(table.root).toBeVisible();
         });
-
         await test.step('Есть хотя бы одна строка', async () => {
             const count = await table.getRowCount();
             expect(count).toBeGreaterThan(0);
         });
-
         await test.step('Кнопка Open открывает страницу сотрудника', async () => {
             const rows = await table.getRows();
             const firstRow = rows[0];
-
             const oldUrl = kpiPage.page.url();
-
             await Promise.all([
                 kpiPage.page.waitForURL(/\/kpi\/.+/),
                 firstRow.openButton.click()
             ]);
-
             await expect(kpiPage.page).toHaveURL(/\/kpi\/.+/);
             expect(kpiPage.page.url()).not.toBe(oldUrl);
         });

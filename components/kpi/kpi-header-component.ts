@@ -5,7 +5,6 @@ export class KpiHeaderComponent {
     readonly settingsButton: Locator;
     readonly subtitle: Locator;
     readonly errorBlock: Locator;
-
     constructor(page: Page) {
         this.root = page.locator('[data-testid="kpi"]');
         this.settingsButton = this.root.locator('[data-testid="settings-button"]');

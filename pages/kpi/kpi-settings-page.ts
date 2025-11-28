@@ -11,26 +11,21 @@ export class KpiSettingsPage extends BasePage {
     readonly loadingState: Locator;
     readonly errorContent: Locator;
     readonly breadcrumbs: Locator;
-
     readonly scoreTable: KpiSettingsScoreComponent;
     readonly abTestsTable: KpiSettingsTableComponent;
     readonly totalMrrTable: KpiSettingsTableComponent;
-
     readonly abTestsAddModal: KpiSettingsAddValueModal;
     readonly totalMrrAddModal: KpiSettingsAddValueModal;
 
     constructor(page: Page) {
         super(page);
-
         this.root = page.locator('[data-testid="kpi-settings"]');
         this.loadingState = page.locator('[data-testid="kpi-settings-loading"]');
         this.errorContent = page.locator('[data-testid="error-content"]');
         this.breadcrumbs = page.locator('[data-testid="bread-crumbs"]');
-
         this.scoreTable = new KpiSettingsScoreComponent(page);
         this.abTestsTable = new KpiSettingsTableComponent(page, 'ab-tests');
         this.totalMrrTable = new KpiSettingsTableComponent(page, 'total-mrr');
-
         this.abTestsAddModal = new KpiSettingsAddValueModal(page, 'ab-tests');
         this.totalMrrAddModal = new KpiSettingsAddValueModal(page, 'total-mrr');
     }

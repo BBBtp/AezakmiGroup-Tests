@@ -45,9 +45,7 @@ export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
         const page = await context.newPage();
 
         const kpiPageInstance = new KpiPage(page);
-
         await use(kpiPageInstance);
-
         await context.close();
     },
 });

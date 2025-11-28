@@ -4,6 +4,7 @@ test.describe('Функциональность авторизации', () => {
     test.beforeEach(async ({ loginPage }) => {
         await loginPage.navigate();
     });
+
     test('Работа модального окна восстановления пароля', async ({ loginPage }) => {
         await loginPage.openForgotPasswordModal();
         await expect(loginPage.forgotPasswordModal.modal).toBeVisible();

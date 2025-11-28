@@ -8,9 +8,7 @@ export class LoginPage extends BasePage {
     loginForm: LoginFormComponent;
     forgotPasswordModal: ForgotPasswordModalComponent;
     pageHeader: PageHeaderComponent;
-
     loginContainer: Locator;
-
     errorMessage: Locator;
     successMessage: Locator;
 

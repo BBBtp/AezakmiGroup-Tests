@@ -4,13 +4,11 @@ export class PodiumItemComponent {
     readonly root: Locator;
     readonly name: Locator;
     readonly currency: Locator;
-
     constructor(root: Locator, index: number) {
         this.root = root.locator(`[data-testid="podium-${index}"]`);
         this.name = this.root.locator(`[data-testid="podium-${index}__name"]`);
         this.currency = this.root.locator(`[data-testid="podium-${index}__currency"] p`);
     }
-
     async verify() {
         await expect(this.root).toBeVisible();
         await expect(this.name).toBeVisible();

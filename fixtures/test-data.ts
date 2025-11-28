@@ -33,7 +33,6 @@ export const TestData = {
            }
         }
     },
-
     timeouts: {
         pageLoad: 30000,
         action: 10000,

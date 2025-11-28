@@ -10,20 +10,16 @@ export class ForgotPasswordModalComponent extends ModalComponent {
         this.telegramButton = this.modal.locator('[data-testid="login__telegram-button"]');
         this.cancelButton = this.modal.locator('[data-testid="login__forgot-password-modal__close"]');
     }
-
     async openTelegram(): Promise<void> {
         await this.telegramButton.click();
 
     }
-
     async cancel(): Promise<void> {
             await this.close();
     }
-
     async closeByOverlay(): Promise<void> {
         await super.closeByOverlay();
     }
-
     async closeByButton(): Promise<void> {
         await super.closeByButton();
     }

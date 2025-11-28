@@ -9,7 +9,6 @@ export type KpiSettingsTableOptions = {
 export class KpiSettingsTableComponent {
     readonly page: Page;
     readonly tableName: string;
-
     readonly root: Locator;
     readonly table: Locator;
     readonly headerRow: Locator;
@@ -19,7 +18,6 @@ export class KpiSettingsTableComponent {
     readonly pointsLabel: Locator;
     readonly tableBody: Locator;
     readonly footerBar?: Locator;
-
     readonly addValueButton: Locator;
     readonly addModal: Locator;
     readonly addForm: Locator;
@@ -30,7 +28,6 @@ export class KpiSettingsTableComponent {
     readonly addModalNextButton: Locator;
     readonly addModalLoading: Locator;
     readonly addModalError: Locator;
-
     private readonly options: Required<KpiSettingsTableOptions>;
 
     constructor(page: Page, tableName: string, options: KpiSettingsTableOptions = {}) {
@@ -40,7 +37,6 @@ export class KpiSettingsTableComponent {
             hasValueColumn: options.hasValueColumn ?? true,
             hasFooterBar: options.hasFooterBar ?? true,
         };
-
         this.root = page.locator(`[data-testid="${tableName}"]`);
         this.table = page.locator(`[data-testid="${tableName}__table"]`);
         this.headerRow = page.locator(`[data-testid="${tableName}__table-header-row"]`);

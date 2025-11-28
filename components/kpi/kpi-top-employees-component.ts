@@ -8,7 +8,6 @@ export class KpiTopEmployeesComponent {
     readonly podium: Locator;
     readonly podiumItems: PodiumItemComponent[];
     readonly contendersRoot: Locator;
-
     constructor(page: Page) {
         this.root = page.locator('[data-testid="top-employees"]');
         this.title = this.root.locator('[data-testid="top-employees__title"]');
@@ -22,32 +21,26 @@ export class KpiTopEmployeesComponent {
 
         this.contendersRoot = this.root.locator('[data-testid="top-employees__contenders"]');
     }
-
     async getContendersCount(): Promise<number> {
         return this.contendersRoot.locator('[data-testid^="contender-"]:not([data-testid*="avatar"]):not([data-testid*="name"]):not([data-testid*="currency"])').count();
     }
-
     getContender(index: number): ContenderItemComponent {
         return new ContenderItemComponent(this.contendersRoot, index);
     }
-
     async getContenders(): Promise<ContenderItemComponent[]> {
         const count = await this.getContendersCount();
         return Array.from({ length: count }, (_, i) => this.getContender(i));
     }
-
     async verifyVisible(expectedTitle: string) {
         await expect(this.root).toBeVisible();
         await expect(this.title).toHaveText(expectedTitle);
     }
-
     async verifyPodium() {
         await expect(this.podium).toBeVisible();
         for (const item of this.podiumItems) {
             await item.verify();
         }
     }
-
     async verifyContenders() {
         await expect(this.contendersRoot).toBeVisible({ timeout: 10000 });
         const contendersCount = await this.getContendersCount();

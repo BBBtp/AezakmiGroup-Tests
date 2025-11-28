@@ -6,7 +6,6 @@ export class AvatarComponent {
     readonly subtitle: Locator;
     readonly sublink: Locator;
     readonly tooltip: Locator;
-
     constructor(page: Page, testId: string) {
         this.root = page.locator(`[data-testid="${testId}"]`);
         this.title = page.locator(`[data-testid="${testId}-title"]`);

@@ -6,6 +6,7 @@ test.describe('Валидация полей авторизации', () => {
     test.beforeEach(async ({ loginPage }) => {
         await loginPage.navigate();
     });
+
     test('Валидация пустых полей', async ({ loginPage }) => {
         await loginPage.loginForm.submitButton.click();
         await expect(loginPage.page).toHaveURL(/login/);

@@ -5,10 +5,8 @@ export class FilterFormComponent {
     readonly page: Page;
     readonly root: Locator;
     private readonly testId: string;
-
     readonly applyButton: Locator;
     readonly resetButton: Locator;
-
     constructor(page: Page, testId: string = 'filter-form') {
         this.page = page;
         this.testId = testId;

@@ -11,7 +11,6 @@ export class EmployeeRowComponent {
     readonly appsNumber: Locator;
     readonly lastModified: Locator;
     readonly openButton: Locator;
-
     constructor(root: Locator, index: number) {
         this.rating = root.locator(`[data-testid="employees-table__rating-${index}"]`);
         this.avatarLetter = root.locator(`[data-testid="employees-table__avatar-${index}"] p`).first();
@@ -23,7 +22,6 @@ export class EmployeeRowComponent {
         this.lastModified = root.locator(`[data-testid="employees-table__last-modified-${index}"]`);
         this.openButton = root.locator('text=Open').first();
     }
-
     async verify() {
         await expect(this.rating).toBeVisible();
         await expect(this.avatarLetter).toBeVisible();
@@ -34,7 +32,6 @@ export class EmployeeRowComponent {
         await expect(this.lastModified).toBeVisible();
         await expect(this.openButton).toBeVisible();
     }
-
     async extractData(): Promise<EmployeeData> {
         return {
             rating: Number(await this.rating.textContent()),
@@ -46,8 +43,6 @@ export class EmployeeRowComponent {
             lastModified: (await this.lastModified.textContent())?.trim() ?? "",
         };
     }
-
-
     async verifyAvatarMatchesName() {
         const letter = (await this.avatarLetter.textContent())?.trim() ?? "";
         const name = (await this.name.textContent())?.trim() ?? "";

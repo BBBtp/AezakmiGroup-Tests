@@ -6,6 +6,7 @@ test.describe('Авторизация в CRM', () => {
     test.beforeEach(async ({ loginPage }) => {
         await loginPage.navigate();
     });
+
     test('Страница авторизации доступна и загружается', async ({ loginPage }) => {
         await expect(loginPage.page).toHaveURL(/.*login/);
         await expect(loginPage.loginContainer).toBeVisible();
@@ -27,11 +28,9 @@ test.describe('Авторизация в CRM', () => {
         await test.step('Проверяем поле password', async () => {
             await expect(loginPage.loginForm.passwordInput).toBeVisible();
         });
-
         await test.step('Проверяем кнопку входа', async () => {
             await expect(loginPage.loginForm.submitButton).toBeVisible();
         });
-
         await test.step('Проверяем кнопку "Забыли пароль"', async () => {
             await expect(loginPage.loginForm.forgotPasswordButton).toBeVisible();
         });

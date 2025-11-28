@@ -7,7 +7,6 @@ export class CardComponent {
     readonly absValue: Locator;
     readonly percentValue: Locator;
     readonly period: Locator;
-
     constructor(page: Page, testId: string) {
         this.root = page.locator(`[data-testid="${testId}"]`);
         this.title = this.root.locator(`[data-testid="${testId}__title"]`);
