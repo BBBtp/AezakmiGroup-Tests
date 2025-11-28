@@ -54,7 +54,6 @@ export class ModalComponent {
         return await this.title.textContent() || '';
     }
 
-    // Универсальный метод который пробует все способы закрытия
     async forceClose(): Promise<void> {
         const closeMethods = [
             () => this.closeByButton(),

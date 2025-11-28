@@ -29,10 +29,8 @@ export class KpiPage extends BasePage {
     constructor(page: Page) {
         super(page);
 
-        // Основной контейнер страницы KPI
         this.root = page.locator('[data-testid="kpi"]');
 
-        // Подключаем компоненты
         this.header = new KpiHeaderComponent(page);
         this.cards = new KpiCardGroupComponent(page);
         this.filters = new KpiMonthFiltersComponent(page);
@@ -41,7 +39,6 @@ export class KpiPage extends BasePage {
         this.employeesTable = new KpiEmployeesTableComponent(page);
         this.filterForm = new FilterFormComponent(page, 'kpi-filter-form');
 
-        // Общие элементы страницы
         this.settingsButton = page.locator('[data-testid="settings-button"]');
         this.subtitle = page.locator('[data-testid="subtitle"]');
         this.errorContent = page.locator('[data-testid="error-content"]');

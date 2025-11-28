@@ -1,5 +1,3 @@
-// Скопируйте этот файл в users.ts и заполните реальными данными
-
 export interface UserCredentials {
     username: string;
     email: string;

@@ -48,12 +48,10 @@ export class LoginFormComponent {
     }
 
     async assertNoEmailError(): Promise<void> {
-        // Проверяет что НЕТ ошибки email
         await this.assertErrorHidden(TestData.texts.login.errorLabels.invalidEmail);
     }
 
     async assertNoPasswordError(): Promise<void> {
-        // Проверяет что НЕТ ошибки пароля
         await this.assertErrorHidden(TestData.texts.login.errorLabels.invalidPassword);
     }
 

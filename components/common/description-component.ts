@@ -10,6 +10,4 @@ export class DescriptionComponent {
         this.title = this.root.locator(`[data-testid="${testId}__title"]`);
         this.message = this.root.locator(`[data-testid="${testId}__message"]`);
     }
-//TODO: Методы добавить
-
 }

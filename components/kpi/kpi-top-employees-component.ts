@@ -23,18 +23,14 @@ export class KpiTopEmployeesComponent {
         this.contendersRoot = this.root.locator('[data-testid="top-employees__contenders"]');
     }
 
-    /** Получить количество претендентов */
     async getContendersCount(): Promise<number> {
-        // Считаем блоки которые содержат весь контент претендента
         return this.contendersRoot.locator('[data-testid^="contender-"]:not([data-testid*="avatar"]):not([data-testid*="name"]):not([data-testid*="currency"])').count();
     }
 
-    /** Получить претендента по индексу */
     getContender(index: number): ContenderItemComponent {
         return new ContenderItemComponent(this.contendersRoot, index);
     }
 
-    /** Получить всех претендентов как объекты */
     async getContenders(): Promise<ContenderItemComponent[]> {
         const count = await this.getContendersCount();
         return Array.from({ length: count }, (_, i) => this.getContender(i));

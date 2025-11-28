@@ -5,7 +5,7 @@ export class ContenderItemComponent {
     readonly name: Locator;
     readonly currency: Locator;
     readonly avatarLetter: Locator;
-    //TODO: Добавить индикатор для места в топе
+
     constructor(root: Locator, index: number) {
         this.root = root.locator(`[data-testid="contender-${index}"]`);
         this.name = this.root.locator(`[data-testid="contender-${index}__name"]`);

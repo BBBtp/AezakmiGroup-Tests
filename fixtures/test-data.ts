@@ -1,18 +1,15 @@
-// fixtures/test-data.ts
 import { testUsers, invalidUsers } from './users';
 
 export const TestData = {
     users: testUsers,
     invalidUsers: invalidUsers,
 
-    // URLы
     urls: {
         login: '/login',
         dashboard: '/dashboard',
         passwordRecovery: '/password-recovery'
     },
 
-    // Тексты для проверки
     texts: {
         login: {
             title: 'Log in to your account',
@@ -37,7 +34,6 @@ export const TestData = {
         }
     },
 
-    // Временные параметры
     timeouts: {
         pageLoad: 30000,
         action: 10000,

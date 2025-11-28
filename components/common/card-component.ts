@@ -17,7 +17,6 @@ export class CardComponent {
         this.period = this.root.locator(`[data-testid="${testId}__period"]`);
     }
 
-    /** Ассерты на видимость элементов карточки */
     async assertVisible(cardTitle: string) {
         await expect(this.root).toBeVisible();
         await expect(this.title).toBeVisible();

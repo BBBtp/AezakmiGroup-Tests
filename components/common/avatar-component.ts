@@ -14,6 +14,4 @@ export class AvatarComponent {
         this.sublink = page.locator(`[data-testid="${testId}-sublink"]`);
         this.tooltip = page.locator(`[data-testid="${testId}-sublink_tooltip"]`);
     }
-//TODO: Методы добавить
-
 }

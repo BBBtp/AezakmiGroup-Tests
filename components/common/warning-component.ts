@@ -6,5 +6,4 @@ export class WarningComponent {
     constructor(page: Page, testId = 'month-end-warning') {
         this.root = page.locator(`[data-testid="${testId}"]`);
     }
-    //TODO: Методы добавить
 }

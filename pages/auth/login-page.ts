@@ -9,10 +9,8 @@ export class LoginPage extends BasePage {
     forgotPasswordModal: ForgotPasswordModalComponent;
     pageHeader: PageHeaderComponent;
 
-    // Корневой контейнер
     loginContainer: Locator;
 
-    // Уведомления и ошибки
     errorMessage: Locator;
     successMessage: Locator;
 

@@ -1,6 +1,3 @@
-// Тестовые данные загружаются из переменных окружения (.env файл)
-// Создайте .env файл на основе .env.example
-
 const getEnv = (envKey: string): string => {
     const value = process.env[envKey];
     if (!value) {

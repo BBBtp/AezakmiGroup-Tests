@@ -13,21 +13,18 @@ export class KpiMonthFiltersComponent {
         this.datePickerButton = this.root.locator('button._pickerButton_8b6qc_10');
     }
 
-    /** Проверяет, что блок фильтров и табы отображаются */
     async verifyVisible() {
         await expect(this.root).toBeVisible();
-        const tabCount = await this.tabs.count(); // await!
+        const tabCount = await this.tabs.count();
         expect(tabCount).toBeGreaterThan(0);
     }
 
-    /** Проверяет, что активный таб виден и только один */
     async verifyActiveTab() {
         const activeCount = await this.root.locator('[role="tab"][aria-selected="true"]').count();
         expect(activeCount).toBe(1);
         await expect(this.activeTab).toBeVisible();
     }
 
-    /** Переключает на вкладку по индексу */
     async selectTabByIndex(index: number) {
         const tab = this.tabs.nth(index);
         await tab.click();

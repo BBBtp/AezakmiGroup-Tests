@@ -10,5 +10,4 @@ export class ToastComponent {
         this.title = this.root.locator(`[data-testid$="__alert-title"]`);
         this.subtitle = this.root.locator(`[data-testid$="__alert-subtitle"]`);
     }
-    //TODO: Методы добавить
 }

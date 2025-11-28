@@ -16,7 +16,6 @@ export type TestFixtures = {
 };
 
 export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
-    // worker-scoped фикстура с объектом storageState
     workerStorageState: [async ({}, use: (state: StorageState) => Promise<void>) => {
         const fileName = path.resolve('.auth/admin.json');
 
@@ -42,7 +41,6 @@ export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
     },
 
     kpiPage: async ({ browser, workerStorageState }, use) => {
-        // Создаём context с валидным storageState, который включает cookies + localStorage
         const context = await browser.newContext({ storageState: workerStorageState });
         const page = await context.newPage();
 
@@ -50,7 +48,6 @@ export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
 
         await use(kpiPageInstance);
 
-        // Закрываем context после теста
         await context.close();
     },
 });
