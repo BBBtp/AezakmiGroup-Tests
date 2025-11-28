@@ -38,7 +38,7 @@ async function globalSetup() {
         try {
             await page.goto(`${BASE_URL}/kpi`, {
                 waitUntil: 'domcontentloaded',
-                timeout: 60000
+                timeout: 30000
             });
             const url = page.url();
             if (!url.includes('/login')) {
@@ -65,14 +65,14 @@ async function globalSetup() {
         try {
             await page.goto(`${BASE_URL}/login`, {
                 waitUntil: 'domcontentloaded',
-                timeout: 60000
+                timeout: 30000
             });
 
             await loginPage.login(testUsers.admin.email, testUsers.admin.password, { remember: true });
 
             await page.waitForURL(`${BASE_URL}/dashboard`, {
                 waitUntil: 'domcontentloaded',
-                timeout: 60000
+                timeout: 30000
             });
 
             fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
