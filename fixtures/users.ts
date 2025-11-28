@@ -17,7 +17,7 @@ export interface UserCredentials {
     permissions: string[];
 }
 
-export const testUsers: Record<string, UserCredentials> = {
+const getTestUsers = (): Record<string, UserCredentials> => ({
     admin: {
         username: getEnv('E2E_ADMIN_USERNAME'),
         email: getEnv('E2E_ADMIN_EMAIL'),
@@ -32,7 +32,13 @@ export const testUsers: Record<string, UserCredentials> = {
         role: 'user',
         permissions: ['read', 'write_own']
     }
-};
+});
+
+export const testUsers = new Proxy({} as Record<string, UserCredentials>, {
+    get(target, prop: string) {
+        return getTestUsers()[prop];
+    }
+});
 
 export const invalidUsers = {
     wrongEmail: {
@@ -40,7 +46,7 @@ export const invalidUsers = {
         password: 'anypassword123'
     },
     wrongPassword: {
-        email: getEnv('E2E_ADMIN_EMAIL'),
+        email: '',
         password: 'wrongpassword123'
     },
     emptyCredentials: {
@@ -56,6 +62,12 @@ export const invalidUsers = {
         password: '123'
     }
 };
+
+Object.defineProperty(invalidUsers.wrongPassword, 'email', {
+    get() {
+        return getEnv('E2E_ADMIN_EMAIL');
+    }
+});
 
 export const getAdminUser = (): UserCredentials => testUsers.admin;
 export const getUser = (): UserCredentials => testUsers.user;
