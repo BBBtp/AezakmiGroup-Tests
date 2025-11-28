@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 2 : undefined,
 
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -30,7 +30,7 @@ export default defineConfig({
   globalSetup: './fixtures/global-setup.ts',
 
   projects: [
-    { name: 'smoke', testMatch: '**/*.smoke.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: 1 },
-    { name: 'regression', testMatch: '**/*.regression.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: 1 },
+    { name: 'smoke', testMatch: '**/*.smoke.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: process.env.CI ? 2 : 1  },
+    { name: 'regression', testMatch: '**/*.regression.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: process.env.CI ? 2 : 1 },
   ],
 });
