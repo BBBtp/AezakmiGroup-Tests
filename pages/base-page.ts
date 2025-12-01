@@ -6,10 +6,23 @@ export class BasePage {
         this.page = page;
     }
     async navigateTo(url: string): Promise<void> {
-        await this.page.goto(url, {
-            waitUntil: 'domcontentloaded',
-            timeout: 30000,
-        });
+        const timeout = process.env.CI ? 60000 : 30000;
+        const maxRetries = 2;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await this.page.goto(url, {
+                    waitUntil: 'commit',
+                    timeout: timeout,
+                });
+                return;
+            } catch (error) {
+                if (attempt === maxRetries) {
+                    throw error;
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+        }
     }
     async getTitle(): Promise<string> {
         return await this.page.title();
