@@ -71,8 +71,8 @@ async function globalSetup() {
             await loginPage.login(testUsers.admin.email, testUsers.admin.password, { remember: true });
 
             await page.waitForURL(`${BASE_URL}/dashboard`, {
-                waitUntil: 'domcontentloaded',
-                timeout: 30000
+                waitUntil: 'commit',
+                timeout: 60000
             });
 
             fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
