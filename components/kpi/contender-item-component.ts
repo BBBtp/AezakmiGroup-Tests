@@ -19,7 +19,10 @@ export class ContenderItemComponent {
         await expect(this.avatarLetter).toBeVisible();
         const nameText = (await this.name.textContent())?.trim() || '';
         const avatarText = (await this.avatarLetter.textContent())?.trim() || '';
-        const expectedInitial = nameText.charAt(0).toUpperCase();
-        await expect(avatarText).toBe(expectedInitial);
+        const words = nameText.split(/\s+/);
+        const expectedInitials =
+            (words[0]?.charAt(0) || '') + (words[1]?.charAt(0) || '');
+        await expect(avatarText.toUpperCase()).toBe(expectedInitials.toUpperCase());
     }
+
 }
