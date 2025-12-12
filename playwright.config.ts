@@ -16,7 +16,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: process.env.BASE_URL || 'https://totally-adequate-goldfinch.cloudpub.ru/',
+    baseURL: process.env.BASE_URL || 'https://comically-authentic-gyrfalcon.cloudpub.ru/',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
