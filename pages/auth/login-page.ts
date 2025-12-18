@@ -42,6 +42,14 @@ export class LoginPage extends BasePage {
         await this.loginForm.login(email, password);
     }
 
+    async loginToGlobalSetup(email: string, password: string, options?: { remember?: boolean }): Promise<void> {
+        if (options?.remember) {
+            await this.loginForm.toggleRememberMe();
+        }
+        await this.loginForm.login(email, password);
+    }
+
+
     async openForgotPasswordModal(): Promise<void> {
         await this.loginForm.forgotPasswordButton.click();
         await this.forgotPasswordModal.waitForOpen();

@@ -68,7 +68,7 @@ async function globalSetup() {
                 timeout: 30000
             });
 
-            await loginPage.login(testUsers.admin.email, testUsers.admin.password, { remember: true });
+            await loginPage.loginToGlobalSetup(testUsers.admin.email, testUsers.admin.password, { remember: true });
 
             await page.waitForURL(`${BASE_URL}/dashboard`, {
                 waitUntil: 'commit',
