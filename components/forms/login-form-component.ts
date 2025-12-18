@@ -17,7 +17,7 @@ export class LoginFormComponent {
         this.emailInput = page.locator('[data-testid="login__email-input"]');
         this.passwordInput = page.locator('[data-testid="login__password-input"]');
         this.toggleButtonPasswordVisibility = page.locator('[data-testid="login__password-input__eye-btn"]');
-        this.rememberMeCheckbox = page.locator('[data-testid="login__remember-me-checkbox"]');
+        this.rememberMeCheckbox = page.locator('[data-testid="login__remember-me-checkbox-checkbox"]');
         this.submitButton = page.locator('[data-testid="login__submit-button"]');
         this.forgotPasswordButton = page.locator('[data-testid="login__forgot-password-button"]');
         this.passwordVisibilityToggle = page.locator('[data-testid="login__password-input__eye-btn"]');
