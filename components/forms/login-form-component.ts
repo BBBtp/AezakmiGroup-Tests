@@ -64,13 +64,12 @@ export class LoginFormComponent {
     }
 
     async toggleRememberMe(): Promise<void> {
-        const checkboxButton = this.rememberMeCheckbox.locator('button[role="checkbox"]');
-        await checkboxButton.click();
+        await this.rememberMeCheckbox.click();
     }
 
     async isRememberMeChecked(): Promise<boolean> {
-        const checkboxButton = this.rememberMeCheckbox.locator('button[role="checkbox"]');
-        const isChecked = await checkboxButton.getAttribute('aria-checked');
+        const isChecked =
+            await this.rememberMeCheckbox.getAttribute('aria-checked');
         return isChecked === 'true';
     }
 
