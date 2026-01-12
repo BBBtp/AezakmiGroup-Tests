@@ -6,7 +6,7 @@ import { testUsers } from './users';
 import { LoginPage } from '../pages/auth/login-page';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');
-const BASE_URL = 'https://comically-authentic-gyrfalcon.cloudpub.ru';
+const BASE_URL = 'https://excitedly-exciting-mutt.cloudpub.ru';
 dotenv.config({ path: path.resolve('./.env') });
 
 async function retryWithBackoff<T>(

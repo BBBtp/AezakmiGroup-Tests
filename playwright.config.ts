@@ -16,7 +16,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: process.env.BASE_URL || 'https://comically-authentic-gyrfalcon.cloudpub.ru/',
+    baseURL: process.env.BASE_URL || 'https://excitedly-exciting-mutt.cloudpub.ru',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
