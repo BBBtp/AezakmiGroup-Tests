@@ -9,6 +9,12 @@ const AUTH_FILE = path.resolve('.auth/admin.json');
 const BASE_URL = 'https://excitedly-exciting-mutt.cloudpub.ru';
 dotenv.config({ path: path.resolve('./.env') });
 
+/**
+ * Выполняет повтор функции с экспоненциальной задержкой при ошибках
+ * @param fn Функция, возвращающая промис
+ * @param maxRetries Максимальное количество попыток
+ * @param delay Задержка между попытками в мс
+ */
 async function retryWithBackoff<T>(
     fn: () => Promise<T>,
     maxRetries: number = 3,
@@ -18,10 +24,7 @@ async function retryWithBackoff<T>(
         try {
             return await fn();
         } catch (error) {
-            if (attempt === maxRetries) {
-                throw error;
-            }
-            console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+            if (attempt === maxRetries) throw error;
             await new Promise(resolve => setTimeout(resolve, delay));
             delay *= 2;
         }
@@ -29,6 +32,12 @@ async function retryWithBackoff<T>(
     throw new Error('Max retries exceeded');
 }
 
+/**
+ * Глобальная настройка Playwright
+ * - Проверяет существующий файл авторизации;
+ * - Если файл недействителен или отсутствует, выполняет UI login;
+ * - Сохраняет состояние авторизации для последующих тестов.
+ */
 async function globalSetup() {
     if (fs.existsSync(AUTH_FILE)) {
         const browser = await chromium.launch();
@@ -36,25 +45,18 @@ async function globalSetup() {
         const page = await context.newPage();
 
         try {
-            await page.goto(`${BASE_URL}/kpi`, {
-                waitUntil: 'domcontentloaded',
-                timeout: 30000
-            });
+            await page.goto(`${BASE_URL}/kpi`, { waitUntil: 'domcontentloaded', timeout: 30000 });
             const url = page.url();
             if (!url.includes('/login')) {
-                console.log('Auth file is valid');
                 await browser.close();
                 return;
             }
-        } catch (error) {
-            console.log('Auth file validation failed, will recreate...');
+        } catch {
         }
 
-        console.log('Auth file invalid, recreating...');
         await browser.close();
         fs.unlinkSync(AUTH_FILE);
     }
-    console.log('Creating new auth storage via UI login...');
 
     await retryWithBackoff(async () => {
         const browser = await chromium.launch();
@@ -63,22 +65,12 @@ async function globalSetup() {
         const loginPage = new LoginPage(page);
 
         try {
-            await page.goto(`${BASE_URL}/login`, {
-                waitUntil: 'domcontentloaded',
-                timeout: 30000
-            });
-
+            await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await loginPage.loginToGlobalSetup(testUsers.admin.email, testUsers.admin.password, { remember: true });
-
-            await page.waitForURL(`${BASE_URL}/dashboard`, {
-                waitUntil: 'commit',
-                timeout: 60000
-            });
+            await page.waitForURL(`${BASE_URL}/dashboard`, { waitUntil: 'commit', timeout: 60000 });
 
             fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
             await context.storageState({ path: AUTH_FILE });
-            console.log('Auth storage saved successfully');
-
             await browser.close();
         } catch (error) {
             await browser.close();

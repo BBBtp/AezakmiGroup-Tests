@@ -1,6 +1,9 @@
 import { expect, Locator, Page } from "@playwright/test";
 import { EmployeeRowComponent } from "./employee-row-component";
 
+/**
+ * Структура данных сотрудника для KPI таблицы
+ */
 export interface EmployeeData {
     rating: number;
     name: string;
@@ -11,30 +14,57 @@ export interface EmployeeData {
     lastModified: string;
 }
 
+/**
+ * Компонент таблицы KPI сотрудников.
+ *
+ * Page Object для работы с таблицей сотрудников.
+ * Поддерживает:
+ * - проверку видимости таблицы и строк;
+ * - получение всех строк и данных;
+ * - сортировку по столбцам;
+ * - проверку валидности данных;
+ * - ассерты на сортировку.
+ */
 export class KpiEmployeesTableComponent {
+    /** Корневой элемент таблицы */
     readonly root: Locator;
+
+    /** Локатор всех строк таблицы */
     readonly rowsRoot: Locator;
+
+    /** Локатор заголовка таблицы */
     readonly header: Locator;
+
+    /**
+     * @param page Экземпляр страницы Playwright
+     */
     constructor(page: Page) {
         this.root = page.locator('[data-testid="employees-table__main"]');
         this.rowsRoot = this.root.locator("tbody tr");
         this.header = this.root.locator("thead tr");
     }
-    async verifyVisible() {
+
+    /**
+     * Проверяет, что таблица видима и содержит строки,
+     * каждая строка проходит проверку видимости через EmployeeRowComponent
+     */
+    async verifyVisible(): Promise<void> {
         await expect(this.root).toBeVisible();
-        const rowCount = await this.getRowCount()
-        const rows = await this.getRows()
+        const rowCount = await this.getRowCount();
+        const rows = await this.getRows();
         expect(rowCount).toBeGreaterThan(0);
         for (const row of rows) {
-            await row.verify()
+            await row.verify();
         }
-
-
     }
-    async getRowCount() {
+
+    /** Возвращает количество строк в таблице */
+    async getRowCount(): Promise<number> {
         return await this.rowsRoot.count();
     }
-    async getRows() {
+
+    /** Возвращает массив компонентов строк таблицы */
+    async getRows(): Promise<EmployeeRowComponent[]> {
         const count = await this.getRowCount();
         const rows: EmployeeRowComponent[] = [];
         for (let i = 0; i < count; i++) {
@@ -42,7 +72,12 @@ export class KpiEmployeesTableComponent {
         }
         return rows;
     }
-    async getHeaderCell(columnName: string) {
+
+    /**
+     * Возвращает локатор ячейки заголовка по имени столбца
+     * @param columnName название столбца
+     */
+    async getHeaderCell(columnName: string): Promise<Locator> {
         const testIdMap: { [key: string]: string } = {
             'Score': 'employees-table__header-score',
             'MRR': 'employees-table__header-mrr',
@@ -58,26 +93,38 @@ export class KpiEmployeesTableComponent {
 
         return this.header.locator(`[data-testid="${testId}"]`);
     }
-    async sortBy(columnName: string) {
+
+    /**
+     * Сортирует таблицу по указанному столбцу и проверяет корректность данных
+     * @param columnName название столбца
+     */
+    async sortBy(columnName: string): Promise<void> {
         const cell = await this.getHeaderCell(columnName);
         await cell.click();
         await this.root.page().waitForTimeout(500);
         await this.waitForTableStable();
         await this.verifyTableDataValid();
     }
-    async waitForTableStable() {
+
+    /**
+     * Ожидает, что таблица стабилизировалась (не изменяет количество строк)
+     */
+    async waitForTableStable(): Promise<void> {
         let previousRowCount = -1;
         await expect(async () => {
             const currentRowCount = await this.getRowCount();
             if (previousRowCount === currentRowCount && currentRowCount > 0) {
                 return true;
             }
-
             previousRowCount = currentRowCount;
             throw new Error('Table is still loading...');
         }).toPass({ timeout: 15000 });
     }
-    async verifyTableDataValid() {
+
+    /**
+     * Проверяет валидность данных таблицы
+     */
+    async verifyTableDataValid(): Promise<void> {
         const data = await this.getData();
         expect(data.length).toBeGreaterThan(0);
         for (const row of data) {
@@ -86,13 +133,21 @@ export class KpiEmployeesTableComponent {
             expect(row.mrr).toBeDefined();
         }
     }
-    async getData() {
+
+    /** Извлекает все данные таблицы в массив EmployeeData */
+    async getData(): Promise<EmployeeData[]> {
         const rows = await this.getRows();
-        const data = [];
+        const data: EmployeeData[] = [];
         for (const row of rows) data.push(await row.extractData());
         return data;
     }
-    async assertSortedBy(column: keyof EmployeeData, direction: "asc" | "desc") {
+
+    /**
+     * Ассерт на сортировку таблицы по указанному столбцу
+     * @param column ключ EmployeeData
+     * @param direction "asc" | "desc"
+     */
+    async assertSortedBy(column: keyof EmployeeData, direction: "asc" | "desc"): Promise<void> {
         const data = await this.getData();
         const values = data.map(d => d[column]);
         const numericColumns: Array<keyof EmployeeData> = ['rating', 'score', 'mrr', 'appsNumber'];

@@ -1,16 +1,48 @@
 import { Page, Locator, expect } from '@playwright/test';
 import TestData from "../../fixtures/test-data";
 
+/**
+ * Компонент формы логина.
+ *
+ * Page Object для работы с формой входа на страницу.
+ * Поддерживает:
+ * - ввод email и пароля;
+ * - переключение видимости пароля;
+ * - работу с чекбоксом «Запомнить меня»;
+ * - кнопки отправки и восстановления пароля;
+ * - проверку ошибок валидации.
+ */
 export class LoginFormComponent {
+    /** Экземпляр страницы Playwright */
     page: Page;
+
+    /** Корневой элемент формы */
     form: Locator;
+
+    /** Поле ввода email */
     emailInput: Locator;
+
+    /** Поле ввода пароля */
     passwordInput: Locator;
+
+    /** Кнопка переключения видимости пароля */
     toggleButtonPasswordVisibility: Locator;
+
+    /** Чекбокс «Запомнить меня» */
     rememberMeCheckbox: Locator;
+
+    /** Кнопка отправки формы */
     submitButton: Locator;
+
+    /** Кнопка «Забыли пароль?» */
     forgotPasswordButton: Locator;
+
+    /** Дублирующий локатор кнопки видимости пароля */
     passwordVisibilityToggle: Locator;
+
+    /**
+     * @param page Экземпляр страницы Playwright
+     */
     constructor(page: Page) {
         this.page = page;
         this.form = page.locator('[data-testid="login__form"]');
@@ -23,72 +55,102 @@ export class LoginFormComponent {
         this.passwordVisibilityToggle = page.locator('[data-testid="login__password-input__eye-btn"]');
     }
 
+    /**
+     * Заполняет поля email и пароль
+     *
+     * @param email email пользователя
+     * @param password пароль пользователя
+     */
     async fillCredentials(email: string, password: string): Promise<void> {
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
     }
 
+    /**
+     * Проверяет видимость ошибки с указанным текстом
+     * @param text текст ошибки
+     */
     async assertErrorVisible(text: string): Promise<void> {
         const error = this.page.locator(`p:has-text("${text}")`);
         await expect(error).toBeVisible({ timeout: TestData.timeouts.action });
     }
 
+    /**
+     * Проверяет отсутствие ошибки с указанным текстом
+     * @param text текст ошибки
+     */
     async assertErrorHidden(text: string): Promise<void> {
         const error = this.page.locator(`p:has-text("${text}")`);
         await expect(error).not.toBeVisible();
     }
 
+    /** Проверяет отображение ошибки «Неверный email» */
     async assertInvalidEmailError(): Promise<void> {
         await this.assertErrorVisible(TestData.texts.login.errorLabels.invalidEmail);
     }
 
+    /** Проверяет отображение ошибки «Неверный пароль» */
     async assertInvalidPasswordError(): Promise<void> {
         await this.assertErrorVisible(TestData.texts.login.errorLabels.invalidPassword);
     }
 
+    /** Проверяет отсутствие ошибки «Неверный email» */
     async assertNoEmailError(): Promise<void> {
         await this.assertErrorHidden(TestData.texts.login.errorLabels.invalidEmail);
     }
 
+    /** Проверяет отсутствие ошибки «Неверный пароль» */
     async assertNoPasswordError(): Promise<void> {
         await this.assertErrorHidden(TestData.texts.login.errorLabels.invalidPassword);
     }
 
+    /**
+     * Выполняет вход, заполняя email и пароль, и нажимая Submit
+     * @param email email пользователя
+     * @param password пароль пользователя
+     */
     async login(email: string, password: string): Promise<void> {
         await this.fillCredentials(email, password);
         await this.submitButton.click();
     }
 
+    /** Переключает видимость пароля */
     async togglePasswordVisibility(): Promise<void> {
         await this.passwordVisibilityToggle.click();
     }
 
+    /** Переключает чекбокс «Запомнить меня» */
     async toggleRememberMe(): Promise<void> {
         await this.rememberMeCheckbox.click();
     }
 
+    /** Проверяет, отмечен ли чекбокс «Запомнить меня» */
     async isRememberMeChecked(): Promise<boolean> {
-        const isChecked =
-            await this.rememberMeCheckbox.getAttribute('aria-checked');
+        const isChecked = await this.rememberMeCheckbox.getAttribute('aria-checked');
         return isChecked === 'true';
     }
 
+    /** Возвращает текущее значение поля email */
     async getEmailValue(): Promise<string> {
         return await this.emailInput.inputValue();
     }
 
+    /** Возвращает текущее значение поля пароль */
     async getPasswordValue(): Promise<string> {
         return await this.passwordInput.inputValue();
     }
 
+    /** Возвращает тип поля пароля ('password' или 'text') */
     async getPasswordType(): Promise<string> {
         return await this.passwordInput.getAttribute('type') || 'password';
     }
 
+    /** Проверяет, что кнопка Submit активна */
     async isSubmitButtonEnabled(): Promise<boolean> {
         return await this.submitButton.isEnabled();
     }
 
+    /** Ожидает готовность формы к взаимодействию */
     async waitForFormReady(): Promise<void> {
         await expect(this.form).toBeVisible();
         await expect(this.emailInput).toBeVisible();

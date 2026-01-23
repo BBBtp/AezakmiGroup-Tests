@@ -1,16 +1,48 @@
 import { Locator, expect } from '@playwright/test';
-import {EmployeeData} from "./kpi-employees-table-component";
-import {parseCurrency} from "../../utils/parcer";
+import { EmployeeData } from "./kpi-employees-table-component";
+import { parseCurrency } from "../../utils/parcer";
+
+/**
+ * Компонент строки таблицы сотрудников (Employee Row).
+ *
+ * Page Object для работы с отдельной строкой таблицы KPI сотрудников.
+ * Поддерживает:
+ * - проверку видимости всех ключевых элементов;
+ * - извлечение данных в структуру EmployeeData;
+ * - проверку соответствия аватара первой букве имени.
+ */
 export class EmployeeRowComponent {
+    /** Рейтинг сотрудника */
     readonly rating: Locator;
+
+    /** Аватар сотрудника (первый символ) */
     readonly avatarLetter: Locator;
+
+    /** Имя сотрудника */
     readonly name: Locator;
+
+    /** Подссылка под именем (sublink) */
     readonly sublink: Locator;
+
+    /** Баллы сотрудника (score) */
     readonly score: Locator;
+
+    /** MRR сотрудника */
     readonly mrr: Locator;
+
+    /** Количество приложений */
     readonly appsNumber: Locator;
+
+    /** Дата последнего изменения */
     readonly lastModified: Locator;
+
+    /** Кнопка открытия подробностей */
     readonly openButton: Locator;
+
+    /**
+     * @param root Корневой локатор таблицы сотрудников
+     * @param index Индекс строки сотрудника (для формирования data-testid)
+     */
     constructor(root: Locator, index: number) {
         this.rating = root.locator(`[data-testid="employees-table__rating-${index}"]`);
         this.avatarLetter = root.locator(`[data-testid="employees-table__avatar-${index}"] p`).first();
@@ -22,7 +54,11 @@ export class EmployeeRowComponent {
         this.lastModified = root.locator(`[data-testid="employees-table__last-modified-${index}"]`);
         this.openButton = root.locator('text=Open').first();
     }
-    async verify() {
+
+    /**
+     * Проверяет видимость всех ключевых элементов строки сотрудника
+     */
+    async verify(): Promise<void> {
         await expect(this.rating).toBeVisible();
         await expect(this.avatarLetter).toBeVisible();
         await expect(this.name).toBeVisible();
@@ -32,6 +68,12 @@ export class EmployeeRowComponent {
         await expect(this.lastModified).toBeVisible();
         await expect(this.openButton).toBeVisible();
     }
+
+    /**
+     * Извлекает данные строки в объект EmployeeData
+     *
+     * @returns данные сотрудника
+     */
     async extractData(): Promise<EmployeeData> {
         return {
             rating: Number(await this.rating.textContent()),
@@ -43,7 +85,11 @@ export class EmployeeRowComponent {
             lastModified: (await this.lastModified.textContent())?.trim() ?? "",
         };
     }
-    async verifyAvatarMatchesName() {
+
+    /**
+     * Проверяет, что аватар соответствует первой букве имени сотрудника
+     */
+    async verifyAvatarMatchesName(): Promise<void> {
         const letter = (await this.avatarLetter.textContent())?.trim() ?? "";
         const name = (await this.name.textContent())?.trim() ?? "";
         await expect(letter).toBe(name.charAt(0));

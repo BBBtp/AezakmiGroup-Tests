@@ -1,15 +1,23 @@
 import { testUsers, invalidUsers } from './users';
 
+/**
+ * Константы и тестовые данные для автотестов
+ */
 export const TestData = {
+    /** Корректные пользователи для тестов */
     users: testUsers,
+
+    /** Некорректные пользователи для негативных тестов */
     invalidUsers: invalidUsers,
 
+    /** Пути страниц приложения */
     urls: {
         login: '/login',
         dashboard: '/dashboard',
         passwordRecovery: '/password-recovery'
     },
 
+    /** Текстовые данные для проверок UI */
     texts: {
         login: {
             title: 'Log in to your account',
@@ -23,16 +31,18 @@ export const TestData = {
                 invalidPassword: 'Must be 8 or more characters long',
             }
         },
-        kpi : {
-           basePage: {
-               title: "Track the performance of your team's ASO managers",
-               cardMrrTitle: "Total MRR",
-               cardScoreTitle: "Average score",
-               cardAppsTitle: "Number of apps",
-               topEmpTitle: "Top employees"
-           }
+        kpi: {
+            basePage: {
+                title: "Track the performance of your team's ASO managers",
+                cardMrrTitle: "Total MRR",
+                cardScoreTitle: "Average score",
+                cardAppsTitle: "Number of apps",
+                topEmpTitle: "Top employees"
+            }
         }
     },
+
+    /** Таймауты для тестов в миллисекундах */
     timeouts: {
         pageLoad: 30000,
         action: 10000,

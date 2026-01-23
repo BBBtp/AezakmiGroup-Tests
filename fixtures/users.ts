@@ -1,3 +1,8 @@
+/**
+ * Получает значение переменной окружения
+ * @param envKey Ключ переменной окружения
+ * @throws Если переменная не определена
+ */
 const getEnv = (envKey: string): string => {
     const value = process.env[envKey];
     if (!value) {
@@ -9,6 +14,7 @@ const getEnv = (envKey: string): string => {
     return value;
 };
 
+/** Интерфейс данных пользователя для тестов */
 export interface UserCredentials {
     username: string;
     email: string;
@@ -17,6 +23,7 @@ export interface UserCredentials {
     permissions: string[];
 }
 
+/** Функция, создающая объект с тестовыми пользователями из env */
 const getTestUsers = (): Record<string, UserCredentials> => ({
     admin: {
         username: getEnv('E2E_ADMIN_USERNAME'),
@@ -34,19 +41,21 @@ const getTestUsers = (): Record<string, UserCredentials> => ({
     }
 });
 
+/** Прокси для динамического получения тестовых пользователей */
 export const testUsers = new Proxy({} as Record<string, UserCredentials>, {
     get(target, prop: string) {
         return getTestUsers()[prop];
     }
 });
 
+/** Некорректные данные пользователей для негативных тестов */
 export const invalidUsers = {
     wrongEmail: {
         email: 'nonexistent@test.com',
         password: 'anypassword123'
     },
     wrongPassword: {
-        email: '',
+        email: '', // будет динамически подставляться админский email
         password: 'wrongpassword123'
     },
     emptyCredentials: {
@@ -63,12 +72,18 @@ export const invalidUsers = {
     }
 };
 
+/** Динамически подставляем админский email для теста с неправильным паролем */
 Object.defineProperty(invalidUsers.wrongPassword, 'email', {
     get() {
         return getEnv('E2E_ADMIN_EMAIL');
     }
 });
 
+/** Получение admin пользователя */
 export const getAdminUser = (): UserCredentials => testUsers.admin;
+
+/** Получение обычного пользователя */
 export const getUser = (): UserCredentials => testUsers.user;
+
+/** Получение пользователя по роли */
 export const getUserByRole = (role: 'admin' | 'user'): UserCredentials => testUsers[role];

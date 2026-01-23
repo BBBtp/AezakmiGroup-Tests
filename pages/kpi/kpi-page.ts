@@ -10,19 +10,47 @@ import { KpiTopEmployeesComponent } from '../../components/kpi/kpi-top-employees
 import { KpiEmployeesTableComponent } from '../../components/kpi/kpi-employees-table-component';
 import { FilterFormComponent } from '../../components/forms/filter-form-component';
 
+/**
+ * Страница KPI
+ */
 export class KpiPage extends BasePage {
+    /** Корневой контейнер страницы */
     readonly root: Locator;
+
+    /** Заголовок KPI страницы */
     readonly header: KpiHeaderComponent;
+
+    /** Группа карточек KPI */
     readonly cards: KpiCardGroupComponent;
+
+    /** Фильтры по месяцам */
     readonly filters: KpiMonthFiltersComponent;
+
+    /** Диаграмма производительности */
     readonly chart: KpiPerformanceChartComponent;
+
+    /** Блок топ-сотрудников */
     readonly topEmployees: KpiTopEmployeesComponent;
+
+    /** Таблица сотрудников KPI */
     readonly employeesTable: KpiEmployeesTableComponent;
+
+    /** Форма фильтров KPI */
     readonly filterForm: FilterFormComponent;
+
+    /** Кнопка настроек */
     readonly settingsButton: Locator;
+
+    /** Подзаголовок страницы */
     readonly subtitle: Locator;
+
+    /** Блок с ошибкой */
     readonly errorContent: Locator;
+
+    /** Основной контент страницы */
     readonly mainContent: Locator;
+
+    /** Предупреждение в конце месяца */
     readonly monthEndWarning: Locator;
 
     constructor(page: Page) {
@@ -43,11 +71,13 @@ export class KpiPage extends BasePage {
         this.monthEndWarning = page.locator('[data-testid="month-end-warning"]');
     }
 
+    /** Переход на страницу KPI */
     async navigate(): Promise<void> {
         await this.navigateTo('/kpi');
         await this.waitForPageLoad();
     }
 
+    /** Ожидание полной загрузки KPI страницы */
     async waitForPageLoad(): Promise<void> {
         await this.waitForLoad();
         await expect(this.mainContent).toBeVisible();
