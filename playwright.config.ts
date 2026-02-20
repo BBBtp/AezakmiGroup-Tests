@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { testSettings } from './config/test-settings';
 
 export default defineConfig({
   testDir: './tests',
@@ -16,7 +17,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: process.env.BASE_URL || 'https://excitedly-exciting-mutt.cloudpub.ru',
+    baseURL: testSettings.baseUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

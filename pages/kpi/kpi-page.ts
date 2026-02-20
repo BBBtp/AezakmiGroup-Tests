@@ -59,13 +59,13 @@ export class KpiPage extends BasePage {
         this.root = page.locator('[data-testid="kpi"]');
         this.header = new KpiHeaderComponent(page);
         this.cards = new KpiCardGroupComponent(page);
-        this.filters = new KpiMonthFiltersComponent(page);
+        this.filters = new KpiMonthFiltersComponent(page, 'kpi-month-filters');
         this.chart = new KpiPerformanceChartComponent(page);
         this.topEmployees = new KpiTopEmployeesComponent(page);
         this.employeesTable = new KpiEmployeesTableComponent(page);
         this.filterForm = new FilterFormComponent(page, 'kpi-filter-form');
         this.settingsButton = page.locator('[data-testid="settings-button"]');
-        this.subtitle = page.locator('[data-testid="subtitle"]');
+        this.subtitle = page.locator('[data-testid="kpi-page-title__desc"], [data-testid="subtitle"]');
         this.errorContent = page.locator('[data-testid="error-content"]');
         this.mainContent = page.locator('[data-testid="main-content"]');
         this.monthEndWarning = page.locator('[data-testid="month-end-warning"]');

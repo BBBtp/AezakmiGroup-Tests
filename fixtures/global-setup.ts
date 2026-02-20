@@ -4,9 +4,9 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { testUsers } from './users';
 import { LoginPage } from '../pages/auth/login-page';
+import { testSettings } from '../config/test-settings';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');
-const BASE_URL = 'https://excitedly-exciting-mutt.cloudpub.ru';
 dotenv.config({ path: path.resolve('./.env') });
 
 /**
@@ -33,28 +33,52 @@ async function retryWithBackoff<T>(
 }
 
 /**
+ * Проверяет, что сохраненный storageState действительно авторизован:
+ * - не попадает на страницу логина;
+ * - видит корневой контейнер KPI.
+ */
+async function isAuthStateValid(): Promise<boolean> {
+    if (!fs.existsSync(AUTH_FILE)) return false;
+
+    const browser = await chromium.launch();
+    const context = await browser.newContext({ storageState: AUTH_FILE });
+    const page = await context.newPage();
+
+    try {
+        await page.goto(`${testSettings.baseUrl}/kpi`, {
+            waitUntil: 'domcontentloaded',
+            timeout: 30000
+        });
+
+        const currentUrl = page.url();
+        const redirectedToAuth = /\/(login|auth|sign-in)/i.test(currentUrl);
+        const hasLoginForm = await page.locator('[data-testid="login"], [data-testid="login__form"]').first()
+            .isVisible({ timeout: 3000 })
+            .catch(() => false);
+        const hasKpiRoot = await page.locator('[data-testid="kpi"]').first()
+            .isVisible({ timeout: 5000 })
+            .catch(() => false);
+
+        return !redirectedToAuth && !hasLoginForm && hasKpiRoot;
+    } catch {
+        return false;
+    } finally {
+        await browser.close();
+    }
+}
+
+/**
  * Глобальная настройка Playwright
  * - Проверяет существующий файл авторизации;
  * - Если файл недействителен или отсутствует, выполняет UI login;
  * - Сохраняет состояние авторизации для последующих тестов.
  */
 async function globalSetup() {
+    if (await isAuthStateValid()) {
+        return;
+    }
+
     if (fs.existsSync(AUTH_FILE)) {
-        const browser = await chromium.launch();
-        const context = await browser.newContext({ storageState: AUTH_FILE });
-        const page = await context.newPage();
-
-        try {
-            await page.goto(`${BASE_URL}/kpi`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-            const url = page.url();
-            if (!url.includes('/login')) {
-                await browser.close();
-                return;
-            }
-        } catch {
-        }
-
-        await browser.close();
         fs.unlinkSync(AUTH_FILE);
     }
 
@@ -65,9 +89,9 @@ async function globalSetup() {
         const loginPage = new LoginPage(page);
 
         try {
-            await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.goto(`${testSettings.baseUrl}/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await loginPage.loginToGlobalSetup(testUsers.admin.email, testUsers.admin.password, { remember: true });
-            await page.waitForURL(`${BASE_URL}/dashboard`, { waitUntil: 'commit', timeout: 60000 });
+            await page.waitForURL(`${testSettings.baseUrl}/dashboard`, { waitUntil: 'commit', timeout: 60000 });
 
             fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
             await context.storageState({ path: AUTH_FILE });

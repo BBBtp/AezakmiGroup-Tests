@@ -22,12 +22,14 @@ export class KpiMonthFiltersComponent {
 
     /** Кнопка выбора даты (datepicker) */
     readonly datePickerButton: Locator;
+    readonly testId: string;
 
     /**
      * @param page Экземпляр страницы Playwright
      */
-    constructor(page: Page) {
-        this.root = page.locator('[data-testid="month-filters"]');
+    constructor(page: Page, testId: string = 'month-filters') {
+        this.testId = testId;
+        this.root = page.locator(`[data-testid="${testId}"]`);
         this.tabs = this.root.locator('[role="tab"]');
         this.activeTab = this.root.locator('[role="tab"][aria-selected="true"]');
         this.datePickerButton = this.root.locator('button._pickerButton_8b6qc_10');
