@@ -10,7 +10,9 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:report": "playwright test && playwright show-report",
-    "test:types": "tsc --noEmit"
+    "test:types": "tsc --noEmit",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report"
   },
   "files": [
     "components/**/*",
@@ -24,14 +26,20 @@
     "package.json",
     ".env.example"
   ],
-  "keywords": ["e2e", "playwright", "testing", "crm"],
+  "keywords": [
+    "e2e",
+    "playwright",
+    "testing",
+    "crm"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.2",
+    "allure-commandline": "^2.36.0",
+    "allure-playwright": "^3.4.5",
     "dotenv": "^16.4.5",
     "typescript": "^5.9.3"
   }
-
 }

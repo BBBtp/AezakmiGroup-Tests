@@ -1,4 +1,4 @@
 export const testSettings = {
-  baseUrl: 'https://admittedly-intimate-louse.cloudpub.ru',
+  baseUrl: 'https://properly-inclusive-tanager.cloudpub.ru/',
 } as const;
 

@@ -1,6 +1,22 @@
 import { defineConfig, devices } from '@playwright/test';
 import { testSettings } from './config/test-settings';
 
+const baseReporters: any[] = [
+  ['blob'],
+  ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  ['json', { outputFile: 'test-results.json' }],
+  ['junit', { outputFile: 'results.xml' }],
+  ['line'],
+];
+
+const reporters = [...baseReporters];
+try {
+  require.resolve('allure-playwright');
+  reporters.splice(reporters.length - 1, 0, ['allure-playwright', { outputFolder: 'allure-results' }]);
+} catch {
+  // Keep default reporters when allure-playwright is not installed.
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
@@ -8,13 +24,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : undefined,
 
-  reporter: [
-    ['blob'],
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['json', { outputFile: 'test-results.json' }],
-    ['junit', { outputFile: 'results.xml' }],
-    ['line']
-  ],
+  reporter: reporters,
 
   use: {
     baseURL: testSettings.baseUrl,
