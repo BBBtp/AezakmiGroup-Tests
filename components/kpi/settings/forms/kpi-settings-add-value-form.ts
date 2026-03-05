@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { requireTestId } from '../../../../utils/test-id';
 
 export class KpiSettingsAddValueForm {
     readonly page: Page;
@@ -20,8 +21,8 @@ export class KpiSettingsAddValueForm {
 
     constructor(page: Page, tableName: string) {
         this.page = page;
-        this.tableName = tableName;
-        this.root = page.locator(`[data-testid="${tableName}__add-form"]`);
+        this.tableName = requireTestId(tableName, 'KpiSettingsAddValueForm');
+        this.root = page.locator(`[data-testid="${this.tableName}__add-form"]`);
         this.actionTypeSelect = this.root.locator('[data-testid="action-type-select"]');
         this.actionTypeTrigger = this.root.locator('[data-testid="action-type-select-trigger"]');
         this.actionTypeContent = this.root.locator('[data-testid="action-type-select-content"]');
@@ -43,6 +44,5 @@ export class KpiSettingsAddValueForm {
         return this.root.locator(`[data-testid="value-type-select_option-${value}"]`);
     }
 }
-
 
 

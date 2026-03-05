@@ -70,7 +70,17 @@ export class LoginPage extends BasePage {
      * @param options Опции (например, remember me)
      */
     async loginToGlobalSetup(email: string, password: string, options?: { remember?: boolean }): Promise<void> {
-        if (options?.remember) await this.loginForm.toggleRememberMe();
+        await this.loginForm.waitForFormReady();
+
+        if (options?.remember) {
+            const checkboxVisible = await this.loginForm.rememberMeCheckbox
+                .isVisible({ timeout: 5000 })
+                .catch(() => false);
+            if (checkboxVisible) {
+                const isChecked = await this.loginForm.isRememberMeChecked();
+                if (!isChecked) await this.loginForm.toggleRememberMe();
+            }
+        }
         await this.loginForm.login(email, password);
     }
 

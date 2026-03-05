@@ -1,4 +1,5 @@
 import { Locator, Page, expect } from '@playwright/test';
+import { composeTestId, requireTestId } from '../../../utils/test-id';
 
 export class KpiSettingsActionRowComponent {
     readonly page: Page;
@@ -28,7 +29,10 @@ export class KpiSettingsActionRowComponent {
         this.tableName = tableName;
         this.actionType = actionType;
         this.value = value;
-        this.baseTestId = this.composeTestId(tableName, actionType, value);
+        this.baseTestId = requireTestId(
+            composeTestId([tableName, actionType, value]),
+            'KpiSettingsActionRowComponent'
+        );
         this.root = page.locator(`[data-testid="${this.baseTestId}"]`);
         this.editButton = page.locator(`[data-testid="${this.baseTestId}__edit"]`);
         this.deleteButton = page.locator(`[data-testid="${this.baseTestId}__delete"]`);
@@ -47,15 +51,11 @@ export class KpiSettingsActionRowComponent {
         this.saveButton = page.locator(`[data-testid="${this.baseTestId}__save"]`);
         this.errorBlock = page.locator(`[data-testid="${this.baseTestId}__error"]`);
     }
-    composeTestId(...parts: string[]): string {
-        return parts.filter(Boolean).join('__');
-    }
     async expectVisible(): Promise<void> {
         await expect(this.root).toBeVisible();
         await expect(this.editButton).toBeVisible();
         await expect(this.deleteButton).toBeVisible();
     }
 }
-
 
 

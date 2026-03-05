@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Базовый компонент модального окна.
@@ -38,9 +39,10 @@ export class ModalComponent {
      */
     constructor(page: Page, modalTestId: string) {
         this.page = page;
+        const normalizedModalTestId = requireTestId(modalTestId, 'ModalComponent');
 
         // Корень модального окна
-        this.modal = page.locator(`[data-testid="${modalTestId}"]`);
+        this.modal = page.locator(`[data-testid="${normalizedModalTestId}"]`);
 
         // Кнопка закрытия модального окна
         this.closeButton = this.modal.locator(
@@ -82,7 +84,13 @@ export class ModalComponent {
      * Закрывает модальное окно кликом вне него
      */
     async closeByClickOutside(): Promise<void> {
-        await this.page.mouse.click(50, 50);
+        await this.page.mouse.click(1, 1);
+        if (await this.modal.isVisible().catch(() => false)) {
+            await this.page.keyboard.press('Escape');
+            if (await this.modal.isVisible().catch(() => false)) {
+                await this.page.mouse.click(1, 1);
+            }
+        }
         await this.waitForClose();
     }
 

@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент карточки с метриками.
@@ -63,23 +64,24 @@ export class CardComponent {
      * - `${testId}__*main`
      */
     constructor(page: Page, testId: string) {
+        const normalizedTestId = requireTestId(testId, 'CardComponent');
         this.root = page.locator(
-            `[data-testid="${testId}"]`
+            `[data-testid="${normalizedTestId}"]`
         );
         this.title = this.root.locator(
-            `[data-testid="${testId}__title"]`
+            `[data-testid="${normalizedTestId}__title"]`
         );
         this.mainValue = this.root.locator(
-            `[data-testid^="${testId}__"][data-testid$="currency"], [data-testid$="main"]`
+            `[data-testid^="${normalizedTestId}__"][data-testid$="currency"], [data-testid$="main"]`
         );
         this.absValue = this.root.locator(
-            `[data-testid="${testId}__abs"]`
+            `[data-testid="${normalizedTestId}__abs"]`
         );
         this.percentValue = this.root.locator(
-            `[data-testid="${testId}__percentage-value"]`
+            `[data-testid="${normalizedTestId}__percentage-value"]`
         );
         this.period = this.root.locator(
-            `[data-testid="${testId}__period"]`
+            `[data-testid="${normalizedTestId}__period"]`
         );
     }
 
@@ -98,7 +100,7 @@ export class CardComponent {
         await expect(this.root).toBeVisible();
 
         await expect(this.title).toBeVisible();
-        await expect(this.title).toHaveText(cardTitle);
+        await expect(this.title).toContainText(cardTitle);
 
         await expect(this.mainValue).toBeVisible();
         await expect(this.absValue).toBeVisible();

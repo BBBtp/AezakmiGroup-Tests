@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { KpiSettingsActionRowComponent } from './kpi-settings-action-row-component';
+import { requireTestId } from '../../../utils/test-id';
 
 export type KpiSettingsTableOptions = {
     hasValueColumn?: boolean;
@@ -32,43 +33,42 @@ export class KpiSettingsTableComponent {
 
     constructor(page: Page, tableName: string, options: KpiSettingsTableOptions = {}) {
         this.page = page;
-        this.tableName = tableName;
+        this.tableName = requireTestId(tableName, 'KpiSettingsTableComponent');
         this.options = {
             hasValueColumn: options.hasValueColumn ?? true,
             hasFooterBar: options.hasFooterBar ?? true,
         };
-        this.root = page.locator(`[data-testid="${tableName}"]`);
-        this.table = page.locator(`[data-testid="${tableName}__table"]`);
-        this.headerRow = page.locator(`[data-testid="${tableName}__table-header-row"]`);
-        this.actionTypeHeader = page.locator(`[data-testid="${tableName}__action-type-header"]`);
-        this.pointsHeader = page.locator(`[data-testid="${tableName}__points-header"]`);
-        this.pointsLabel = page.locator(`[data-testid="${tableName}__points-label"]`);
-        this.tableBody = page.locator(`[data-testid="${tableName}__table-body"]`);
+        this.root = page.locator(`[data-testid="${this.tableName}"]`);
+        this.table = page.locator(`[data-testid="${this.tableName}__table"]`);
+        this.headerRow = page.locator(`[data-testid="${this.tableName}__table-header-row"]`);
+        this.actionTypeHeader = page.locator(`[data-testid="${this.tableName}__action-type-header"]`);
+        this.pointsHeader = page.locator(`[data-testid="${this.tableName}__points-header"]`);
+        this.pointsLabel = page.locator(`[data-testid="${this.tableName}__points-label"]`);
+        this.tableBody = page.locator(`[data-testid="${this.tableName}__table-body"]`);
 
         if (this.options.hasValueColumn) {
-            this.valueHeader = page.locator(`[data-testid="${tableName}__value-header"]`);
+            this.valueHeader = page.locator(`[data-testid="${this.tableName}__value-header"]`);
         }
 
         if (this.options.hasFooterBar) {
-            this.footerBar = page.locator(`[data-testid="${tableName}__table-bar"]`);
+            this.footerBar = page.locator(`[data-testid="${this.tableName}__table-bar"]`);
         }
 
-        this.addValueButton = page.locator(`[data-testid="${tableName}__add-value"]`);
-        this.addModal = page.locator(`[data-testid="${tableName}__add-modal"]`);
-        this.addForm = page.locator(`[data-testid="${tableName}__add-form"]`);
-        this.addModalStepActionType = page.locator(`[data-testid="${tableName}-Action type"]`);
-        this.addModalStepValue = page.locator(`[data-testid="${tableName}-Value"]`);
-        this.addModalStepPoints = page.locator(`[data-testid="${tableName}-Points"]`);
-        this.addModalPrevButton = page.locator(`[data-testid="${tableName}__button-prev"]`);
-        this.addModalNextButton = page.locator(`[data-testid="${tableName}__button-next"]`);
-        this.addModalLoading = page.locator(`[data-testid="${tableName}__loading"]`);
-        this.addModalError = page.locator(`[data-testid="${tableName}__error"]`);
+        this.addValueButton = page.locator(`[data-testid="${this.tableName}__add-value"]`);
+        this.addModal = page.locator(`[data-testid="${this.tableName}__add-modal"]`);
+        this.addForm = page.locator(`[data-testid="${this.tableName}__add-form"]`);
+        this.addModalStepActionType = page.locator(`[data-testid="${this.tableName}-Action type"]`);
+        this.addModalStepValue = page.locator(`[data-testid="${this.tableName}-Value"]`);
+        this.addModalStepPoints = page.locator(`[data-testid="${this.tableName}-Points"]`);
+        this.addModalPrevButton = page.locator(`[data-testid="${this.tableName}__button-prev"]`);
+        this.addModalNextButton = page.locator(`[data-testid="${this.tableName}__button-next"]`);
+        this.addModalLoading = page.locator(`[data-testid="${this.tableName}__loading"]`);
+        this.addModalError = page.locator(`[data-testid="${this.tableName}__error"]`);
     }
 
     createActionRow(actionType: string, value: string): KpiSettingsActionRowComponent {
         return new KpiSettingsActionRowComponent(this.page, this.tableName, actionType, value);
     }
 }
-
 
 

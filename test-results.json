@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 4
     },
     "preserveOutput": "always",
     "reporter": [
@@ -60,7 +60,7 @@
         "repeatEach": 1,
         "retries": 1,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 4
         },
         "id": "smoke",
         "name": "smoke",
@@ -76,7 +76,7 @@
         "repeatEach": 1,
         "retries": 1,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 4
         },
         "id": "regression",
         "name": "regression",
@@ -125,12 +125,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3064,
+                      "duration": 4056,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:32:59.219Z",
+                      "startTime": "2026-03-05T11:29:44.826Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -159,7 +159,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3002,
+                      "duration": 3774,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -167,34 +167,34 @@
                       "steps": [
                         {
                           "title": "Проверяем Title",
-                          "duration": 24
+                          "duration": 12
                         },
                         {
                           "title": "Проверяем SubTitle",
-                          "duration": 95
+                          "duration": 9
                         },
                         {
                           "title": "Проверяем текст в Title и SubTitle",
-                          "duration": 23
+                          "duration": 52
                         },
                         {
                           "title": "Проверяем поле email",
-                          "duration": 45
-                        },
-                        {
-                          "title": "Проверяем поле password",
                           "duration": 7
                         },
                         {
+                          "title": "Проверяем поле password",
+                          "duration": 11
+                        },
+                        {
                           "title": "Проверяем кнопку входа",
-                          "duration": 193
+                          "duration": 5
                         },
                         {
                           "title": "Проверяем кнопку \"Забыли пароль\"",
-                          "duration": 25
+                          "duration": 3
                         }
                       ],
-                      "startTime": "2026-02-20T13:33:02.854Z",
+                      "startTime": "2026-03-05T11:29:49.127Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -223,12 +223,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4623,
+                      "duration": 4223,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:05.974Z",
+                      "startTime": "2026-03-05T11:29:52.939Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -257,12 +257,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3856,
+                      "duration": 4763,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:10.655Z",
+                      "startTime": "2026-03-05T11:29:57.187Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -291,12 +291,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2842,
+                      "duration": 4142,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:14.540Z",
+                      "startTime": "2026-03-05T11:30:01.969Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -325,12 +325,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2547,
+                      "duration": 3544,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:17.489Z",
+                      "startTime": "2026-03-05T11:30:06.135Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -376,12 +376,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3420,
+                      "duration": 4776,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:32:59.260Z",
+                      "startTime": "2026-03-05T11:29:44.835Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -410,12 +410,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 7819,
+                      "duration": 4505,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:03.164Z",
+                      "startTime": "2026-03-05T11:29:49.845Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -444,12 +444,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3049,
+                      "duration": 3042,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:11.073Z",
+                      "startTime": "2026-03-05T11:29:54.401Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -478,12 +478,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 5040,
+                      "duration": 6740,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:14.254Z",
+                      "startTime": "2026-03-05T11:29:57.458Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -512,7 +512,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3798,
+                      "duration": 3035,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -520,18 +520,18 @@
                       "steps": [
                         {
                           "title": "Проверяем карточку Total MRR",
-                          "duration": 193
+                          "duration": 73
                         },
                         {
                           "title": "Проверяем карточку Average Score",
-                          "duration": 375
+                          "duration": 33
                         },
                         {
                           "title": "Проверяем карточку Number of Apps",
-                          "duration": 295
+                          "duration": 30
                         }
                       ],
-                      "startTime": "2026-02-20T13:33:19.445Z",
+                      "startTime": "2026-03-05T11:30:04.209Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -560,7 +560,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 2684,
+                      "duration": 3463,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -568,18 +568,18 @@
                       "steps": [
                         {
                           "title": "Проверяем видимость фильтров по месяцам",
-                          "duration": 44
+                          "duration": 20
                         },
                         {
                           "title": "Есть хотя бы один таб",
-                          "duration": 10
+                          "duration": 26
                         },
                         {
                           "title": "Активный таб отображается",
-                          "duration": 4
+                          "duration": 3
                         }
                       ],
-                      "startTime": "2026-02-20T13:33:23.288Z",
+                      "startTime": "2026-03-05T11:30:07.266Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -608,12 +608,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3047,
+                      "duration": 4664,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-02-20T13:33:26.011Z",
+                      "startTime": "2026-03-05T11:30:10.743Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -642,7 +642,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 2701,
+                      "duration": 3359,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -650,14 +650,14 @@
                       "steps": [
                         {
                           "title": "Podium рендерится",
-                          "duration": 16
+                          "duration": 5
                         },
                         {
                           "title": "Есть хотя бы один contender",
-                          "duration": 25
+                          "duration": 6
                         }
                       ],
-                      "startTime": "2026-02-20T13:33:29.141Z",
+                      "startTime": "2026-03-05T11:30:15.416Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -686,7 +686,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3153,
+                      "duration": 4607,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -694,18 +694,18 @@
                       "steps": [
                         {
                           "title": "Таблица отображается",
-                          "duration": 18
+                          "duration": 9
                         },
                         {
                           "title": "Есть хотя бы одна строка",
-                          "duration": 14
+                          "duration": 20
                         },
                         {
                           "title": "Кнопка Open открывает страницу сотрудника",
-                          "duration": 189
+                          "duration": 104
                         }
                       ],
-                      "startTime": "2026-02-20T13:33:31.870Z",
+                      "startTime": "2026-03-05T11:30:18.786Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -721,13 +721,770 @@
           ]
         }
       ]
+    },
+    {
+      "title": "regression/functionality.regression.spec.ts",
+      "file": "regression/functionality.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Функциональность авторизации",
+          "file": "regression/functionality.regression.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Работа модального окна восстановления пароля",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 4657,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:29:44.824Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-866eff8ac5ea8c393cce",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 8,
+              "column": 9
+            },
+            {
+              "title": "Закрытие модалки через оверлей",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3936,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:29:49.729Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-2b2a09e722bfdfce16f7",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 16,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Remember me\" работает (UI)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3470,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:29:53.703Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-a3c3609d854cfa56507a",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 23,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Remember me\" работает (Functional)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 5114,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:29:57.240Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-bcf343885c34b78f38e2",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 34,
+              "column": 9
+            },
+            {
+              "title": "Кнопка показа/скрытия пароля работает корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 4234,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:02.376Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-a60f0f3ef0ed393ec6e0",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 43,
+              "column": 9
+            },
+            {
+              "title": "Переход по Telegram ссылке",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3397,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:06.625Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-8666c3e43f94766f38d3",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 51,
+              "column": 9
+            },
+            {
+              "title": "Поля сохраняют значения после неуспешной попытки",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2839,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:10.032Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-7bb0f2b278ca08f8bf1b",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 58,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "regression/kpi.regression.spec.ts",
+      "file": "regression/kpi.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Страница KPI",
+          "file": "regression/kpi.regression.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Фильтры: отображение, активный таб, переключение и изменение контента",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 5340,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Фильтры отображаются",
+                          "duration": 53
+                        },
+                        {
+                          "title": "Активный таб корректен",
+                          "duration": 27
+                        },
+                        {
+                          "title": "Переключение месяца обновляет контент",
+                          "duration": 585
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:29:44.829Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-eb3ce5a20de8065c0ecf",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 11,
+              "column": 9
+            },
+            {
+              "title": "Top Employees: подиум отображается полностью и корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4433,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Блок отображается",
+                          "duration": 37
+                        },
+                        {
+                          "title": "Проверяем полный подиум (3 позиции)",
+                          "duration": 117
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:29:50.408Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-32c09721f5c6eeea8684",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 28,
+              "column": 9
+            },
+            {
+              "title": "Top Employees: претенденты корректны и инициалы совпадают",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3066,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем отображение претендентов 2 ",
+                          "duration": 107
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:29:54.871Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-d14cf17dcceb5f17f5dd",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 39,
+              "column": 9
+            },
+            {
+              "title": "Карточки KPI отображаются и содержат значения",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4415,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Total MRR",
+                          "duration": 137
+                        },
+                        {
+                          "title": "Average Score",
+                          "duration": 282
+                        },
+                        {
+                          "title": "Number of Apps",
+                          "duration": 49
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:29:57.955Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-6458c5bee334cc09d26e",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 47,
+              "column": 9
+            },
+            {
+              "title": "График отображается, табы переключаются без ошибок",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4226,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:02.378Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-83352092c17f117e4f3d",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 61,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: строки отображаются и корректны",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4269,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Таблица отображается",
+                          "duration": 366
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:30:06.646Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-ead3762814023d23fb09",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 73,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: кнопка Open открывает страницу сотрудника",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3835,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:10.924Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-1b9a0567ddedf830c9a9",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: сортировка по колонкам",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 9193,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Sort by Score",
+                          "duration": 2891
+                        },
+                        {
+                          "title": "Sort by MRR",
+                          "duration": 2412
+                        }
+                      ],
+                      "startTime": "2026-03-05T11:30:14.772Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-034d239edaff1f65908f",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 96,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "regression/validation.regression.spec.ts",
+      "file": "regression/validation.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Валидация полей авторизации",
+          "file": "regression/validation.regression.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Валидация пустых полей",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3770,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:10.692Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-7eed01f52dbb25927e50",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 10,
+              "column": 9
+            },
+            {
+              "title": "Валидация некорректного email формата",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3857,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:14.741Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-02fd27ecca5e7052b8b8",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "Неуспешная авторизация с неверным паролем",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3381,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:18.610Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-f0bd8c5bc19e39aff48b",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 27,
+              "column": 9
+            },
+            {
+              "title": "Неуспешная авторизация с несуществующим email",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2916,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-05T11:30:22.012Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-6069f0f9b0ee804982da",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 35,
+              "column": 9
+            }
+          ]
+        }
+      ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-02-20T13:32:49.677Z",
-    "duration": 45609.028,
-    "expected": 15,
+    "startTime": "2026-03-05T11:29:38.398Z",
+    "duration": 46574.589,
+    "expected": 34,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

@@ -8,6 +8,12 @@ import { testSettings } from '../config/test-settings';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');
 dotenv.config({ path: path.resolve('./.env') });
+const BASE_URL = testSettings.baseUrl.replace(/\/+$/, '');
+
+function appUrl(pathname: string): string {
+    const normalizedPath = pathname.startsWith('/') ? pathname : `/${pathname}`;
+    return `${BASE_URL}${normalizedPath}`;
+}
 
 /**
  * Выполняет повтор функции с экспоненциальной задержкой при ошибках
@@ -45,7 +51,7 @@ async function isAuthStateValid(): Promise<boolean> {
     const page = await context.newPage();
 
     try {
-        await page.goto(`${testSettings.baseUrl}/kpi`, {
+        await page.goto(appUrl('/kpi'), {
             waitUntil: 'domcontentloaded',
             timeout: 30000
         });
@@ -89,9 +95,20 @@ async function globalSetup() {
         const loginPage = new LoginPage(page);
 
         try {
-            await page.goto(`${testSettings.baseUrl}/login`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.goto(appUrl('/login'), { waitUntil: 'domcontentloaded', timeout: 30000 });
             await loginPage.loginToGlobalSetup(testUsers.admin.email, testUsers.admin.password, { remember: true });
-            await page.waitForURL(`${testSettings.baseUrl}/dashboard`, { waitUntil: 'commit', timeout: 60000 });
+            await page.waitForURL(
+                url => {
+                    const value = url.toString();
+                    return !/\/(login|auth|sign-in)/i.test(value);
+                },
+                { waitUntil: 'domcontentloaded', timeout: 60000 }
+            );
+
+            const stillOnLogin = /\/(login|auth|sign-in)/i.test(page.url());
+            if (stillOnLogin) {
+                throw new Error(`Global setup login failed: still on auth page (${page.url()})`);
+            }
 
             fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
             await context.storageState({ path: AUTH_FILE });

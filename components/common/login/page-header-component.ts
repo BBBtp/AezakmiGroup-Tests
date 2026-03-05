@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../../utils/test-id';
 
 /**
  * Компонент заголовка страницы.
@@ -35,10 +36,11 @@ export class PageHeaderComponent {
      */
     constructor(page: Page, containerTestId: string) {
         this.page = page;
+        const normalizedContainerTestId = requireTestId(containerTestId, 'PageHeaderComponent');
 
         // Корневой контейнер заголовка
         const container = page.locator(
-            `[data-testid="${containerTestId}"]`
+            `[data-testid="${normalizedContainerTestId}"]`
         );
 
         // Локаторы элементов заголовка

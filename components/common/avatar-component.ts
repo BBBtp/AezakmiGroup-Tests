@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент аватара пользователя.
@@ -53,20 +54,21 @@ export class AvatarComponent {
      * - `${testId}-sublink_tooltip`
      */
     constructor(page: Page, testId: string) {
+        const normalizedTestId = requireTestId(testId, 'AvatarComponent');
         this.root = page.locator(
-            `[data-testid="${testId}"]`
+            `[data-testid="${normalizedTestId}"]`
         );
         this.title = page.locator(
-            `[data-testid="${testId}-title"]`
+            `[data-testid="${normalizedTestId}-title"]`
         );
         this.subtitle = page.locator(
-            `[data-testid="${testId}-subtitle"]`
+            `[data-testid="${normalizedTestId}-subtitle"]`
         );
         this.sublink = page.locator(
-            `[data-testid="${testId}-sublink"]`
+            `[data-testid="${normalizedTestId}-sublink"]`
         );
         this.tooltip = page.locator(
-            `[data-testid="${testId}-sublink_tooltip"]`
+            `[data-testid="${normalizedTestId}-sublink_tooltip"]`
         );
     }
 }

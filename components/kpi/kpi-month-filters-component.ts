@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент фильтров KPI по месяцам.
@@ -28,8 +29,8 @@ export class KpiMonthFiltersComponent {
      * @param page Экземпляр страницы Playwright
      */
     constructor(page: Page, testId: string = 'month-filters') {
-        this.testId = testId;
-        this.root = page.locator(`[data-testid="${testId}"]`);
+        this.testId = requireTestId(testId, 'KpiMonthFiltersComponent');
+        this.root = page.locator(`[data-testid="${this.testId}"]`);
         this.tabs = this.root.locator('[role="tab"]');
         this.activeTab = this.root.locator('[role="tab"][aria-selected="true"]');
         this.datePickerButton = this.root.locator('button._pickerButton_8b6qc_10');

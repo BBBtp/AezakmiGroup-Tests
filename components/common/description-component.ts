@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент описания или информационного блока.
@@ -38,8 +39,9 @@ export class DescriptionComponent {
      * - `${testId}__message`
      */
     constructor(page: Page, testId: string) {
-        this.root = page.locator(`[data-testid="${testId}"]`);
-        this.title = this.root.locator(`[data-testid="${testId}__title"]`);
-        this.message = this.root.locator(`[data-testid="${testId}__message"]`);
+        const normalizedTestId = requireTestId(testId, 'DescriptionComponent');
+        this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
+        this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
+        this.message = this.root.locator(`[data-testid="${normalizedTestId}__message"]`);
     }
 }

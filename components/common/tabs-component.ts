@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент вкладок (Tabs).
@@ -32,8 +33,8 @@ export class TabsComponent {
      * то отдельный таб имеет testId = "profile-tabs__settings"
      */
     constructor(page: Page, testId: string) {
-        this.testId = testId;
-        this.root = page.locator(`[data-testid="${testId}"]`);
+        this.testId = requireTestId(testId, 'TabsComponent');
+        this.root = page.locator(`[data-testid="${this.testId}"]`);
     }
 
     /**

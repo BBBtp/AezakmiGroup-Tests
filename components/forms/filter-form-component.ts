@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент формы фильтров.
@@ -49,10 +50,10 @@ export class FilterFormComponent {
      */
     constructor(page: Page, testId: string = 'filter-form') {
         this.page = page;
-        this.testId = testId;
-        this.root = page.locator(`[data-testid="${testId}"]`);
-        this.applyButton = page.locator(`[data-testid="${testId}__apply"]`);
-        this.resetButton = page.locator(`[data-testid="${testId}__reset"]`);
+        this.testId = requireTestId(testId, 'FilterFormComponent');
+        this.root = page.locator(`[data-testid="${this.testId}"]`);
+        this.applyButton = page.locator(`[data-testid="${this.testId}__apply"]`);
+        this.resetButton = page.locator(`[data-testid="${this.testId}__reset"]`);
     }
 
     /**

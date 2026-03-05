@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { requireTestId } from '../../utils/test-id';
 
 /**
  * Компонент уведомления (Toast / Alert).
@@ -34,7 +35,8 @@ export class ToastComponent {
      * @param testId Базовый data-testid уведомления
      */
     constructor(page: Page, testId: string) {
-        this.root = page.locator(`[data-testid="${testId}"]`);
+        const normalizedTestId = requireTestId(testId, 'ToastComponent');
+        this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
         this.title = this.root.locator(`[data-testid$="__alert-title"]`);
         this.subtitle = this.root.locator(`[data-testid$="__alert-subtitle"]`);
     }

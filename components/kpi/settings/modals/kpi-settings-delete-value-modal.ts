@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { composeTestId, requireTestId } from '../../../../utils/test-id';
 
 export class KpiSettingsDeleteValueModal {
     readonly page: Page;
@@ -11,7 +12,10 @@ export class KpiSettingsDeleteValueModal {
 
     constructor(page: Page, tableName: string, actionType: string, value: string) {
         this.page = page;
-        this.baseTestId = [tableName, actionType, value].filter(Boolean).join('__');
+        this.baseTestId = requireTestId(
+            composeTestId([tableName, actionType, value]),
+            'KpiSettingsDeleteValueModal'
+        );
 
         this.modal = page.locator(`[data-testid="${this.baseTestId}__delete-modal"]`);
         this.confirmButton = page.locator('[data-testid="delete-item__del-btn"]');
@@ -19,6 +23,5 @@ export class KpiSettingsDeleteValueModal {
         this.loader = page.locator('[data-testid="delete-item__loader"]');
     }
 }
-
 
 

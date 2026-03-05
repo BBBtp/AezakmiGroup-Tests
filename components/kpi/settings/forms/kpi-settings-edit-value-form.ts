@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { composeTestId, requireTestId } from '../../../../utils/test-id';
 
 export class KpiSettingsEditValueForm {
     readonly page: Page;
@@ -15,7 +16,10 @@ export class KpiSettingsEditValueForm {
     readonly errorBlock: Locator;
     constructor(page: Page, tableName: string, actionType: string, value: string) {
         this.page = page;
-        this.baseTestId = [tableName, actionType, value].filter(Boolean).join('__');
+        this.baseTestId = requireTestId(
+            composeTestId([tableName, actionType, value]),
+            'KpiSettingsEditValueForm'
+        );
         this.root = page.locator(`[data-testid="${this.baseTestId}__edit-form"]`);
         this.actionType = page.locator(`[data-testid="${this.baseTestId}__actionType"]`);
         this.valueType = page.locator(`[data-testid="${this.baseTestId}__valueType"]`);
@@ -28,6 +32,5 @@ export class KpiSettingsEditValueForm {
         this.errorBlock = page.locator(`[data-testid="${this.baseTestId}__error"]`);
     }
 }
-
 
 
