@@ -1,80 +1,80 @@
-<testsuites id="" name="" tests="34" failures="0" skipped="0" errors="0" time="46.574589">
-<testsuite name="smoke/auth.smoke.spec.ts" timestamp="2026-03-05T11:29:44.323Z" hostname="smoke" tests="6" failures="0" skipped="0" time="24.502" errors="0">
-<testcase name="Авторизация в CRM › Страница авторизации доступна и загружается" classname="smoke/auth.smoke.spec.ts" time="4.056">
+<testsuites id="" name="" tests="34" failures="0" skipped="0" errors="0" time="55.044074">
+<testsuite name="smoke/auth.smoke.spec.ts" timestamp="2026-03-06T09:52:15.104Z" hostname="smoke" tests="6" failures="0" skipped="0" time="22.771" errors="0">
+<testcase name="Авторизация в CRM › Страница авторизации доступна и загружается" classname="smoke/auth.smoke.spec.ts" time="4.175">
 </testcase>
-<testcase name="Авторизация в CRM › Основные элементы страницы отображаются" classname="smoke/auth.smoke.spec.ts" time="3.774">
+<testcase name="Авторизация в CRM › Основные элементы страницы отображаются" classname="smoke/auth.smoke.spec.ts" time="4.017">
 </testcase>
-<testcase name="Авторизация в CRM › Успешная авторизация администратора" classname="smoke/auth.smoke.spec.ts" time="4.223">
+<testcase name="Авторизация в CRM › Успешная авторизация администратора" classname="smoke/auth.smoke.spec.ts" time="4.477">
 </testcase>
-<testcase name="Авторизация в CRM › Успешная авторизация обычного пользователя" classname="smoke/auth.smoke.spec.ts" time="4.763">
+<testcase name="Авторизация в CRM › Успешная авторизация обычного пользователя" classname="smoke/auth.smoke.spec.ts" time="4.14">
 </testcase>
-<testcase name="Авторизация в CRM › Кнопка &quot;Forgot password&quot; открывает модальное окно" classname="smoke/auth.smoke.spec.ts" time="4.142">
+<testcase name="Авторизация в CRM › Кнопка &quot;Forgot password&quot; открывает модальное окно" classname="smoke/auth.smoke.spec.ts" time="3.251">
 </testcase>
-<testcase name="Авторизация в CRM › Модальное окно восстановления пароля закрывается" classname="smoke/auth.smoke.spec.ts" time="3.544">
-</testcase>
-</testsuite>
-<testsuite name="smoke/kpi.smoke.spec.ts" timestamp="2026-03-05T11:29:44.323Z" hostname="smoke" tests="9" failures="0" skipped="0" time="38.191" errors="0">
-<testcase name="Страница KPI › Подзаголовок отображается корректно" classname="smoke/kpi.smoke.spec.ts" time="4.776">
-</testcase>
-<testcase name="Страница KPI › Кнопка настроек отображается и кликабельна" classname="smoke/kpi.smoke.spec.ts" time="4.505">
-</testcase>
-<testcase name="Страница KPI › Основной контент рендерится, error-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="3.042">
-</testcase>
-<testcase name="Страница KPI › При ошибке загрузки отображается error-content, main-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="6.74">
-</testcase>
-<testcase name="Страница KPI › Проверка отображения карточек KPI" classname="smoke/kpi.smoke.spec.ts" time="3.035">
-</testcase>
-<testcase name="Страница KPI › Фильтры по месяцам видимы и работают" classname="smoke/kpi.smoke.spec.ts" time="3.463">
-</testcase>
-<testcase name="Страница KPI › График производительности отображается и табы переключаются" classname="smoke/kpi.smoke.spec.ts" time="4.664">
-</testcase>
-<testcase name="Страница KPI › Top Employees отображается" classname="smoke/kpi.smoke.spec.ts" time="3.359">
-</testcase>
-<testcase name="Страница KPI › Таблица сотрудников отображается и можно открыть карточку сотрудника" classname="smoke/kpi.smoke.spec.ts" time="4.607">
+<testcase name="Авторизация в CRM › Модальное окно восстановления пароля закрывается" classname="smoke/auth.smoke.spec.ts" time="2.711">
 </testcase>
 </testsuite>
-<testsuite name="regression/functionality.regression.spec.ts" timestamp="2026-03-05T11:29:44.323Z" hostname="regression" tests="7" failures="0" skipped="0" time="27.647" errors="0">
-<testcase name="Функциональность авторизации › Работа модального окна восстановления пароля" classname="regression/functionality.regression.spec.ts" time="4.657">
+<testsuite name="smoke/kpi.smoke.spec.ts" timestamp="2026-03-06T09:52:15.104Z" hostname="smoke" tests="9" failures="0" skipped="0" time="37.584" errors="0">
+<testcase name="Страница KPI › Подзаголовок отображается корректно" classname="smoke/kpi.smoke.spec.ts" time="4.935">
 </testcase>
-<testcase name="Функциональность авторизации › Закрытие модалки через оверлей" classname="regression/functionality.regression.spec.ts" time="3.936">
+<testcase name="Страница KPI › Кнопка настроек отображается и кликабельна" classname="smoke/kpi.smoke.spec.ts" time="3.918">
 </testcase>
-<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; работает (UI)" classname="regression/functionality.regression.spec.ts" time="3.47">
+<testcase name="Страница KPI › Основной контент рендерится, error-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="4.283">
 </testcase>
-<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; работает (Functional)" classname="regression/functionality.regression.spec.ts" time="5.114">
+<testcase name="Страница KPI › При ошибке загрузки отображается error-content, main-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="6.09">
 </testcase>
-<testcase name="Функциональность авторизации › Кнопка показа/скрытия пароля работает корректно" classname="regression/functionality.regression.spec.ts" time="4.234">
+<testcase name="Страница KPI › Проверка отображения карточек KPI" classname="smoke/kpi.smoke.spec.ts" time="3.247">
 </testcase>
-<testcase name="Функциональность авторизации › Переход по Telegram ссылке" classname="regression/functionality.regression.spec.ts" time="3.397">
+<testcase name="Страница KPI › Фильтры по месяцам видимы и работают" classname="smoke/kpi.smoke.spec.ts" time="3.789">
 </testcase>
-<testcase name="Функциональность авторизации › Поля сохраняют значения после неуспешной попытки" classname="regression/functionality.regression.spec.ts" time="2.839">
+<testcase name="Страница KPI › График производительности отображается и табы переключаются" classname="smoke/kpi.smoke.spec.ts" time="3.499">
 </testcase>
-</testsuite>
-<testsuite name="regression/kpi.regression.spec.ts" timestamp="2026-03-05T11:29:44.323Z" hostname="regression" tests="8" failures="0" skipped="0" time="38.777" errors="0">
-<testcase name="Страница KPI › Фильтры: отображение, активный таб, переключение и изменение контента" classname="regression/kpi.regression.spec.ts" time="5.34">
+<testcase name="Страница KPI › Top Employees отображается" classname="smoke/kpi.smoke.spec.ts" time="3.191">
 </testcase>
-<testcase name="Страница KPI › Top Employees: подиум отображается полностью и корректно" classname="regression/kpi.regression.spec.ts" time="4.433">
-</testcase>
-<testcase name="Страница KPI › Top Employees: претенденты корректны и инициалы совпадают" classname="regression/kpi.regression.spec.ts" time="3.066">
-</testcase>
-<testcase name="Страница KPI › Карточки KPI отображаются и содержат значения" classname="regression/kpi.regression.spec.ts" time="4.415">
-</testcase>
-<testcase name="Страница KPI › График отображается, табы переключаются без ошибок" classname="regression/kpi.regression.spec.ts" time="4.226">
-</testcase>
-<testcase name="Страница KPI › Таблица сотрудников: строки отображаются и корректны" classname="regression/kpi.regression.spec.ts" time="4.269">
-</testcase>
-<testcase name="Страница KPI › Таблица сотрудников: кнопка Open открывает страницу сотрудника" classname="regression/kpi.regression.spec.ts" time="3.835">
-</testcase>
-<testcase name="Страница KPI › Таблица сотрудников: сортировка по колонкам" classname="regression/kpi.regression.spec.ts" time="9.193">
+<testcase name="Страница KPI › Таблица сотрудников отображается и можно открыть карточку сотрудника" classname="smoke/kpi.smoke.spec.ts" time="4.632">
 </testcase>
 </testsuite>
-<testsuite name="regression/validation.regression.spec.ts" timestamp="2026-03-05T11:29:44.323Z" hostname="regression" tests="4" failures="0" skipped="0" time="13.924" errors="0">
-<testcase name="Валидация полей авторизации › Валидация пустых полей" classname="regression/validation.regression.spec.ts" time="3.77">
+<testsuite name="regression/functionality.regression.spec.ts" timestamp="2026-03-06T09:52:15.104Z" hostname="regression" tests="7" failures="0" skipped="0" time="27.795" errors="0">
+<testcase name="Функциональность авторизации › Работа модального окна восстановления пароля" classname="regression/functionality.regression.spec.ts" time="4.475">
 </testcase>
-<testcase name="Валидация полей авторизации › Валидация некорректного email формата" classname="regression/validation.regression.spec.ts" time="3.857">
+<testcase name="Функциональность авторизации › Закрытие модалки через оверлей" classname="regression/functionality.regression.spec.ts" time="3.763">
 </testcase>
-<testcase name="Валидация полей авторизации › Неуспешная авторизация с неверным паролем" classname="regression/validation.regression.spec.ts" time="3.381">
+<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; работает (UI)" classname="regression/functionality.regression.spec.ts" time="4.016">
 </testcase>
-<testcase name="Валидация полей авторизации › Неуспешная авторизация с несуществующим email" classname="regression/validation.regression.spec.ts" time="2.916">
+<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; работает (Functional)" classname="regression/functionality.regression.spec.ts" time="6.117">
+</testcase>
+<testcase name="Функциональность авторизации › Кнопка показа/скрытия пароля работает корректно" classname="regression/functionality.regression.spec.ts" time="3.037">
+</testcase>
+<testcase name="Функциональность авторизации › Переход по Telegram ссылке" classname="regression/functionality.regression.spec.ts" time="2.72">
+</testcase>
+<testcase name="Функциональность авторизации › Поля сохраняют значения после неуспешной попытки" classname="regression/functionality.regression.spec.ts" time="3.667">
+</testcase>
+</testsuite>
+<testsuite name="regression/kpi.regression.spec.ts" timestamp="2026-03-06T09:52:15.104Z" hostname="regression" tests="8" failures="0" skipped="0" time="45.831" errors="0">
+<testcase name="Страница KPI › Фильтры: отображение, активный таб, переключение и изменение контента" classname="regression/kpi.regression.spec.ts" time="5.373">
+</testcase>
+<testcase name="Страница KPI › Top Employees: подиум отображается полностью и корректно" classname="regression/kpi.regression.spec.ts" time="3.765">
+</testcase>
+<testcase name="Страница KPI › Top Employees: претенденты корректны и инициалы совпадают" classname="regression/kpi.regression.spec.ts" time="4.479">
+</testcase>
+<testcase name="Страница KPI › Карточки KPI отображаются и содержат значения" classname="regression/kpi.regression.spec.ts" time="3.957">
+</testcase>
+<testcase name="Страница KPI › График отображается, табы переключаются без ошибок" classname="regression/kpi.regression.spec.ts" time="6.44">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: строки отображаются и корректны" classname="regression/kpi.regression.spec.ts" time="4.965">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: кнопка Open открывает страницу сотрудника" classname="regression/kpi.regression.spec.ts" time="4.493">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: сортировка по колонкам" classname="regression/kpi.regression.spec.ts" time="12.359">
+</testcase>
+</testsuite>
+<testsuite name="regression/validation.regression.spec.ts" timestamp="2026-03-06T09:52:15.104Z" hostname="regression" tests="4" failures="0" skipped="0" time="13.362" errors="0">
+<testcase name="Валидация полей авторизации › Валидация пустых полей" classname="regression/validation.regression.spec.ts" time="3.511">
+</testcase>
+<testcase name="Валидация полей авторизации › Валидация некорректного email формата" classname="regression/validation.regression.spec.ts" time="2.893">
+</testcase>
+<testcase name="Валидация полей авторизации › Неуспешная авторизация с неверным паролем" classname="regression/validation.regression.spec.ts" time="3.098">
+</testcase>
+<testcase name="Валидация полей авторизации › Неуспешная авторизация с несуществующим email" classname="regression/validation.regression.spec.ts" time="3.86">
 </testcase>
 </testsuite>
 </testsuites>
