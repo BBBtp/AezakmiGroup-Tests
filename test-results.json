@@ -125,12 +125,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4673,
+                      "duration": 3736,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:16.129Z",
+                      "startTime": "2026-03-19T12:26:34.146Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -159,7 +159,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3639,
+                      "duration": 3075,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -167,34 +167,34 @@
                       "steps": [
                         {
                           "title": "Проверяем Title",
-                          "duration": 5
+                          "duration": 12
                         },
                         {
                           "title": "Проверяем SubTitle",
-                          "duration": 7
+                          "duration": 56
                         },
                         {
                           "title": "Проверяем текст в Title и SubTitle",
-                          "duration": 11
+                          "duration": 28
                         },
                         {
                           "title": "Проверяем поле email",
-                          "duration": 5
+                          "duration": 39
                         },
                         {
                           "title": "Проверяем поле password",
-                          "duration": 7
+                          "duration": 11
                         },
                         {
                           "title": "Проверяем кнопку входа",
-                          "duration": 4
+                          "duration": 143
                         },
                         {
                           "title": "Проверяем кнопку \"Забыли пароль\"",
-                          "duration": 23
+                          "duration": 11
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:21.223Z",
+                      "startTime": "2026-03-19T12:26:38.171Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -223,12 +223,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4879,
+                      "duration": 3130,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:24.877Z",
+                      "startTime": "2026-03-19T12:26:41.255Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -257,12 +257,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5251,
+                      "duration": 3734,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:29.810Z",
+                      "startTime": "2026-03-19T12:26:44.418Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -291,12 +291,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3542,
+                      "duration": 3443,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:35.092Z",
+                      "startTime": "2026-03-19T12:26:48.165Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -325,12 +325,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3561,
+                      "duration": 3008,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:38.648Z",
+                      "startTime": "2026-03-19T12:26:51.632Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -376,12 +376,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 5255,
+                      "duration": 4169,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:16.196Z",
+                      "startTime": "2026-03-19T12:26:34.151Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -410,12 +410,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 5666,
+                      "duration": 3673,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:21.758Z",
+                      "startTime": "2026-03-19T12:26:38.544Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -444,12 +444,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3287,
+                      "duration": 2819,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:27.446Z",
+                      "startTime": "2026-03-19T12:26:42.241Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -478,12 +478,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 7183,
+                      "duration": 6192,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:30.809Z",
+                      "startTime": "2026-03-19T12:26:45.090Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -512,7 +512,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4331,
+                      "duration": 3136,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -520,18 +520,18 @@
                       "steps": [
                         {
                           "title": "Проверяем карточку Total MRR",
-                          "duration": 199
+                          "duration": 56
                         },
                         {
                           "title": "Проверяем карточку Average Score",
-                          "duration": 144
+                          "duration": 49
                         },
                         {
                           "title": "Проверяем карточку Number of Apps",
-                          "duration": 62
+                          "duration": 210
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:38.015Z",
+                      "startTime": "2026-03-19T12:26:51.295Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -560,7 +560,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4647,
+                      "duration": 2476,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -568,18 +568,18 @@
                       "steps": [
                         {
                           "title": "Проверяем видимость фильтров по месяцам",
-                          "duration": 32
+                          "duration": 14
                         },
                         {
                           "title": "Есть хотя бы один таб",
-                          "duration": 9
+                          "duration": 5
                         },
                         {
                           "title": "Активный таб отображается",
-                          "duration": 7
+                          "duration": 5
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:42.358Z",
+                      "startTime": "2026-03-19T12:26:54.456Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -608,12 +608,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3905,
+                      "duration": 2416,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:47.017Z",
+                      "startTime": "2026-03-19T12:26:56.944Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -642,7 +642,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 2806,
+                      "duration": 3085,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -650,14 +650,14 @@
                       "steps": [
                         {
                           "title": "Podium рендерится",
-                          "duration": 8
+                          "duration": 18
                         },
                         {
                           "title": "Есть хотя бы один contender",
-                          "duration": 12
+                          "duration": 27
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:50.964Z",
+                      "startTime": "2026-03-19T12:26:59.371Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -686,7 +686,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3321,
+                      "duration": 2931,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -694,18 +694,18 @@
                       "steps": [
                         {
                           "title": "Таблица отображается",
-                          "duration": 26
+                          "duration": 13
                         },
                         {
                           "title": "Есть хотя бы одна строка",
-                          "duration": 40
+                          "duration": 29
                         },
                         {
                           "title": "Кнопка Open открывает страницу сотрудника",
-                          "duration": 147
+                          "duration": 160
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:53.785Z",
+                      "startTime": "2026-03-19T12:27:02.499Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -732,7 +732,7 @@
         {
           "title": "Функциональность авторизации",
           "file": "regression/functionality.regression.spec.ts",
-          "line": 3,
+          "line": 9,
           "column": 6,
           "specs": [
             {
@@ -751,12 +751,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 4465,
+                      "duration": 3949,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:16.254Z",
+                      "startTime": "2026-03-19T12:26:34.161Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -766,7 +766,7 @@
               ],
               "id": "97ac3ac23f1978ce2d30-866eff8ac5ea8c393cce",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 8,
+              "line": 14,
               "column": 9
             },
             {
@@ -785,12 +785,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 3261,
+                      "duration": 3343,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:21.285Z",
+                      "startTime": "2026-03-19T12:26:38.342Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -800,7 +800,7 @@
               ],
               "id": "97ac3ac23f1978ce2d30-2b2a09e722bfdfce16f7",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 16,
+              "line": 22,
               "column": 9
             },
             {
@@ -819,12 +819,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 5220,
+                      "duration": 2753,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:24.565Z",
+                      "startTime": "2026-03-19T12:26:41.693Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -834,11 +834,11 @@
               ],
               "id": "97ac3ac23f1978ce2d30-a3c3609d854cfa56507a",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 23,
+              "line": 29,
               "column": 9
             },
             {
-              "title": "Кнопка \"Remember me\" работает (Functional)",
+              "title": "Кнопка \"Remember me\" сохраняет сессию между перезапусками браузерного контекста",
               "ok": true,
               "tags": [],
               "tests": [
@@ -853,12 +853,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 5175,
+                      "duration": 8984,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:29.902Z",
+                      "startTime": "2026-03-19T12:26:44.458Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -866,9 +866,9 @@
                   "status": "expected"
                 }
               ],
-              "id": "97ac3ac23f1978ce2d30-bcf343885c34b78f38e2",
+              "id": "97ac3ac23f1978ce2d30-a02a1127698b28564725",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 34,
+              "line": 40,
               "column": 9
             },
             {
@@ -887,12 +887,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 4147,
+                      "duration": 2108,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:35.100Z",
+                      "startTime": "2026-03-19T12:26:53.456Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -902,7 +902,7 @@
               ],
               "id": "97ac3ac23f1978ce2d30-a60f0f3ef0ed393ec6e0",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 43,
+              "line": 71,
               "column": 9
             },
             {
@@ -921,12 +921,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 2944,
+                      "duration": 2732,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:39.272Z",
+                      "startTime": "2026-03-19T12:26:55.572Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -936,7 +936,7 @@
               ],
               "id": "97ac3ac23f1978ce2d30-8666c3e43f94766f38d3",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 51,
+              "line": 79,
               "column": 9
             },
             {
@@ -955,12 +955,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "passed",
-                      "duration": 3930,
+                      "duration": 4243,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:42.282Z",
+                      "startTime": "2026-03-19T12:26:58.313Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -970,7 +970,7 @@
               ],
               "id": "97ac3ac23f1978ce2d30-7bb0f2b278ca08f8bf1b",
               "file": "regression/functionality.regression.spec.ts",
-              "line": 58,
+              "line": 86,
               "column": 9
             }
           ]
@@ -1006,7 +1006,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 5377,
+                      "duration": 4279,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1014,18 +1014,18 @@
                       "steps": [
                         {
                           "title": "Фильтры отображаются",
-                          "duration": 17
+                          "duration": 7
                         },
                         {
                           "title": "Активный таб корректен",
-                          "duration": 10
+                          "duration": 8
                         },
                         {
                           "title": "Переключение месяца обновляет контент",
-                          "duration": 554
+                          "duration": 208
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:16.033Z",
+                      "startTime": "2026-03-19T12:26:34.147Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1054,7 +1054,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 3856,
+                      "duration": 3574,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1062,14 +1062,14 @@
                       "steps": [
                         {
                           "title": "Блок отображается",
-                          "duration": 16
+                          "duration": 86
                         },
                         {
                           "title": "Проверяем полный подиум (3 позиции)",
-                          "duration": 106
+                          "duration": 110
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:21.855Z",
+                      "startTime": "2026-03-19T12:26:38.639Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1098,7 +1098,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 4025,
+                      "duration": 2706,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1106,10 +1106,10 @@
                       "steps": [
                         {
                           "title": "Проверяем отображение претендентов 2 ",
-                          "duration": 550
+                          "duration": 116
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:25.737Z",
+                      "startTime": "2026-03-19T12:26:42.235Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1138,7 +1138,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 5626,
+                      "duration": 3424,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1146,18 +1146,18 @@
                       "steps": [
                         {
                           "title": "Total MRR",
-                          "duration": 94
+                          "duration": 246
                         },
                         {
                           "title": "Average Score",
-                          "duration": 59
+                          "duration": 97
                         },
                         {
                           "title": "Number of Apps",
-                          "duration": 81
+                          "duration": 76
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:29.862Z",
+                      "startTime": "2026-03-19T12:26:44.963Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1186,12 +1186,12 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 4055,
+                      "duration": 3708,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:35.581Z",
+                      "startTime": "2026-03-19T12:26:48.424Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1220,7 +1220,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 3592,
+                      "duration": 2809,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1228,10 +1228,10 @@
                       "steps": [
                         {
                           "title": "Таблица отображается",
-                          "duration": 471
+                          "duration": 217
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:39.656Z",
+                      "startTime": "2026-03-19T12:26:52.143Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1260,12 +1260,12 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 4183,
+                      "duration": 2813,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:43.260Z",
+                      "startTime": "2026-03-19T12:26:54.959Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1294,7 +1294,7 @@
                       "workerIndex": 3,
                       "parallelIndex": 3,
                       "status": "passed",
-                      "duration": 10895,
+                      "duration": 11328,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -1302,14 +1302,14 @@
                       "steps": [
                         {
                           "title": "Sort by Score",
-                          "duration": 3646
+                          "duration": 5473
                         },
                         {
                           "title": "Sort by MRR",
-                          "duration": 3628
+                          "duration": 3110
                         }
                       ],
-                      "startTime": "2026-03-06T10:06:47.459Z",
+                      "startTime": "2026-03-19T12:26:57.804Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1355,12 +1355,12 @@
                       "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3018,
+                      "duration": 2862,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:43.573Z",
+                      "startTime": "2026-03-19T12:26:55.228Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1389,12 +1389,12 @@
                       "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3422,
+                      "duration": 4344,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:46.833Z",
+                      "startTime": "2026-03-19T12:26:58.229Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1423,12 +1423,12 @@
                       "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3355,
+                      "duration": 3166,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:50.269Z",
+                      "startTime": "2026-03-19T12:27:02.612Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1457,12 +1457,12 @@
                       "workerIndex": 4,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3578,
+                      "duration": 2025,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-03-06T10:06:53.645Z",
+                      "startTime": "2026-03-19T12:27:05.832Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1482,8 +1482,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-03-06T10:06:06.952Z",
-    "duration": 51454.058000000005,
+    "startTime": "2026-03-19T12:26:22.402Z",
+    "duration": 46776.774,
     "expected": 34,
     "skipped": 0,
     "unexpected": 0,

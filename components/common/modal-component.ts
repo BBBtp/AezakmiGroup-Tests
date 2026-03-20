@@ -45,9 +45,9 @@ export class ModalComponent {
         this.modal = page.locator(`[data-testid="${normalizedModalTestId}"]`);
 
         // Кнопка закрытия модального окна
-        this.closeButton = this.modal.locator(
-            '[data-testid="login__forgot-password-modal__close"]'
-        );
+        this.closeButton = this.modal
+            .locator('[data-testid$="__close"], [aria-label="Close"], [aria-label="close"], button:has-text("Close")')
+            .first();
 
         // Заголовок модального окна
         this.title = this.modal.locator('.modal-title, h2, h3');
@@ -105,6 +105,7 @@ export class ModalComponent {
      * Закрывает модальное окно через кнопку закрытия
      */
     async closeByButton(): Promise<void> {
+        await expect(this.closeButton).toBeVisible();
         await this.closeButton.click();
         await this.waitForClose();
     }

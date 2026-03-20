@@ -58,12 +58,12 @@ test.describe('Страница KPI', () => {
         });
     });
 
-    test('График отображается, табы переключаются без ошибок', async ({ kpiPage, page }) => {
+    test('График отображается, табы переключаются без ошибок', async ({ kpiPage }) => {
         const chart = kpiPage.chart;
 
         await chart.verifyVisible();
         const errors: string[] = [];
-        page.on('console', msg => msg.type() === 'error' && errors.push(msg.text()));
+        kpiPage.page.on('console', msg => msg.type() === 'error' && errors.push(msg.text()));
         await chart.mrrTab.click();
         expect(errors).toHaveLength(0);
         await chart.scoreTab.click();

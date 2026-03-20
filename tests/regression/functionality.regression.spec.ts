@@ -1,5 +1,11 @@
 import { test } from '../../fixtures/test-fixtures';
-import {expect} from "@playwright/test";
+import { chromium, expect } from '@playwright/test';
+import type { BrowserContext } from '@playwright/test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { LoginPage } from '../../pages/auth/login-page';
+import { testSettings } from '../../config/test-settings';
 test.describe('Функциональность авторизации', () => {
     test.beforeEach(async ({ loginPage }) => {
         await loginPage.navigate();
@@ -31,13 +37,35 @@ test.describe('Функциональность авторизации', () => {
         expect(finalState).toBe(false);
     });
 
-    test('Кнопка "Remember me" работает (Functional)', async ({ browser, context, loginPage, adminUser }) => {
-        await loginPage.loginForm.toggleRememberMe();
-        await loginPage.login(adminUser.email, adminUser.password, { remember: true });
-        const page2 = await context.newPage();
-        await page2.goto('/dashboard');
-        await expect(page2).toHaveURL(/dashboard/);
-        await page2.close();
+    test('Кнопка "Remember me" сохраняет сессию между перезапусками браузерного контекста', async ({ adminUser }) => {
+        const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-remember-me-'));
+        const contextOptions = {
+            baseURL: testSettings.baseUrl,
+            viewport: { width: 1280, height: 720 },
+        };
+
+        let context: BrowserContext | undefined;
+
+        try {
+            context = await chromium.launchPersistentContext(userDataDir, contextOptions);
+            const page = context.pages()[0] ?? await context.newPage();
+            const loginPage = new LoginPage(page);
+
+            await loginPage.navigate();
+            await loginPage.login(adminUser.email, adminUser.password, { remember: true });
+            await expect(page).toHaveURL(/dashboard/);
+            await context.close();
+
+            context = await chromium.launchPersistentContext(userDataDir, contextOptions);
+            const pageAfterRestart = context.pages()[0] ?? await context.newPage();
+            await pageAfterRestart.goto('/dashboard');
+            await expect(pageAfterRestart).toHaveURL(/dashboard/);
+        } finally {
+            if (context) {
+                await context.close();
+            }
+            fs.rmSync(userDataDir, { recursive: true, force: true });
+        }
     });
 
     test('Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {

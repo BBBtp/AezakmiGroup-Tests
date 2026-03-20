@@ -12,11 +12,11 @@ test.describe('Страница KPI', () => {
         await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
     });
 
-    test('Кнопка настроек отображается и кликабельна', async ({ kpiPage, page }) => {
+    test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
         const btn = kpiPage.settingsButton;
         await expect(btn).toBeVisible();
         const errors: string[] = [];
-        page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+        kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
         await btn.click();
         await kpiPage.page.waitForURL(/\/kpi\/settings/);
         expect(errors.length).toBe(0);
@@ -72,12 +72,12 @@ test.describe('Страница KPI', () => {
         });
     });
 
-    test('График производительности отображается и табы переключаются', async ({ kpiPage, page }) => {
+    test('График производительности отображается и табы переключаются', async ({ kpiPage }) => {
         const chart = kpiPage.chart;
         await chart.verifyVisible();
 
         const errors: string[] = [];
-        page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+        kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
         await chart.mrrTab.click();
         expect(errors.length).toBe(0);
         await chart.scoreTab.click();

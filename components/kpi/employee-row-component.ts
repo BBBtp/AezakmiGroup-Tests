@@ -12,6 +12,8 @@ import { parseCurrency } from "../../utils/parcer";
  * - проверку соответствия аватара первой букве имени.
  */
 export class EmployeeRowComponent {
+    /** Корневой элемент конкретной строки */
+    readonly row: Locator;
     /** Рейтинг сотрудника */
     readonly rating: Locator;
 
@@ -44,6 +46,7 @@ export class EmployeeRowComponent {
      * @param index Индекс строки сотрудника (для формирования data-testid)
      */
     constructor(root: Locator, index: number) {
+        this.row = root.locator('tbody tr').nth(index);
         this.rating = root.locator(`[data-testid="employees-table__rating-${index}"]`);
         this.avatarLetter = root.locator(`[data-testid="employees-table__avatar-${index}"] p`).first();
         this.name = root.locator(`[data-testid="employees-table__avatar-${index}-title"]`);
@@ -52,7 +55,7 @@ export class EmployeeRowComponent {
         this.mrr = root.locator(`[data-testid="employees-table__mrr-${index}"]`);
         this.appsNumber = root.locator(`[data-testid="employees-table__apps-number-${index}"]`);
         this.lastModified = root.locator(`[data-testid="employees-table__last-modified-${index}"]`);
-        this.openButton = root.locator('text=Open').first();
+        this.openButton = this.row.locator('button:has-text("Open"), a:has-text("Open"), [role="button"]:has-text("Open")').first();
     }
 
     /**
