@@ -56,6 +56,63 @@ export class KpiSettingsActionRowComponent {
         await expect(this.editButton).toBeVisible();
         await expect(this.deleteButton).toBeVisible();
     }
+
+    async expectEditable(): Promise<void> {
+        await expect(this.editButton).toBeVisible();
+        await expect(this.deleteButton).toBeEnabled();
+    }
+
+    async openEditModal(): Promise<void> {
+        await expect(this.editButton).toBeEnabled();
+        await this.editButton.click();
+        await this.expectEditModalVisible();
+    }
+
+    async expectEditModalVisible(): Promise<void> {
+        await expect(this.editModal).toBeVisible();
+        await expect(this.editForm).toBeVisible();
+        await expect(this.pointsRadioGroup).toBeVisible();
+        await expect(this.pointsRadioPlus).toBeVisible();
+        await expect(this.pointsRadioMinus).toBeVisible();
+        await expect(this.pointsInput).toBeVisible();
+        await expect(this.saveButton).toBeVisible();
+    }
+
+    async selectEditPointsType(type: 'plus' | 'minus'): Promise<void> {
+        const option = type === 'plus' ? this.pointsRadioPlus : this.pointsRadioMinus;
+        await option.click({ force: true });
+    }
+
+    async fillEditPoints(value: string): Promise<void> {
+        await this.pointsInput.fill(value);
+        await expect(this.saveButton).toBeEnabled();
+    }
+
+    async saveEdit(): Promise<void> {
+        await expect(this.saveButton).toBeEnabled();
+        await this.saveButton.click();
+    }
+
+    async expectEditModalHidden(): Promise<void> {
+        await expect(this.editModal).toBeHidden();
+    }
+
+    async openDeleteModal(): Promise<void> {
+        await expect(this.deleteButton).toBeEnabled();
+        await this.deleteButton.click();
+        await expect(this.deleteModal).toBeVisible();
+    }
+
+    async confirmDelete(): Promise<void> {
+        await this.page.locator('[data-testid="delete-item__del-btn"]').click();
+    }
+
+    async cancelDelete(): Promise<void> {
+        await this.page.locator('[data-testid="delete-item__cancel-btn"]').click();
+        await expect(this.deleteModal).toBeHidden();
+    }
+
+    async expectDeleted(): Promise<void> {
+        await expect(this.deleteButton).toHaveCount(0);
+    }
 }
-
-

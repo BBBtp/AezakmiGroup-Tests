@@ -2,7 +2,7 @@ import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from '../base-page';
 import { KpiSettingsScoreComponent } from '../../components/kpi/settings/kpi-settings-score-component';
 import { KpiSettingsTableComponent } from '../../components/kpi/settings/kpi-settings-table-component';
-import { KpiSettingsAddValueModal } from '../../components/kpi/settings/modals/kpi-settings-add-value-modal';
+import { KpiSettingsAddValueModal, KpiSettingsAddValueTableName } from '../../components/kpi/settings/modals/kpi-settings-add-value-modal';
 import { KpiSettingsActionRowComponent } from '../../components/kpi/settings/kpi-settings-action-row-component';
 import { KpiSettingsDeleteValueModal } from '../../components/kpi/settings/modals/kpi-settings-delete-value-modal';
 
@@ -30,6 +30,10 @@ export class KpiSettingsPage extends BasePage {
         this.totalMrrAddModal = new KpiSettingsAddValueModal(page, 'total-mrr');
     }
 
+    private getTable(tableName: KpiSettingsAddValueTableName): KpiSettingsTableComponent {
+        return tableName === 'ab-tests' ? this.abTestsTable : this.totalMrrTable;
+    }
+
     createAbTestRow(actionType: string, value: string): KpiSettingsActionRowComponent {
         return this.abTestsTable.createActionRow(actionType, value);
     }
@@ -42,9 +46,37 @@ export class KpiSettingsPage extends BasePage {
         return new KpiSettingsDeleteValueModal(this.page, tableName, actionType, value);
     }
 
+    async openAddModal(tableName: KpiSettingsAddValueTableName): Promise<KpiSettingsAddValueModal> {
+        const table = this.getTable(tableName);
+        return table.openAddModal();
+    }
+
+    async openAbTestsAddModal(): Promise<KpiSettingsAddValueModal> {
+        return this.abTestsTable.openAddModal();
+    }
+
+    async openTotalMrrAddModal(): Promise<KpiSettingsAddValueModal> {
+        return this.totalMrrTable.openAddModal();
+    }
+
     async navigate(): Promise<void> {
         await this.navigateTo('/kpi/settings');
         await this.waitForPageLoad();
+    }
+
+    async expectShellVisible(): Promise<void> {
+        await expect(this.page).toHaveURL(/\/kpi\/settings/);
+        await expect(this.root).toBeVisible();
+        await expect(this.loadingState).toBeHidden();
+        await expect(this.breadcrumbs.first()).toBeVisible();
+        await this.scoreTable.expectShellVisible();
+    }
+
+    async expectBaseTablesVisible(): Promise<void> {
+        await expect(this.root).toBeVisible();
+        await this.scoreTable.expectShellVisible();
+        await this.abTestsTable.expectEditableShellVisible();
+        await this.totalMrrTable.expectEditableShellVisible();
     }
 
     async waitForPageLoad(): Promise<void> {
@@ -53,6 +85,3 @@ export class KpiSettingsPage extends BasePage {
         await expect(this.loadingState).toBeHidden({ timeout: 15000 });
     }
 }
-
-
-
