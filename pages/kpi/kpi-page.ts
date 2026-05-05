@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from '../base-page';
+import { KpiSettingsPage } from './kpi-settings-page';
 
 // Common + KPI-specific components
 import { KpiHeaderComponent } from '../../components/kpi/kpi-header-component';
@@ -75,6 +76,18 @@ export class KpiPage extends BasePage {
     async navigate(): Promise<void> {
         await this.navigateTo('/kpi');
         await this.waitForPageLoad();
+    }
+
+    /** Открывает KPI Settings и возвращает готовую страницу */
+    async openSettings(): Promise<KpiSettingsPage> {
+        await Promise.all([
+            this.page.waitForURL(/\/kpi\/settings/),
+            this.settingsButton.click(),
+        ]);
+
+        const settingsPage = new KpiSettingsPage(this.page);
+        await settingsPage.waitForPageLoad();
+        return settingsPage;
     }
 
     /** Ожидание полной загрузки KPI страницы */

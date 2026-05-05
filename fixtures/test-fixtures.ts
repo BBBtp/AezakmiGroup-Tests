@@ -1,12 +1,76 @@
 import { test as baseTest } from '@playwright/test';
-import type { BrowserContextOptions } from '@playwright/test';
+import type { Browser, BrowserContextOptions, Page, TestInfo } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { KpiPage } from '../pages/kpi/kpi-page';
+import { KpiSettingsPage } from '../pages/kpi/kpi-settings-page';
 import { LoginPage } from '../pages/auth/login-page';
 import { testUsers } from './users';
 
-type StorageState = NonNullable<BrowserContextOptions['storageState']>;
+const AUTH_FILE = path.resolve('.auth/admin.json');
+
+const contextOptionKeys = [
+    'acceptDownloads',
+    'baseURL',
+    'bypassCSP',
+    'colorScheme',
+    'deviceScaleFactor',
+    'extraHTTPHeaders',
+    'forcedColors',
+    'geolocation',
+    'hasTouch',
+    'httpCredentials',
+    'ignoreHTTPSErrors',
+    'isMobile',
+    'javaScriptEnabled',
+    'locale',
+    'offline',
+    'permissions',
+    'proxy',
+    'reducedMotion',
+    'screen',
+    'serviceWorkers',
+    'timezoneId',
+    'userAgent',
+    'viewport',
+] as const;
+
+function ensureAuthFileExists(): void {
+    if (!fs.existsSync(AUTH_FILE)) {
+        throw new Error('Auth file not found! Make sure globalSetup ran successfully.');
+    }
+}
+
+function getProjectContextOptions(testInfo: TestInfo): BrowserContextOptions {
+    const projectUse = testInfo.project.use as Record<string, unknown>;
+    const contextOptions: BrowserContextOptions = {};
+
+    for (const key of contextOptionKeys) {
+        if (projectUse[key] !== undefined) {
+            (contextOptions as Record<string, unknown>)[key] = projectUse[key];
+        }
+    }
+
+    return contextOptions;
+}
+
+async function createAuthenticatedPage(
+    browser: Browser,
+    testInfo: TestInfo
+): Promise<{ page: Page; close: () => Promise<void> }> {
+    ensureAuthFileExists();
+
+    const context = await browser.newContext({
+        ...getProjectContextOptions(testInfo),
+        storageState: AUTH_FILE,
+    });
+    const page = await context.newPage();
+
+    return {
+        page,
+        close: () => context.close(),
+    };
+}
 
 /**
  * Типы кастомных фикстур для тестов
@@ -23,6 +87,9 @@ export type TestFixtures = {
 
     /** KPI страница */
     kpiPage: KpiPage;
+
+    /** KPI Settings страница */
+    kpiSettingsPage: KpiSettingsPage;
 };
 
 /**
@@ -31,26 +98,9 @@ export type TestFixtures = {
  * - adminUser
  * - regularUser
  * - kpiPage
- * - workerStorageState (загружает storageState для всех воркеров)
+ * - kpiSettingsPage
  */
-export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
-    /**
-     * Загружает состояние авторизации для воркера
-     */
-    workerStorageState: [
-        async ({}, use: (state: StorageState) => Promise<void>) => {
-            const fileName = path.resolve('.auth/admin.json');
-
-            if (!fs.existsSync(fileName)) {
-                throw new Error('Auth file not found! Make sure globalSetup ran successfully.');
-            }
-
-            const state: StorageState = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
-            await use(state);
-        },
-        { scope: 'worker' }
-    ],
-
+export const test = baseTest.extend<TestFixtures>({
     /**
      * Фикстура страницы логина
      */
@@ -76,12 +126,20 @@ export const test = baseTest.extend<TestFixtures, { workerStorageState: any }>({
     /**
      * Фикстура KPI страницы с использованием сохраненного storageState
      */
-    kpiPage: async ({ browser, workerStorageState }, use) => {
-        const context = await browser.newContext({ storageState: workerStorageState });
-        const page = await context.newPage();
-
+    kpiPage: async ({ browser }, use, testInfo) => {
+        const { page, close } = await createAuthenticatedPage(browser, testInfo);
         const kpiPageInstance = new KpiPage(page);
         await use(kpiPageInstance);
-        await context.close();
+        await close();
+    },
+
+    /**
+     * Фикстура KPI Settings страницы с использованием сохраненного storageState
+     */
+    kpiSettingsPage: async ({ browser }, use, testInfo) => {
+        const { page, close } = await createAuthenticatedPage(browser, testInfo);
+        const kpiSettingsPageInstance = new KpiSettingsPage(page);
+        await use(kpiSettingsPageInstance);
+        await close();
     },
 });

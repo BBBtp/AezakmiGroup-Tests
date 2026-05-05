@@ -1,5 +1,6 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { KpiSettingsActionRowComponent } from './kpi-settings-action-row-component';
+import { KpiSettingsAddValueModal, KpiSettingsAddValueTableName } from './modals/kpi-settings-add-value-modal';
 import { requireTestId } from '../../../utils/test-id';
 
 export type KpiSettingsTableOptions = {
@@ -69,6 +70,42 @@ export class KpiSettingsTableComponent {
     createActionRow(actionType: string, value: string): KpiSettingsActionRowComponent {
         return new KpiSettingsActionRowComponent(this.page, this.tableName, actionType, value);
     }
+
+    async openAddModal(): Promise<KpiSettingsAddValueModal> {
+        await this.addValueButton.click();
+
+        const modal = new KpiSettingsAddValueModal(this.page, this.tableName as KpiSettingsAddValueTableName);
+        await modal.waitForOpen();
+        return modal;
+    }
+
+    async expectShellVisible(): Promise<void> {
+        await expect(this.root).toBeVisible();
+        await expect(this.table).toBeVisible();
+        await expect(this.headerRow).toBeVisible();
+        await expect(this.actionTypeHeader).toBeVisible();
+        await expect(this.pointsHeader).toBeVisible();
+        await expect(this.tableBody).toBeVisible();
+
+        if (this.options.hasValueColumn) {
+            await this.expectValueHeaderVisible();
+        }
+
+        if (this.options.hasFooterBar && this.footerBar) {
+            await expect(this.footerBar).toBeVisible();
+        }
+    }
+
+    async expectEditableShellVisible(): Promise<void> {
+        await this.expectShellVisible();
+        await expect(this.addValueButton).toBeVisible();
+    }
+
+    async expectValueHeaderVisible(): Promise<void> {
+        if (!this.valueHeader) {
+            throw new Error(`${this.tableName} table does not have a value column`);
+        }
+
+        await expect(this.valueHeader).toBeVisible();
+    }
 }
-
-
