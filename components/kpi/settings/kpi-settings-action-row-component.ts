@@ -7,6 +7,7 @@ export class KpiSettingsActionRowComponent {
     readonly actionType: string;
     readonly value: string;
     readonly baseTestId: string;
+    readonly alternateBaseTestId?: string;
     readonly root: Locator;
     readonly editButton: Locator;
     readonly deleteButton: Locator;
@@ -33,24 +34,49 @@ export class KpiSettingsActionRowComponent {
             composeTestId([tableName, actionType, value]),
             'KpiSettingsActionRowComponent'
         );
-        this.root = page.locator(`[data-testid="${this.baseTestId}"]`);
-        this.editButton = page.locator(`[data-testid="${this.baseTestId}__edit"]`);
-        this.deleteButton = page.locator(`[data-testid="${this.baseTestId}__delete"]`);
-        this.actionButtons = page.locator(`[data-testid="${this.baseTestId}__action-buttons"]`);
-        this.toast = page.locator(`[data-testid="${this.baseTestId}__alert"]`);
-        this.toastTitle = page.locator(`[data-testid="${this.baseTestId}__alert-title"]`);
-        this.toastSubtitle = page.locator(`[data-testid="${this.baseTestId}__alert-subtitle"]`);
-        this.editModal = page.locator(`[data-testid="${this.baseTestId}__edit-modal"]`);
-        this.editForm = page.locator(`[data-testid="${this.baseTestId}__edit-form"]`);
-        this.deleteModal = page.locator(`[data-testid="${this.baseTestId}__delete-modal"]`);
-        this.pointsRadioGroup = page.locator(`[data-testid="${this.baseTestId}__points-radio"]`);
-        this.pointsRadioPlus = page.locator(`[data-testid="${this.baseTestId}__points-radio__plus"]`);
-        this.pointsRadioMinus = page.locator(`[data-testid="${this.baseTestId}__points-radio__minus"]`);
-        this.pointsInput = page.locator(`[data-testid="${this.baseTestId}__points-input"]`);
-        this.pointsInputSign = page.locator(`[data-testid="${this.baseTestId}__points-input-sign"]`);
-        this.saveButton = page.locator(`[data-testid="${this.baseTestId}__save"]`);
-        this.errorBlock = page.locator(`[data-testid="${this.baseTestId}__error"]`);
+        this.alternateBaseTestId = this.createAlternateBaseTestId();
+        this.root = this.locatorByTestId();
+        this.editButton = this.locatorByTestId('__edit');
+        this.deleteButton = this.locatorByTestId('__delete');
+        this.actionButtons = this.locatorByTestId('__action-buttons');
+        this.toast = this.locatorByTestId('__alert');
+        this.toastTitle = this.locatorByTestId('__alert-title');
+        this.toastSubtitle = this.locatorByTestId('__alert-subtitle');
+        this.editModal = this.locatorByTestId('__edit-modal');
+        this.editForm = this.locatorByTestId('__edit-form');
+        this.deleteModal = this.locatorByTestId('__delete-modal');
+        this.pointsRadioGroup = this.locatorByTestId('__points-radio');
+        this.pointsRadioPlus = this.locatorByTestId('__points-radio__plus');
+        this.pointsRadioMinus = this.locatorByTestId('__points-radio__minus');
+        this.pointsInput = this.locatorByTestId('__points-input');
+        this.pointsInputSign = this.locatorByTestId('__points-input-sign');
+        this.saveButton = this.locatorByTestId('__save');
+        this.errorBlock = this.locatorByTestId('__error');
     }
+
+    private createAlternateBaseTestId(): string | undefined {
+        const reachedValue = this.value.match(/^Reached \$(\d+)$/)?.[1];
+
+        if (this.tableName !== 'total-mrr' || !reachedValue) {
+            return undefined;
+        }
+
+        return requireTestId(
+            composeTestId([this.tableName, this.actionType, `Reached $ ${reachedValue}`]),
+            'KpiSettingsActionRowComponent'
+        );
+    }
+
+    private locatorByTestId(suffix = ''): Locator {
+        const primary = this.page.locator(`[data-testid="${this.baseTestId}${suffix}"]`);
+
+        if (!this.alternateBaseTestId) {
+            return primary;
+        }
+
+        return primary.or(this.page.locator(`[data-testid="${this.alternateBaseTestId}${suffix}"]`)).first();
+    }
+
     async expectVisible(): Promise<void> {
         await expect(this.root).toBeVisible();
         await expect(this.editButton).toBeVisible();

@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 4
     },
     "preserveOutput": "always",
     "reporter": [
@@ -60,7 +60,7 @@
         "repeatEach": 1,
         "retries": 1,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 4
         },
         "id": "smoke",
         "name": "smoke",
@@ -76,7 +76,7 @@
         "repeatEach": 1,
         "retries": 1,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 4
         },
         "id": "regression",
         "name": "regression",
@@ -96,6 +96,257 @@
     "webServer": null
   },
   "suites": [
+    {
+      "title": "smoke/auth.smoke.spec.ts",
+      "file": "smoke/auth.smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Авторизация в CRM",
+          "file": "smoke/auth.smoke.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Страница авторизации доступна и загружается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3778,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:15.746Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-8a465511d71a024a6473",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 10,
+              "column": 9
+            },
+            {
+              "title": "Основные элементы страницы отображаются",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3363,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем Title",
+                          "duration": 3
+                        },
+                        {
+                          "title": "Проверяем SubTitle",
+                          "duration": 2
+                        },
+                        {
+                          "title": "Проверяем текст в Title и SubTitle",
+                          "duration": 9
+                        },
+                        {
+                          "title": "Проверяем поле email",
+                          "duration": 2
+                        },
+                        {
+                          "title": "Проверяем поле password",
+                          "duration": 3
+                        },
+                        {
+                          "title": "Проверяем кнопку входа",
+                          "duration": 6
+                        },
+                        {
+                          "title": "Проверяем кнопку \"Забыли пароль\"",
+                          "duration": 4
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:19.755Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-cb79399495f8e10a32fb",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 15,
+              "column": 9
+            },
+            {
+              "title": "Успешная авторизация администратора",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5025,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:23.126Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-014628b2c0b5ea452a65",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 40,
+              "column": 9
+            },
+            {
+              "title": "Успешная авторизация обычного пользователя",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4836,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:28.158Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-3adc527cb7fafdbf328f",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 45,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Forgot password\" открывает модальное окно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4164,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:33.006Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-869f22e427b78f866c7d",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 50,
+              "column": 9
+            },
+            {
+              "title": "Модальное окно восстановления пароля закрывается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4288,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:37.181Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe221ab76de3f55e528a-609fab5c4cabbc96b6fc",
+              "file": "smoke/auth.smoke.spec.ts",
+              "line": 56,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
     {
       "title": "smoke/kpi-settings.smoke.spec.ts",
       "file": "smoke/kpi-settings.smoke.spec.ts",
@@ -122,15 +373,15 @@
                   "projectName": "smoke",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3710,
+                      "duration": 4979,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:31:15.030Z",
+                      "startTime": "2026-06-01T11:20:15.725Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -156,15 +407,15 @@
                   "projectName": "smoke",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4021,
+                      "duration": 3633,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:31:18.866Z",
+                      "startTime": "2026-06-01T11:20:20.951Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -190,15 +441,15 @@
                   "projectName": "smoke",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4137,
+                      "duration": 4172,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:31:22.893Z",
+                      "startTime": "2026-06-01T11:20:24.594Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -224,15 +475,15 @@
                   "projectName": "smoke",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3945,
+                      "duration": 4625,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:31:27.035Z",
+                      "startTime": "2026-06-01T11:20:28.777Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -243,6 +494,636 @@
               "id": "928d5f3fadb61b8aad94-3e2774fb0c81e9c5e7fd",
               "file": "smoke/kpi-settings.smoke.spec.ts",
               "line": 27,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "smoke/kpi.smoke.spec.ts",
+      "file": "smoke/kpi.smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Страница KPI",
+          "file": "smoke/kpi.smoke.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Подзаголовок отображается корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3620,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:15.709Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-0057afd006ac3840782e",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 10,
+              "column": 9
+            },
+            {
+              "title": "Кнопка настроек отображается и кликабельна",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3176,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:19.581Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-1398ee2f542b10b00c6e",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 15,
+              "column": 9
+            },
+            {
+              "title": "Основной контент рендерится, error-content скрыт",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3177,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:22.770Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-5563d2de9a6497634cef",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "При ошибке загрузки отображается error-content, main-content скрыт",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 7027,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:25.959Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-32e35dc76b40638f12e3",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 30,
+              "column": 9
+            },
+            {
+              "title": "Проверка отображения карточек KPI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3437,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем карточку Total MRR",
+                          "duration": 21
+                        },
+                        {
+                          "title": "Проверяем карточку Average Score",
+                          "duration": 16
+                        },
+                        {
+                          "title": "Проверяем карточку Number of Apps",
+                          "duration": 18
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:32.998Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-08eac5e963bbbcaae805",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 45,
+              "column": 9
+            },
+            {
+              "title": "Фильтры по месяцам видимы и работают",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2747,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем видимость фильтров по месяцам",
+                          "duration": 7
+                        },
+                        {
+                          "title": "Есть хотя бы один таб",
+                          "duration": 3
+                        },
+                        {
+                          "title": "Активный таб отображается",
+                          "duration": 2
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:36.443Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-aab1bcc1b354f76583d8",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 59,
+              "column": 9
+            },
+            {
+              "title": "График производительности отображается и табы переключаются",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3372,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:39.197Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-b212d86ef28938b3b0ef",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 75,
+              "column": 9
+            },
+            {
+              "title": "Top Employees отображается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3664,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Podium рендерится",
+                          "duration": 7
+                        },
+                        {
+                          "title": "Есть хотя бы один contender",
+                          "duration": 7
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:42.576Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-78af2b5d120d99ca9107",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 87,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников отображается и можно открыть карточку сотрудника",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 3485,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Таблица отображается",
+                          "duration": 7
+                        },
+                        {
+                          "title": "Есть хотя бы одна строка",
+                          "duration": 8
+                        },
+                        {
+                          "title": "Кнопка Open открывает страницу сотрудника",
+                          "duration": 40
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:46.250Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8d7cd7ad773e021e1f76-dc9dbbf7125c91cbbf38",
+              "file": "smoke/kpi.smoke.spec.ts",
+              "line": 102,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "regression/functionality.regression.spec.ts",
+      "file": "regression/functionality.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Функциональность авторизации",
+          "file": "regression/functionality.regression.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Работа модального окна восстановления пароля",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3958,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:15.729Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-866eff8ac5ea8c393cce",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 14,
+              "column": 9
+            },
+            {
+              "title": "Закрытие модалки через оверлей",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4342,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:19.914Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-2b2a09e722bfdfce16f7",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 22,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Remember me\" работает (UI)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4383,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:24.268Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-a3c3609d854cfa56507a",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "title": "Кнопка \"Remember me\" сохраняет сессию между перезапусками браузерного контекста",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 10023,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:28.676Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-a02a1127698b28564725",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 40,
+              "column": 9
+            },
+            {
+              "title": "Кнопка показа/скрытия пароля работает корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3243,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:38.710Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-a60f0f3ef0ed393ec6e0",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 71,
+              "column": 9
+            },
+            {
+              "title": "Переход по Telegram ссылке",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2832,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:41.964Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-8666c3e43f94766f38d3",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 79,
+              "column": 9
+            },
+            {
+              "title": "Поля сохраняют значения после неуспешной попытки",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4000,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:44.809Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "97ac3ac23f1978ce2d30-7bb0f2b278ca08f8bf1b",
+              "file": "regression/functionality.regression.spec.ts",
+              "line": 86,
               "column": 9
             }
           ]
@@ -275,15 +1156,15 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 3590,
+                      "duration": 3384,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:31:31.264Z",
+                      "startTime": "2026-06-01T11:20:53.910Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -309,10 +1190,10 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 9988,
+                      "duration": 8543,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -320,10 +1201,10 @@
                       "steps": [
                         {
                           "title": "Создаём, редактируем и удаляем уникальное значение",
-                          "duration": 6059
+                          "duration": 5301
                         }
                       ],
-                      "startTime": "2026-05-05T07:31:34.860Z",
+                      "startTime": "2026-06-01T11:20:57.302Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -349,10 +1230,10 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 7883,
+                      "duration": 8422,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -360,10 +1241,10 @@
                       "steps": [
                         {
                           "title": "Создаём, редактируем и удаляем уникальное значение",
-                          "duration": 4573
+                          "duration": 4672
                         }
                       ],
-                      "startTime": "2026-05-05T07:31:44.854Z",
+                      "startTime": "2026-06-01T11:21:05.854Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -389,10 +1270,10 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 8348,
+                      "duration": 7782,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
@@ -400,14 +1281,14 @@
                       "steps": [
                         {
                           "title": "Создаём уникальное значение",
-                          "duration": 1554
+                          "duration": 1553
                         },
                         {
                           "title": "Отменяем удаление и проверяем, что строка осталась",
-                          "duration": 98
+                          "duration": 93
                         }
                       ],
-                      "startTime": "2026-05-05T07:31:52.743Z",
+                      "startTime": "2026-06-01T11:21:14.283Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -433,15 +1314,15 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4319,
+                      "duration": 4120,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:32:01.097Z",
+                      "startTime": "2026-06-01T11:21:22.070Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -467,15 +1348,15 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 8598,
+                      "duration": 7747,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:32:05.424Z",
+                      "startTime": "2026-06-01T11:21:26.196Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -501,15 +1382,15 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 4392,
+                      "duration": 4068,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:32:14.031Z",
+                      "startTime": "2026-06-01T11:21:33.950Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -535,15 +1416,15 @@
                   "projectName": "regression",
                   "results": [
                     {
-                      "workerIndex": 1,
+                      "workerIndex": 4,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 7435,
+                      "duration": 6552,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-05-05T07:32:18.429Z",
+                      "startTime": "2026-06-01T11:21:38.025Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -577,15 +1458,15 @@
                       "projectName": "regression",
                       "results": [
                         {
-                          "workerIndex": 1,
+                          "workerIndex": 4,
                           "parallelIndex": 1,
                           "status": "passed",
-                          "duration": 4125,
+                          "duration": 4891,
                           "errors": [],
                           "stdout": [],
                           "stderr": [],
                           "retry": 0,
-                          "startTime": "2026-05-05T07:31:15.033Z",
+                          "startTime": "2026-06-01T11:20:33.957Z",
                           "annotations": [],
                           "attachments": []
                         }
@@ -611,15 +1492,15 @@
                       "projectName": "regression",
                       "results": [
                         {
-                          "workerIndex": 1,
+                          "workerIndex": 4,
                           "parallelIndex": 1,
                           "status": "passed",
-                          "duration": 4010,
+                          "duration": 6170,
                           "errors": [],
                           "stdout": [],
                           "stderr": [],
                           "retry": 0,
-                          "startTime": "2026-05-05T07:31:19.281Z",
+                          "startTime": "2026-06-01T11:20:38.968Z",
                           "annotations": [],
                           "attachments": []
                         }
@@ -653,15 +1534,15 @@
                       "projectName": "regression",
                       "results": [
                         {
-                          "workerIndex": 1,
+                          "workerIndex": 4,
                           "parallelIndex": 1,
                           "status": "passed",
-                          "duration": 3729,
+                          "duration": 4257,
                           "errors": [],
                           "stdout": [],
                           "stderr": [],
                           "retry": 0,
-                          "startTime": "2026-05-05T07:31:23.298Z",
+                          "startTime": "2026-06-01T11:20:45.147Z",
                           "annotations": [],
                           "attachments": []
                         }
@@ -687,15 +1568,15 @@
                       "projectName": "regression",
                       "results": [
                         {
-                          "workerIndex": 1,
+                          "workerIndex": 4,
                           "parallelIndex": 1,
                           "status": "passed",
-                          "duration": 4224,
+                          "duration": 4491,
                           "errors": [],
                           "stdout": [],
                           "stderr": [],
                           "retry": 0,
-                          "startTime": "2026-05-05T07:31:27.034Z",
+                          "startTime": "2026-06-01T11:20:49.412Z",
                           "annotations": [],
                           "attachments": []
                         }
@@ -713,13 +1594,515 @@
           ]
         }
       ]
+    },
+    {
+      "title": "regression/kpi.regression.spec.ts",
+      "file": "regression/kpi.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Страница KPI",
+          "file": "regression/kpi.regression.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Фильтры: отображение, активный таб, переключение и изменение контента",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4052,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Фильтры отображаются",
+                          "duration": 10
+                        },
+                        {
+                          "title": "Активный таб корректен",
+                          "duration": 12
+                        },
+                        {
+                          "title": "Переключение месяца обновляет контент",
+                          "duration": 469
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:42.290Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-eb3ce5a20de8065c0ecf",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 11,
+              "column": 9
+            },
+            {
+              "title": "Top Employees: подиум отображается полностью и корректно",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3382,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Блок отображается",
+                          "duration": 8
+                        },
+                        {
+                          "title": "Проверяем полный подиум (3 позиции)",
+                          "duration": 40
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:46.482Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-32c09721f5c6eeea8684",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 28,
+              "column": 9
+            },
+            {
+              "title": "Top Employees: претенденты корректны и инициалы совпадают",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3273,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Проверяем отображение претендентов 2 ",
+                          "duration": 51
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:49.875Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-d14cf17dcceb5f17f5dd",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 39,
+              "column": 9
+            },
+            {
+              "title": "Карточки KPI отображаются и содержат значения",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3021,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Total MRR",
+                          "duration": 33
+                        },
+                        {
+                          "title": "Average Score",
+                          "duration": 39
+                        },
+                        {
+                          "title": "Number of Apps",
+                          "duration": 15
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:53.156Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-6458c5bee334cc09d26e",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 47,
+              "column": 9
+            },
+            {
+              "title": "График отображается, табы переключаются без ошибок",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3080,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:56.186Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-83352092c17f117e4f3d",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 61,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: строки отображаются и корректны",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2945,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Таблица отображается",
+                          "duration": 93
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:20:59.275Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-ead3762814023d23fb09",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 73,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: кнопка Open открывает страницу сотрудника",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2743,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:21:02.227Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-1b9a0567ddedf830c9a9",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "title": "Таблица сотрудников: сортировка по колонкам",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7061,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Sort by Score",
+                          "duration": 2209
+                        },
+                        {
+                          "title": "Sort by MRR",
+                          "duration": 2126
+                        }
+                      ],
+                      "startTime": "2026-06-01T11:21:04.975Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c2f726e92e0936e764b-034d239edaff1f65908f",
+              "file": "regression/kpi.regression.spec.ts",
+              "line": 96,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "regression/validation.regression.spec.ts",
+      "file": "regression/validation.regression.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Валидация полей авторизации",
+          "file": "regression/validation.regression.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Валидация пустых полей",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3753,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:48.841Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-7eed01f52dbb25927e50",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 10,
+              "column": 9
+            },
+            {
+              "title": "Валидация некорректного email формата",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3814,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:52.601Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-02fd27ecca5e7052b8b8",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "Неуспешная авторизация с неверным паролем",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 3375,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:56.422Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-f0bd8c5bc19e39aff48b",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 27,
+              "column": 9
+            },
+            {
+              "title": "Неуспешная авторизация с несуществующим email",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "regression",
+                  "projectName": "regression",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2887,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-01T11:20:59.806Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f00f1da1cf7e60083c5f-6069f0f9b0ee804982da",
+              "file": "regression/validation.regression.spec.ts",
+              "line": 35,
+              "column": 9
+            }
+          ]
+        }
+      ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-05-05T07:31:08.900Z",
-    "duration": 77007.04000000001,
-    "expected": 16,
+    "startTime": "2026-06-01T11:20:10.560Z",
+    "duration": 94055.815,
+    "expected": 50,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
