@@ -36,10 +36,14 @@ export async function pickAvailableTotalMrrReachedValue(settingsPage: KpiSetting
     const existingIds = await settingsPage.page
         .locator('[data-testid^="total-mrr__MRR milestones__Reached $"][data-testid$="__edit"]')
         .evaluateAll(nodes => nodes.map(node => node.getAttribute('data-testid') ?? ''));
+    const existingValues = new Set(
+        existingIds
+            .map(id => id.match(/total-mrr__MRR milestones__Reached \$\s?(\d+)__edit$/)?.[1])
+            .filter((value): value is string => Boolean(value))
+    );
 
     for (let value = 30001; value < 100000; value++) {
-        const expectedId = `total-mrr__MRR milestones__Reached $${value}__edit`;
-        if (!existingIds.includes(expectedId)) {
+        if (!existingValues.has(String(value))) {
             return String(value);
         }
     }

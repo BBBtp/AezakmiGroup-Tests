@@ -1,38 +1,116 @@
-<testsuites id="" name="" tests="16" failures="0" skipped="0" errors="0" time="77.00704">
-<testsuite name="smoke/kpi-settings.smoke.spec.ts" timestamp="2026-05-05T07:31:14.628Z" hostname="smoke" tests="4" failures="0" skipped="0" time="15.813" errors="0">
-<testcase name="Страница KPI Settings › Страница KPI Settings открывается и базовый каркас виден" classname="smoke/kpi-settings.smoke.spec.ts" time="3.71">
+<testsuites id="" name="" tests="50" failures="0" skipped="0" errors="0" time="94.055815">
+<testsuite name="smoke/auth.smoke.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="smoke" tests="6" failures="0" skipped="0" time="25.454" errors="0">
+<testcase name="Авторизация в CRM › Страница авторизации доступна и загружается" classname="smoke/auth.smoke.spec.ts" time="3.778">
 </testcase>
-<testcase name="Страница KPI Settings › Базовые секции и таблицы отображаются" classname="smoke/kpi-settings.smoke.spec.ts" time="4.021">
+<testcase name="Авторизация в CRM › Основные элементы страницы отображаются" classname="smoke/auth.smoke.spec.ts" time="3.363">
 </testcase>
-<testcase name="Страница KPI Settings › Add-modal для ab-tests открывается и показывает шаги" classname="smoke/kpi-settings.smoke.spec.ts" time="4.137">
+<testcase name="Авторизация в CRM › Успешная авторизация администратора" classname="smoke/auth.smoke.spec.ts" time="5.025">
 </testcase>
-<testcase name="Страница KPI Settings › Add-modal для total-mrr открывается и показывает шаги" classname="smoke/kpi-settings.smoke.spec.ts" time="3.945">
+<testcase name="Авторизация в CRM › Успешная авторизация обычного пользователя" classname="smoke/auth.smoke.spec.ts" time="4.836">
+</testcase>
+<testcase name="Авторизация в CRM › Кнопка &quot;Forgot password&quot; открывает модальное окно" classname="smoke/auth.smoke.spec.ts" time="4.164">
+</testcase>
+<testcase name="Авторизация в CRM › Модальное окно восстановления пароля закрывается" classname="smoke/auth.smoke.spec.ts" time="4.288">
 </testcase>
 </testsuite>
-<testsuite name="regression/kpi-settings.regression.spec.ts" timestamp="2026-05-05T07:31:14.628Z" hostname="regression" tests="12" failures="0" skipped="0" time="70.641" errors="0">
-<testcase name="Страница KPI Settings › add-modal для ab-tests › содержит все шаги и базовые контролы" classname="regression/kpi-settings.regression.spec.ts" time="4.125">
+<testsuite name="smoke/kpi-settings.smoke.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="smoke" tests="4" failures="0" skipped="0" time="17.409" errors="0">
+<testcase name="Страница KPI Settings › Страница KPI Settings открывается и базовый каркас виден" classname="smoke/kpi-settings.smoke.spec.ts" time="4.979">
 </testcase>
-<testcase name="Страница KPI Settings › add-modal для ab-tests › переключает шаги Next и Back" classname="regression/kpi-settings.regression.spec.ts" time="4.01">
+<testcase name="Страница KPI Settings › Базовые секции и таблицы отображаются" classname="smoke/kpi-settings.smoke.spec.ts" time="3.633">
 </testcase>
-<testcase name="Страница KPI Settings › add-modal для total-mrr › содержит все шаги и базовые контролы" classname="regression/kpi-settings.regression.spec.ts" time="3.729">
+<testcase name="Страница KPI Settings › Add-modal для ab-tests открывается и показывает шаги" classname="smoke/kpi-settings.smoke.spec.ts" time="4.172">
 </testcase>
-<testcase name="Страница KPI Settings › add-modal для total-mrr › переключает шаги Next и Back" classname="regression/kpi-settings.regression.spec.ts" time="4.224">
+<testcase name="Страница KPI Settings › Add-modal для total-mrr открывается и показывает шаги" classname="smoke/kpi-settings.smoke.spec.ts" time="4.625">
 </testcase>
-<testcase name="Страница KPI Settings › Score-таблица отображается и edit-кнопки недоступны" classname="regression/kpi-settings.regression.spec.ts" time="3.59">
+</testsuite>
+<testsuite name="smoke/kpi.smoke.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="smoke" tests="9" failures="0" skipped="0" time="33.705" errors="0">
+<testcase name="Страница KPI › Подзаголовок отображается корректно" classname="smoke/kpi.smoke.spec.ts" time="3.62">
 </testcase>
-<testcase name="Страница KPI Settings › A/B tests: создаёт, редактирует и удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="9.988">
+<testcase name="Страница KPI › Кнопка настроек отображается и кликабельна" classname="smoke/kpi.smoke.spec.ts" time="3.176">
 </testcase>
-<testcase name="Страница KPI Settings › Total MRR: создаёт, редактирует и удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="7.883">
+<testcase name="Страница KPI › Основной контент рендерится, error-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="3.177">
 </testcase>
-<testcase name="Страница KPI Settings › A/B tests: отмена удаления не удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="8.348">
+<testcase name="Страница KPI › При ошибке загрузки отображается error-content, main-content скрыт" classname="smoke/kpi.smoke.spec.ts" time="7.027">
 </testcase>
-<testcase name="Страница KPI Settings › A/B tests: ошибка сервера при создании показывает error и не создаёт строку" classname="regression/kpi-settings.regression.spec.ts" time="4.319">
+<testcase name="Страница KPI › Проверка отображения карточек KPI" classname="smoke/kpi.smoke.spec.ts" time="3.437">
 </testcase>
-<testcase name="Страница KPI Settings › A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку" classname="regression/kpi-settings.regression.spec.ts" time="8.598">
+<testcase name="Страница KPI › Фильтры по месяцам видимы и работают" classname="smoke/kpi.smoke.spec.ts" time="2.747">
 </testcase>
-<testcase name="Страница KPI Settings › Total MRR: ошибка сервера при создании показывает error и не создаёт строку" classname="regression/kpi-settings.regression.spec.ts" time="4.392">
+<testcase name="Страница KPI › График производительности отображается и табы переключаются" classname="smoke/kpi.smoke.spec.ts" time="3.372">
 </testcase>
-<testcase name="Страница KPI Settings › Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку" classname="regression/kpi-settings.regression.spec.ts" time="7.435">
+<testcase name="Страница KPI › Top Employees отображается" classname="smoke/kpi.smoke.spec.ts" time="3.664">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников отображается и можно открыть карточку сотрудника" classname="smoke/kpi.smoke.spec.ts" time="3.485">
+</testcase>
+</testsuite>
+<testsuite name="regression/functionality.regression.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="regression" tests="7" failures="0" skipped="0" time="32.781" errors="0">
+<testcase name="Функциональность авторизации › Работа модального окна восстановления пароля" classname="regression/functionality.regression.spec.ts" time="3.958">
+</testcase>
+<testcase name="Функциональность авторизации › Закрытие модалки через оверлей" classname="regression/functionality.regression.spec.ts" time="4.342">
+</testcase>
+<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; работает (UI)" classname="regression/functionality.regression.spec.ts" time="4.383">
+</testcase>
+<testcase name="Функциональность авторизации › Кнопка &quot;Remember me&quot; сохраняет сессию между перезапусками браузерного контекста" classname="regression/functionality.regression.spec.ts" time="10.023">
+</testcase>
+<testcase name="Функциональность авторизации › Кнопка показа/скрытия пароля работает корректно" classname="regression/functionality.regression.spec.ts" time="3.243">
+</testcase>
+<testcase name="Функциональность авторизации › Переход по Telegram ссылке" classname="regression/functionality.regression.spec.ts" time="2.832">
+</testcase>
+<testcase name="Функциональность авторизации › Поля сохраняют значения после неуспешной попытки" classname="regression/functionality.regression.spec.ts" time="4">
+</testcase>
+</testsuite>
+<testsuite name="regression/kpi-settings.regression.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="regression" tests="12" failures="0" skipped="0" time="70.427" errors="0">
+<testcase name="Страница KPI Settings › add-modal для ab-tests › содержит все шаги и базовые контролы" classname="regression/kpi-settings.regression.spec.ts" time="4.891">
+</testcase>
+<testcase name="Страница KPI Settings › add-modal для ab-tests › переключает шаги Next и Back" classname="regression/kpi-settings.regression.spec.ts" time="6.17">
+</testcase>
+<testcase name="Страница KPI Settings › add-modal для total-mrr › содержит все шаги и базовые контролы" classname="regression/kpi-settings.regression.spec.ts" time="4.257">
+</testcase>
+<testcase name="Страница KPI Settings › add-modal для total-mrr › переключает шаги Next и Back" classname="regression/kpi-settings.regression.spec.ts" time="4.491">
+</testcase>
+<testcase name="Страница KPI Settings › Score-таблица отображается и edit-кнопки недоступны" classname="regression/kpi-settings.regression.spec.ts" time="3.384">
+</testcase>
+<testcase name="Страница KPI Settings › A/B tests: создаёт, редактирует и удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="8.543">
+</testcase>
+<testcase name="Страница KPI Settings › Total MRR: создаёт, редактирует и удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="8.422">
+</testcase>
+<testcase name="Страница KPI Settings › A/B tests: отмена удаления не удаляет тестовое значение" classname="regression/kpi-settings.regression.spec.ts" time="7.782">
+</testcase>
+<testcase name="Страница KPI Settings › A/B tests: ошибка сервера при создании показывает error и не создаёт строку" classname="regression/kpi-settings.regression.spec.ts" time="4.12">
+</testcase>
+<testcase name="Страница KPI Settings › A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку" classname="regression/kpi-settings.regression.spec.ts" time="7.747">
+</testcase>
+<testcase name="Страница KPI Settings › Total MRR: ошибка сервера при создании показывает error и не создаёт строку" classname="regression/kpi-settings.regression.spec.ts" time="4.068">
+</testcase>
+<testcase name="Страница KPI Settings › Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку" classname="regression/kpi-settings.regression.spec.ts" time="6.552">
+</testcase>
+</testsuite>
+<testsuite name="regression/kpi.regression.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="regression" tests="8" failures="0" skipped="0" time="29.557" errors="0">
+<testcase name="Страница KPI › Фильтры: отображение, активный таб, переключение и изменение контента" classname="regression/kpi.regression.spec.ts" time="4.052">
+</testcase>
+<testcase name="Страница KPI › Top Employees: подиум отображается полностью и корректно" classname="regression/kpi.regression.spec.ts" time="3.382">
+</testcase>
+<testcase name="Страница KPI › Top Employees: претенденты корректны и инициалы совпадают" classname="regression/kpi.regression.spec.ts" time="3.273">
+</testcase>
+<testcase name="Страница KPI › Карточки KPI отображаются и содержат значения" classname="regression/kpi.regression.spec.ts" time="3.021">
+</testcase>
+<testcase name="Страница KPI › График отображается, табы переключаются без ошибок" classname="regression/kpi.regression.spec.ts" time="3.08">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: строки отображаются и корректны" classname="regression/kpi.regression.spec.ts" time="2.945">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: кнопка Open открывает страницу сотрудника" classname="regression/kpi.regression.spec.ts" time="2.743">
+</testcase>
+<testcase name="Страница KPI › Таблица сотрудников: сортировка по колонкам" classname="regression/kpi.regression.spec.ts" time="7.061">
+</testcase>
+</testsuite>
+<testsuite name="regression/validation.regression.spec.ts" timestamp="2026-06-01T11:20:15.158Z" hostname="regression" tests="4" failures="0" skipped="0" time="13.829" errors="0">
+<testcase name="Валидация полей авторизации › Валидация пустых полей" classname="regression/validation.regression.spec.ts" time="3.753">
+</testcase>
+<testcase name="Валидация полей авторизации › Валидация некорректного email формата" classname="regression/validation.regression.spec.ts" time="3.814">
+</testcase>
+<testcase name="Валидация полей авторизации › Неуспешная авторизация с неверным паролем" classname="regression/validation.regression.spec.ts" time="3.375">
+</testcase>
+<testcase name="Валидация полей авторизации › Неуспешная авторизация с несуществующим email" classname="regression/validation.regression.spec.ts" time="2.887">
 </testcase>
 </testsuite>
 </testsuites>
