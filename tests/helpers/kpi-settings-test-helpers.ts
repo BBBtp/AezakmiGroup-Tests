@@ -17,13 +17,16 @@ type CreateEditDeleteKpiSettingsActionOptions = CreateKpiSettingsActionOptions &
     editPoints: string;
 };
 
-export async function pickAvailableAbTestPercent(settingsPage: KpiSettingsPage): Promise<string> {
+export async function pickAvailableAbTestPercent(
+    settingsPage: KpiSettingsPage,
+    actionType = 'Internal test'
+): Promise<string> {
     const existingIds = await settingsPage.page
-        .locator('[data-testid^="ab-tests__Internal test__Completed with "][data-testid$="__edit"]')
+        .locator(`[data-testid^="ab-tests__${actionType}__Completed with "][data-testid$="__edit"]`)
         .evaluateAll(nodes => nodes.map(node => node.getAttribute('data-testid') ?? ''));
 
     for (let value = 31; value < 100; value++) {
-        const expectedId = `ab-tests__Internal test__Completed with ${value}% +__edit`;
+        const expectedId = `ab-tests__${actionType}__Completed with ${value}% +__edit`;
         if (!existingIds.includes(expectedId)) {
             return String(value);
         }
