@@ -27,20 +27,24 @@ test.describe('Страница KPI Settings', () => {
         })
 
         test('содержит все шаги и базовые контролы', async () => {
+            const value = await pickAvailableAbTestPercent(settingsPage, 'Internal test');
+
             await modal.assertAbTestsActionTypeStep();
             await modal.selectActionType('Internal test');
             await modal.goToValueStep();
             await modal.selectValueType('Completed with a success over N%');
-            await modal.fillValue('10');
+            await modal.fillValue(value);
             await modal.goToPointsStep();
         });
 
         test('переключает шаги Next и Back', async () => {
+            const value = await pickAvailableAbTestPercent(settingsPage, 'External test');
+
             await modal.assertAbTestsActionTypeStep();
             await modal.selectActionType('External test');
             await modal.goToValueStep();
             await modal.selectValueType('Completed with a success over N%');
-            await modal.fillValue('10');
+            await modal.fillValue(value);
             await modal.goToPointsStep();
             await modal.goBackToValueStep();
         });
@@ -56,22 +60,26 @@ test.describe('Страница KPI Settings', () => {
         })
 
         test('содержит все шаги и базовые контролы', async () => {
+            const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+
             await modal.assertTotalMrrActionTypeStep();
             await modal.selectActionType('Change of SUM MRR');
             await modal.goToValueStep();
             await modal.assertTotalMrrValueStep();
             await modal.selectValueType('Reached $N');
-            await modal.fillValue('2500');
+            await modal.fillValue(value);
             await modal.goToPointsStep();
         });
 
         test('переключает шаги Next и Back', async () => {
+            const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+
             await modal.assertTotalMrrActionTypeStep();
             await modal.selectActionType('Change of SUM MRR');
             await modal.goToValueStep();
             await modal.assertTotalMrrValueStep();
             await modal.selectValueType('Reached $N');
-            await modal.fillValue('2500');
+            await modal.fillValue(value);
             await modal.goToPointsStep();
             await modal.goBackToValueStep();
         });
