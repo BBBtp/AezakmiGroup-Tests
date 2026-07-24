@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { requireTestId } from '../../../../utils/test-id';
+import { loggedClick, loggedFill } from '../../../../utils/playwright-logger';
 
 export class KpiSettingsAddValueForm {
     readonly page: Page;
@@ -50,29 +51,29 @@ export class KpiSettingsAddValueForm {
     }
 
     async openActionTypeSelect(): Promise<void> {
-        await this.actionTypeTrigger.click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: open action type`, this.actionTypeTrigger);
         await expect(this.actionTypeContent).toBeVisible();
     }
 
     async openValueTypeSelect(): Promise<void> {
-        await this.valueTypeTrigger.click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: open value type`, this.valueTypeTrigger);
         await expect(this.valueTypeContent).toBeVisible();
     }
 
     async selectActionType(value: string): Promise<void> {
         await this.openActionTypeSelect();
-        await this.actionTypeOption(value).click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: select action type ${value}`, this.actionTypeOption(value));
         await expect(this.actionTypeTriggerValue).toContainText(value);
     }
 
     async selectValueType(value: string): Promise<void> {
         await this.openValueTypeSelect();
-        await this.valueTypeOption(value).click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: select value type ${value}`, this.valueTypeOption(value));
         await expect(this.valueTypeTriggerValue).toContainText(value);
     }
 
     async fillValue(value: string): Promise<void> {
-        await this.valueInput.fill(value);
+        await loggedFill(this.page, `KPI settings ${this.tableName}: fill value`, this.valueInput, value);
     }
 
     async expectActionTypeControlsVisible(): Promise<void> {

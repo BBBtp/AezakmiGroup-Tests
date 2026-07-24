@@ -10,6 +10,7 @@ import { KpiPerformanceChartComponent } from '../../components/kpi/kpi-performan
 import { KpiTopEmployeesComponent } from '../../components/kpi/kpi-top-employees-component';
 import { KpiEmployeesTableComponent } from '../../components/kpi/kpi-employees-table-component';
 import { FilterFormComponent } from '../../components/forms/filter-form-component';
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Страница KPI
@@ -82,7 +83,7 @@ export class KpiPage extends BasePage {
     async openSettings(): Promise<KpiSettingsPage> {
         await Promise.all([
             this.page.waitForURL(/\/kpi\/settings/),
-            this.settingsButton.click(),
+            loggedClick(this.page, 'KPI: open settings', this.settingsButton),
         ]);
 
         const settingsPage = new KpiSettingsPage(this.page);

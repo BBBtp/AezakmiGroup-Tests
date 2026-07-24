@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import TestData from "../../fixtures/test-data";
+import { loggedAction, loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент формы логина.
@@ -62,8 +63,8 @@ export class LoginFormComponent {
      * @param password пароль пользователя
      */
     async fillCredentials(email: string, password: string): Promise<void> {
-        await this.emailInput.fill(email);
-        await this.passwordInput.fill(password);
+        await loggedAction(this.page, 'fill', 'login email', this.emailInput, () => this.emailInput.fill(email));
+        await loggedAction(this.page, 'fill', 'login password', this.passwordInput, () => this.passwordInput.fill(password));
     }
 
     /**
@@ -111,17 +112,17 @@ export class LoginFormComponent {
      */
     async login(email: string, password: string): Promise<void> {
         await this.fillCredentials(email, password);
-        await this.submitButton.click();
+        await loggedClick(this.page, 'login: submit credentials', this.submitButton);
     }
 
     /** Переключает видимость пароля */
     async togglePasswordVisibility(): Promise<void> {
-        await this.passwordVisibilityToggle.click();
+        await loggedClick(this.page, 'login: toggle password visibility', this.passwordVisibilityToggle);
     }
 
     /** Переключает чекбокс «Запомнить меня» */
     async toggleRememberMe(): Promise<void> {
-        await this.rememberMeCheckbox.click();
+        await loggedClick(this.page, 'login: toggle remember me', this.rememberMeCheckbox);
     }
 
     /** Проверяет, отмечен ли чекбокс «Запомнить меня» */

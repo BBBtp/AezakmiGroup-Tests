@@ -4,11 +4,20 @@ node_modules/
 /playwright-report/
 /blob-report/
 /allure-results/
+/allure-results*.zip
 /results.xml
 /test-results.json
 /playwright/.cache/
 .auth/
 dist/
+
+# Local test and research artifacts
+/.playwright-cli/
+/outputs/
+/reports/
+/tmp/
+*.inspect.ndjson
+.DS_Store
 
 
 .env

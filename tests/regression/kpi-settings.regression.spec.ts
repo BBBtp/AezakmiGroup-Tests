@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { test } from '../../fixtures/test-fixtures';
-import { KpiSettingsPage } from '../../pages/kpi/kpi-settings-page';
-import { KpiSettingsAddValueModal } from '../../components/kpi/settings/modals/kpi-settings-add-value-modal';
+import { test } from '@fixtures';
+import { KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
+import { allure } from 'allure-playwright';
 import {
     createEditDeleteKpiSettingsAction,
     createKpiSettingsAction,
@@ -10,7 +10,7 @@ import {
     pickAvailableAbTestPercent,
     pickAvailableTotalMrrReachedValue,
     waitForFailedSettingsAction,
-} from '../helpers/kpi-settings-test-helpers';
+} from '@support/kpi';
 
 test.describe('Страница KPI Settings', () => {
     test.beforeEach(async ({ kpiPage }) => {
@@ -27,6 +27,7 @@ test.describe('Страница KPI Settings', () => {
         })
 
         test('содержит все шаги и базовые контролы', async () => {
+            await allure.allureId('823');
             const value = await pickAvailableAbTestPercent(settingsPage, 'Internal test');
 
             await modal.assertAbTestsActionTypeStep();
@@ -38,6 +39,7 @@ test.describe('Страница KPI Settings', () => {
         });
 
         test('переключает шаги Next и Back', async () => {
+            await allure.allureId('824');
             const value = await pickAvailableAbTestPercent(settingsPage, 'External test');
 
             await modal.assertAbTestsActionTypeStep();
@@ -60,6 +62,7 @@ test.describe('Страница KPI Settings', () => {
         })
 
         test('содержит все шаги и базовые контролы', async () => {
+            await allure.allureId('825');
             const value = await pickAvailableTotalMrrReachedValue(settingsPage);
 
             await modal.assertTotalMrrActionTypeStep();
@@ -72,6 +75,7 @@ test.describe('Страница KPI Settings', () => {
         });
 
         test('переключает шаги Next и Back', async () => {
+            await allure.allureId('826');
             const value = await pickAvailableTotalMrrReachedValue(settingsPage);
 
             await modal.assertTotalMrrActionTypeStep();
@@ -87,11 +91,13 @@ test.describe('Страница KPI Settings', () => {
 
 
     test('Score-таблица отображается и edit-кнопки недоступны', async ({ kpiPage }) => {
+        await allure.allureId('827');
         const settingsPage = await kpiPage.openSettings();
         await settingsPage.scoreTable.expectReadOnlyShellVisible();
     });
 
     test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+        await allure.allureId('828');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableAbTestPercent(settingsPage);
         const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
@@ -113,6 +119,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('Total MRR: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+        await allure.allureId('829');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableTotalMrrReachedValue(settingsPage);
         const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
@@ -130,6 +137,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('A/B tests: отмена удаления не удаляет тестовое значение', async ({ kpiPage }) => {
+        await allure.allureId('830');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableAbTestPercent(settingsPage);
         const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
@@ -166,6 +174,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('A/B tests: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
+        await allure.allureId('831');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableAbTestPercent(settingsPage);
         const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
@@ -187,6 +196,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку', async ({ kpiPage }) => {
+        await allure.allureId('832');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableAbTestPercent(settingsPage);
         const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
@@ -229,6 +239,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('Total MRR: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
+        await allure.allureId('833');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableTotalMrrReachedValue(settingsPage);
         const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
@@ -250,6 +261,7 @@ test.describe('Страница KPI Settings', () => {
     });
 
     test('Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку', async ({ kpiPage }) => {
+        await allure.allureId('834');
         const settingsPage = await kpiPage.openSettings();
         const value = await pickAvailableTotalMrrReachedValue(settingsPage);
         const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);

@@ -1,6 +1,7 @@
-import { test } from '../../fixtures/test-fixtures';
-import testData from "../../fixtures/test-data";
+import { test, testData } from '@fixtures';
 import {expect} from "@playwright/test";
+import { allure } from 'allure-playwright';
+import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
 
@@ -9,6 +10,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Фильтры: отображение, активный таб, переключение и изменение контента', async ({ kpiPage }) => {
+        await allure.allureId('811');
         const filters = kpiPage.filters;
         const mainContent = kpiPage.mainContent;
 
@@ -26,6 +28,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Top Employees: подиум отображается полностью и корректно', async ({ kpiPage }) => {
+        await allure.allureId('812');
         const top = kpiPage.topEmployees;
         await test.step('Блок отображается', async () => {
             await top.verifyVisible(testData.texts.kpi.basePage.topEmpTitle);
@@ -37,6 +40,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Top Employees: претенденты корректны и инициалы совпадают', async ({ kpiPage }) => {
+        await allure.allureId('813');
         const top = kpiPage.topEmployees;
         const contendersCount = await top.getContendersCount();
         await test.step(`Проверяем отображение претендентов ${contendersCount} `, async () => {
@@ -45,6 +49,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Карточки KPI отображаются и содержат значения', async ({ kpiPage }) => {
+        await allure.allureId('814');
         const { mrrCard, scoreCard, appsCard } = kpiPage.cards;
 
         await test.step('Total MRR', async () => {
@@ -59,18 +64,20 @@ test.describe('Страница KPI', () => {
     });
 
     test('График отображается, табы переключаются без ошибок', async ({ kpiPage }) => {
+        await allure.allureId('815');
         const chart = kpiPage.chart;
 
         await chart.verifyVisible();
         const errors: string[] = [];
         kpiPage.page.on('console', msg => msg.type() === 'error' && errors.push(msg.text()));
-        await chart.mrrTab.click();
+        await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
         expect(errors).toHaveLength(0);
-        await chart.scoreTab.click();
+        await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
         expect(errors).toHaveLength(0);
     });
 
     test('Таблица сотрудников: строки отображаются и корректны', async ({ kpiPage }) => {
+        await allure.allureId('817');
         const table = kpiPage.employeesTable;
 
         await test.step('Таблица отображается', async () => {
@@ -79,6 +86,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Таблица сотрудников: кнопка Open открывает страницу сотрудника', async ({ kpiPage }) => {
+        await allure.allureId('816');
         const table = kpiPage.employeesTable;
 
         const rows = await table.getRows();
@@ -87,13 +95,14 @@ test.describe('Страница KPI', () => {
         const baseUrl = kpiPage.page.url();
         await Promise.all([
             kpiPage.page.waitForURL(/\/kpi\/.+/),
-            firstRow.openButton.click()
+            loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton)
         ]);
         const newUrl = kpiPage.page.url();
         expect(newUrl).not.toBe(baseUrl);
     });
 
     test('Таблица сотрудников: сортировка по колонкам', async ({ kpiPage }) => {
+        await allure.allureId('818');
         const table = kpiPage.employeesTable;
 
         await test.step('Sort by Score', async () => {

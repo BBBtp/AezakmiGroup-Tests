@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { requireTestId } from '../../utils/test-id';
+import { loggedAction, loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Базовый компонент модального окна.
@@ -73,7 +74,7 @@ export class ModalComponent {
      */
     async close(): Promise<void> {
         if (await this.closeButton.isVisible()) {
-            await this.closeButton.click();
+            await loggedClick(this.page, 'modal: close button', this.closeButton);
         } else {
             await this.closeByClickOutside();
         }
@@ -84,11 +85,11 @@ export class ModalComponent {
      * Закрывает модальное окно кликом вне него
      */
     async closeByClickOutside(): Promise<void> {
-        await this.page.mouse.click(1, 1);
+        await loggedAction(this.page, 'click', 'modal: click outside', this.modal, () => this.page.mouse.click(1, 1));
         if (await this.modal.isVisible().catch(() => false)) {
-            await this.page.keyboard.press('Escape');
+            await loggedAction(this.page, 'press', 'modal: Escape', this.modal, () => this.page.keyboard.press('Escape'));
             if (await this.modal.isVisible().catch(() => false)) {
-                await this.page.mouse.click(1, 1);
+                await loggedAction(this.page, 'click', 'modal: second click outside', this.modal, () => this.page.mouse.click(1, 1));
             }
         }
         await this.waitForClose();
@@ -106,7 +107,7 @@ export class ModalComponent {
      */
     async closeByButton(): Promise<void> {
         await expect(this.closeButton).toBeVisible();
-        await this.closeButton.click();
+        await loggedClick(this.page, 'modal: close button', this.closeButton);
         await this.waitForClose();
     }
 
@@ -114,7 +115,7 @@ export class ModalComponent {
      * Закрывает модальное окно нажатием Escape
      */
     async closeByEscape(): Promise<void> {
-        await this.page.keyboard.press('Escape');
+        await loggedAction(this.page, 'press', 'modal: Escape', this.modal, () => this.page.keyboard.press('Escape'));
         await this.waitForClose();
     }
 

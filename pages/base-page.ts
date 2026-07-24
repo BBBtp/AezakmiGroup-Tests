@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { loggedAction, loggedExpectation } from '../utils/playwright-logger';
 
 export class BasePage {
     readonly page: Page;
@@ -11,10 +12,10 @@ export class BasePage {
         
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                await this.page.goto(url, {
+                await loggedAction(this.page, 'navigate', `navigation to ${url}`, this.page.locator('body'), () => this.page.goto(url, {
                     waitUntil: 'commit',
                     timeout: timeout,
-                });
+                }));
                 return;
             } catch (error) {
                 if (attempt === maxRetries) {
@@ -32,7 +33,7 @@ export class BasePage {
     }
     async waitForElement(selector: string): Promise<Locator> {
         const element = this.page.locator(selector);
-        await element.waitFor({ state: 'visible' });
+        await loggedExpectation(this.page, `element ${selector}`, element, 'visible', () => element.waitFor({ state: 'visible' }));
         return element;
     }
 

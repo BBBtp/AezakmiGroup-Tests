@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { testUsers } from './users';
-import { LoginPage } from '../pages/auth/login-page';
-import { testSettings } from '../config/test-settings';
+import { LoginPage } from '@modules/auth';
+import { testSettings } from '@config/test-settings';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');
 dotenv.config({ path: path.resolve('./.env') });
