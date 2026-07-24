@@ -9,13 +9,12 @@ const baseReporters: any[] = [
   ['line'],
 ];
 
-const reporters = [...baseReporters];
-try {
-  require.resolve('allure-playwright');
-  reporters.splice(reporters.length - 1, 0, ['allure-playwright', { outputFolder: 'allure-results' }]);
-} catch {
-  // Keep default reporters when allure-playwright is not installed.
-}
+const reporters = [
+  ['./utils/diagnostic-reporter.ts'],
+  ...baseReporters.slice(0, -1),
+  ['allure-playwright', { outputFolder: process.env.ALLURE_RESULTS_DIR || 'allure-results' }],
+  baseReporters.at(-1)!,
+];
 
 export default defineConfig({
   testDir: './tests',

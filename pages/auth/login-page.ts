@@ -3,6 +3,7 @@ import { BasePage } from '../base-page';
 import { LoginFormComponent } from '../../components/forms/login-form-component';
 import { ForgotPasswordModalComponent } from '../../components/auth/forgot-password-modal-component';
 import { PageHeaderComponent } from '../../components/common/login/page-header-component';
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Страница логина
@@ -86,7 +87,7 @@ export class LoginPage extends BasePage {
 
     /** Открыть модальное окно "Забыли пароль" */
     async openForgotPasswordModal(): Promise<void> {
-        await this.loginForm.forgotPasswordButton.click();
+        await loggedClick(this.page, 'login: forgot password', this.loginForm.forgotPasswordButton);
         await this.forgotPasswordModal.waitForOpen();
     }
 

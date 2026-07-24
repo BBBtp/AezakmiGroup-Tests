@@ -2,6 +2,7 @@ import { Page, Locator, expect } from '@playwright/test';
 import { KpiSettingsActionRowComponent } from './kpi-settings-action-row-component';
 import { KpiSettingsAddValueModal, KpiSettingsAddValueTableName } from './modals/kpi-settings-add-value-modal';
 import { requireTestId } from '../../../utils/test-id';
+import { loggedClick } from '../../../utils/playwright-logger';
 
 export type KpiSettingsTableOptions = {
     hasValueColumn?: boolean;
@@ -72,7 +73,7 @@ export class KpiSettingsTableComponent {
     }
 
     async openAddModal(): Promise<KpiSettingsAddValueModal> {
-        await this.addValueButton.click();
+        await loggedClick(this.page, `KPI settings: add value ${this.tableName}`, this.addValueButton);
 
         const modal = new KpiSettingsAddValueModal(this.page, this.tableName as KpiSettingsAddValueTableName);
         await modal.waitForOpen();

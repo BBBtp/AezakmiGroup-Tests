@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { KpiSettingsAddValueForm } from '../forms/kpi-settings-add-value-form';
 import { requireTestId } from '../../../../utils/test-id';
+import { loggedClick, loggedFill } from '../../../../utils/playwright-logger';
 
 export type KpiSettingsAddValueTableName = 'ab-tests' | 'total-mrr';
 
@@ -56,12 +57,12 @@ export class KpiSettingsAddValueModal {
 
     async clickNextSafely(): Promise<void> {
         await expect(this.nextButton).toBeEnabled();
-        await this.nextButton.click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: next`, this.nextButton);
     }
 
     async clickBackSafely(): Promise<void> {
         await expect(this.backButton).toBeEnabled();
-        await this.backButton.click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: back`, this.backButton);
     }
 
     async assertNextEnabled(): Promise<void> {
@@ -182,7 +183,7 @@ export class KpiSettingsAddValueModal {
             ]);
         }
 
-        await this.form.valueTypeOption(value).click();
+        await loggedClick(this.page, `KPI settings ${this.tableName}: select value type ${value}`, this.form.valueTypeOption(value));
         await expect(this.form.valueTypeTriggerValue).toContainText(value);
         await expect(this.form.valueInput).toBeVisible();
         await this.assertNextDisabled();
@@ -195,11 +196,11 @@ export class KpiSettingsAddValueModal {
 
     async selectPointsType(type: 'plus' | 'minus'): Promise<void> {
         const option = type === 'plus' ? this.form.pointsRadioPlus : this.form.pointsRadioMinus;
-        await option.click({ force: true });
+        await loggedClick(this.page, `KPI settings ${this.tableName}: select points ${type}`, option, { force: true });
     }
 
     async fillPoints(value: string): Promise<void> {
-        await this.form.pointsInput.fill(value);
+        await loggedFill(this.page, `KPI settings ${this.tableName}: fill points`, this.form.pointsInput, value);
         await this.assertNextEnabled();
     }
 

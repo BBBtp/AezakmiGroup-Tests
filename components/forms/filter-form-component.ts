@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { requireTestId } from '../../utils/test-id';
+import { loggedClick, loggedFill, loggedSelectOption } from '../../utils/playwright-logger';
 
 /**
  * Компонент формы фильтров.
@@ -73,7 +74,7 @@ export class FilterFormComponent {
         const input = this.page.locator(
             `[data-testid="${this.testId}__input-${name}"]`
         );
-        await input.fill(value);
+        await loggedFill(this.page, `filter ${name}: fill value`, input, value);
     }
 
     /**
@@ -86,21 +87,21 @@ export class FilterFormComponent {
         const select = this.page.locator(
             `[data-testid="${this.testId}__select-${name}"]`
         );
-        await select.selectOption({ label: value });
+        await loggedSelectOption(this.page, `filter ${name}: select ${value}`, select, { label: value });
     }
 
     /**
      * Применяет фильтры (нажатие кнопки Apply)
      */
     async apply(): Promise<void> {
-        await this.applyButton.click();
+        await loggedClick(this.page, 'filters: apply', this.applyButton);
     }
 
     /**
      * Сбрасывает фильтры (нажатие кнопки Reset)
      */
     async reset(): Promise<void> {
-        await this.resetButton.click();
+        await loggedClick(this.page, 'filters: reset', this.resetButton);
     }
 
     /**

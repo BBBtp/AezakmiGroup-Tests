@@ -4,6 +4,15 @@
     "lib": ["ES2022", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@fixtures": ["fixtures/index"],
+      "@fixtures/*": ["fixtures/*"],
+      "@modules/*": ["modules/*"],
+      "@support/*": ["tests/support/*"],
+      "@utils/*": ["utils/*"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

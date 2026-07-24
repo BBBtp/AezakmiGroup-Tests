@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { composeTestId, requireTestId } from '../../../utils/test-id';
+import { loggedClick, loggedFill } from '../../../utils/playwright-logger';
 
 export class KpiSettingsActionRowComponent {
     readonly page: Page;
@@ -90,7 +91,7 @@ export class KpiSettingsActionRowComponent {
 
     async openEditModal(): Promise<void> {
         await expect(this.editButton).toBeEnabled();
-        await this.editButton.click();
+        await loggedClick(this.page, `KPI settings: edit ${this.actionType}/${this.value}`, this.editButton);
         await this.expectEditModalVisible();
     }
 
@@ -106,17 +107,17 @@ export class KpiSettingsActionRowComponent {
 
     async selectEditPointsType(type: 'plus' | 'minus'): Promise<void> {
         const option = type === 'plus' ? this.pointsRadioPlus : this.pointsRadioMinus;
-        await option.click({ force: true });
+        await loggedClick(this.page, `KPI settings: select ${type} points`, option, { force: true });
     }
 
     async fillEditPoints(value: string): Promise<void> {
-        await this.pointsInput.fill(value);
+        await loggedFill(this.page, `KPI settings: fill points ${this.actionType}/${this.value}`, this.pointsInput, value);
         await expect(this.saveButton).toBeEnabled();
     }
 
     async saveEdit(): Promise<void> {
         await expect(this.saveButton).toBeEnabled();
-        await this.saveButton.click();
+        await loggedClick(this.page, `KPI settings: save ${this.actionType}/${this.value}`, this.saveButton);
     }
 
     async expectEditModalHidden(): Promise<void> {
@@ -125,16 +126,18 @@ export class KpiSettingsActionRowComponent {
 
     async openDeleteModal(): Promise<void> {
         await expect(this.deleteButton).toBeEnabled();
-        await this.deleteButton.click();
+        await loggedClick(this.page, `KPI settings: open delete ${this.actionType}/${this.value}`, this.deleteButton);
         await expect(this.deleteModal).toBeVisible();
     }
 
     async confirmDelete(): Promise<void> {
-        await this.page.locator('[data-testid="delete-item__del-btn"]').click();
+        const confirmButton = this.page.locator('[data-testid="delete-item__del-btn"]');
+        await loggedClick(this.page, 'KPI settings: confirm delete', confirmButton);
     }
 
     async cancelDelete(): Promise<void> {
-        await this.page.locator('[data-testid="delete-item__cancel-btn"]').click();
+        const cancelButton = this.page.locator('[data-testid="delete-item__cancel-btn"]');
+        await loggedClick(this.page, 'KPI settings: cancel delete', cancelButton);
         await expect(this.deleteModal).toBeHidden();
     }
 

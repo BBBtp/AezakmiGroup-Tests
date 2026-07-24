@@ -1,6 +1,7 @@
-import { test } from '../../fixtures/test-fixtures';
-import testData from "../../fixtures/test-data";
+import { test, testData } from '@fixtures';
 import {expect} from "@playwright/test";
+import { allure } from 'allure-playwright';
+import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
     test.beforeEach(async ({ kpiPage }) => {
@@ -8,27 +9,31 @@ test.describe('Страница KPI', () => {
     });
 
     test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
+        await allure.allureId('802');
         await expect(kpiPage.subtitle).toBeVisible();
         await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
     });
 
     test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
+        await allure.allureId('803');
         const btn = kpiPage.settingsButton;
         await expect(btn).toBeVisible();
         const errors: string[] = [];
         kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-        await btn.click();
+        await loggedClick(kpiPage.page, 'KPI: open settings', btn);
         await kpiPage.page.waitForURL(/\/kpi\/settings/);
         expect(errors.length).toBe(0);
     });
 
     test('Основной контент рендерится, error-content скрыт', async ({ kpiPage }) => {
+        await allure.allureId('804');
         await expect(kpiPage.mainContent).toBeVisible();
         await expect(kpiPage.errorContent).toBeHidden();
     });
 
     test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage }) => {
-        await kpiPage.page.route('**/api/v1/kpi/managers/statistics*', async (route) => {
+        await allure.allureId('805');
+        await kpiPage.page.route('**/staff/api/v1/kpi/managers/statistics*', async (route) => {
             await route.fulfill({
                 status: 500,
                 contentType: 'application/json',
@@ -43,6 +48,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Проверка отображения карточек KPI', async ({ kpiPage }) => {
+        await allure.allureId('806');
         const { mrrCard, scoreCard, appsCard } = kpiPage.cards;
 
         await test.step('Проверяем карточку Total MRR', async () => {
@@ -57,6 +63,7 @@ test.describe('Страница KPI', () => {
     });
 
     test('Фильтры по месяцам видимы и работают', async ({ kpiPage }) => {
+        await allure.allureId('807');
         const filters = kpiPage.filters;
         const mainContent = kpiPage.mainContent;
 
@@ -73,18 +80,20 @@ test.describe('Страница KPI', () => {
     });
 
     test('График производительности отображается и табы переключаются', async ({ kpiPage }) => {
+        await allure.allureId('808');
         const chart = kpiPage.chart;
         await chart.verifyVisible();
 
         const errors: string[] = [];
         kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-        await chart.mrrTab.click();
+        await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
         expect(errors.length).toBe(0);
-        await chart.scoreTab.click();
+        await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
         expect(errors.length).toBe(0);
     });
 
     test('Top Employees отображается', async ({ kpiPage }) => {
+        await allure.allureId('809');
         const top = kpiPage.topEmployees;
 
         await expect(top.root).toBeVisible();
@@ -100,6 +109,7 @@ test.describe('Страница KPI', () => {
 
 
     test('Таблица сотрудников отображается и можно открыть карточку сотрудника', async ({ kpiPage }) => {
+        await allure.allureId('810');
         const table = kpiPage.employeesTable;
 
         await test.step('Таблица отображается', async () => {
@@ -115,7 +125,7 @@ test.describe('Страница KPI', () => {
             const oldUrl = kpiPage.page.url();
             await Promise.all([
                 kpiPage.page.waitForURL(/\/kpi\/.+/),
-                firstRow.openButton.click()
+                loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton)
             ]);
             await expect(kpiPage.page).toHaveURL(/\/kpi\/.+/);
             expect(kpiPage.page.url()).not.toBe(oldUrl);

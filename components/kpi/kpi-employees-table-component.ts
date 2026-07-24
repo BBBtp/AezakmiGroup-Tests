@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from "@playwright/test";
 import { EmployeeRowComponent } from "./employee-row-component";
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Структура данных сотрудника для KPI таблицы
@@ -100,7 +101,7 @@ export class KpiEmployeesTableComponent {
      */
     async sortBy(columnName: string): Promise<void> {
         const cell = await this.getHeaderCell(columnName);
-        await cell.click();
+        await loggedClick(this.root.page(), `employees table: sort ${columnName}`, cell);
         await this.root.page().waitForTimeout(500);
         await this.waitForTableStable();
         await this.verifyTableDataValid();

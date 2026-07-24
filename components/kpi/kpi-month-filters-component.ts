@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { requireTestId } from '../../utils/test-id';
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент фильтров KPI по месяцам.
@@ -60,7 +61,7 @@ export class KpiMonthFiltersComponent {
      */
     async selectTabByIndex(index: number): Promise<void> {
         const tab = this.tabs.nth(index);
-        await tab.click();
+        await loggedClick(this.root.page(), `KPI month filter: tab ${index}`, tab);
         await expect(tab).toHaveAttribute('aria-selected', 'true');
     }
 

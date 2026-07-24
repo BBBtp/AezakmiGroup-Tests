@@ -2,9 +2,8 @@ import { test as baseTest } from '@playwright/test';
 import type { Browser, BrowserContextOptions, Page, TestInfo } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
-import { KpiPage } from '../pages/kpi/kpi-page';
-import { KpiSettingsPage } from '../pages/kpi/kpi-settings-page';
-import { LoginPage } from '../pages/auth/login-page';
+import { LoginPage } from '@modules/auth';
+import { KpiPage, KpiSettingsPage } from '@modules/kpi';
 import { testUsers } from './users';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');

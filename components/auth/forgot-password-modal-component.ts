@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { ModalComponent } from '../common/modal-component';
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент модального окна «Забыли пароль».
@@ -48,7 +49,7 @@ export class ForgotPasswordModalComponent extends ModalComponent {
      * - сценариев восстановления пароля через Telegram.
      */
     async openTelegram(): Promise<void> {
-        await this.telegramButton.click();
+        await loggedClick(this.page, 'forgot password: open Telegram', this.telegramButton);
     }
 
     /**

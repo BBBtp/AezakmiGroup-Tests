@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { requireTestId } from '../../utils/test-id';
+import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент вкладок (Tabs).
@@ -53,7 +54,7 @@ export class TabsComponent {
      * @param value значение таба (суффикс в data-testid)
      */
     async clickTab(value: string): Promise<void> {
-        await this.root.locator(`[data-testid$="__${value}"]`).click();
+        await loggedClick(this.root.page(), `tabs ${this.testId}: ${value}`, this.root.locator(`[data-testid$="__${value}"]`));
     }
 
     /**

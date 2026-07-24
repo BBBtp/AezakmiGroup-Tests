@@ -1,5 +1,6 @@
-import { test } from '../../fixtures/test-fixtures';
+import { test } from '@fixtures';
 import {expect} from "@playwright/test";
+import { allure } from 'allure-playwright';
 
 
 test.describe('Авторизация в CRM', () => {
@@ -8,11 +9,13 @@ test.describe('Авторизация в CRM', () => {
     });
 
     test('Страница авторизации доступна и загружается', async ({ loginPage }) => {
+        await allure.allureId('785');
         await expect(loginPage.page).toHaveURL(/.*login/);
         await expect(loginPage.loginContainer).toBeVisible();
     });
 
     test('Основные элементы страницы отображаются', async ({ loginPage }) => {
+        await allure.allureId('786');
         await test.step('Проверяем Title', async () => {
             await expect(loginPage.pageHeader.title).toBeVisible()
         })
@@ -38,22 +41,26 @@ test.describe('Авторизация в CRM', () => {
     });
 
     test('Успешная авторизация администратора', async ({ loginPage, adminUser, page }) => {
+        await allure.allureId('787');
         await loginPage.login(adminUser.email, adminUser.password);
         await expect(page).toHaveURL(/dashboard/);
     });
 
     test('Успешная авторизация обычного пользователя', async ({ loginPage, regularUser, page }) => {
+        await allure.allureId('788');
         await loginPage.login(regularUser.email, regularUser.password);
         await expect(page).toHaveURL(/dashboard/);
     });
 
     test('Кнопка "Forgot password" открывает модальное окно', async ({ loginPage }) => {
+        await allure.allureId('789');
         await loginPage.openForgotPasswordModal();
         await expect(loginPage.forgotPasswordModal.modal).toBeVisible();
         await expect(loginPage.forgotPasswordModal.telegramButton).toBeVisible();
     });
 
     test('Модальное окно восстановления пароля закрывается', async ({ loginPage }) => {
+        await allure.allureId('790');
         await loginPage.openForgotPasswordModal();
         await loginPage.closeForgotPasswordModal();
         await expect(loginPage.forgotPasswordModal.modal).toBeHidden();
