@@ -1,5 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'node:path';
 import { testSettings } from './config/test-settings';
+
+const adminStorageState = path.resolve('.auth/admin.json');
+const desktopChrome = {
+  ...devices['Desktop Chrome'],
+  viewport: { width: 1920, height: 1080 },
+};
+const unauthenticatedRegressionFiles = [
+  '**/access-control.regression.spec.ts',
+  '**/auth-ui.regression.spec.ts',
+  '**/functionality.regression.spec.ts',
+  '**/validation.regression.spec.ts',
+];
 
 const baseReporters: any[] = [
   ['blob'],
@@ -20,7 +33,7 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1,
+  retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
 
   reporter: reporters,
@@ -38,10 +51,40 @@ export default defineConfig({
   timeout: 60000,
   expect: { timeout: 10000 },
 
-  globalSetup: './fixtures/global-setup.ts',
-
   projects: [
-    { name: 'smoke', testMatch: '**/*.smoke.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: process.env.CI ? 2 : 1  },
-    { name: 'regression', testMatch: '**/*.regression.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } }, retries: process.env.CI ? 2 : 1 },
+    {
+      name: 'setup',
+      testMatch: '**/*.setup.ts',
+    },
+    {
+      name: 'smoke-auth',
+      testMatch: '**/auth.smoke.spec.ts',
+      use: desktopChrome,
+    },
+    {
+      name: 'smoke',
+      testMatch: '**/*.smoke.spec.ts',
+      testIgnore: '**/auth.smoke.spec.ts',
+      dependencies: ['setup'],
+      use: {
+        ...desktopChrome,
+        storageState: adminStorageState,
+      },
+    },
+    {
+      name: 'regression-auth',
+      testMatch: unauthenticatedRegressionFiles,
+      use: desktopChrome,
+    },
+    {
+      name: 'regression',
+      testMatch: '**/*.regression.spec.ts',
+      testIgnore: unauthenticatedRegressionFiles,
+      dependencies: ['setup'],
+      use: {
+        ...desktopChrome,
+        storageState: adminStorageState,
+      },
+    },
   ],
 });

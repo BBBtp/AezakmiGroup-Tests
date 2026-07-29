@@ -1,0 +1,16 @@
+.auth
+.idea
+.playwright-cli
+allure-report
+allure-results
+blob-report
+dist
+node_modules
+outputs
+package-lock.json
+playwright-report
+reports
+results.xml
+test-results
+test-results.json
+tmp

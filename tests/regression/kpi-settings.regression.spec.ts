@@ -3,299 +3,284 @@ import { test } from '@fixtures';
 import { KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
 import { allure } from 'allure-playwright';
 import {
-    createEditDeleteKpiSettingsAction,
-    createKpiSettingsAction,
-    deleteKpiSettingsActionIfPresent,
-    failNextSettingsAction,
-    pickAvailableAbTestPercent,
-    pickAvailableTotalMrrReachedValue,
-    waitForFailedSettingsAction,
+  createEditDeleteKpiSettingsAction,
+  createKpiSettingsAction,
+  deleteKpiSettingsActionIfPresent,
+  failNextSettingsAction,
+  pickAvailableAbTestPercent,
+  pickAvailableTotalMrrReachedValue,
+  waitForFailedSettingsAction,
 } from '@support/kpi';
 
 test.describe('Страница KPI Settings', () => {
+  // Сценарии изменяют общую конфигурацию CRM; сериализация предотвращает гонки данных.
+  test.describe.configure({ mode: 'serial' });
+
+  test.beforeEach(async ({ kpiPage }) => {
+    await kpiPage.navigate();
+  });
+
+  test.describe('add-modal для ab-tests', () => {
+    let settingsPage: KpiSettingsPage;
+    let modal: KpiSettingsAddValueModal;
+
     test.beforeEach(async ({ kpiPage }) => {
-        await kpiPage.navigate();
+      settingsPage = await kpiPage.openSettings();
+      modal = await settingsPage.openAbTestsAddModal();
     });
 
-    test.describe('add-modal для ab-tests',() => {
-        let settingsPage: KpiSettingsPage
-        let modal: KpiSettingsAddValueModal
+    test('содержит все шаги и базовые контролы', async () => {
+      await allure.allureId('823');
+      const value = await pickAvailableAbTestPercent(settingsPage, 'Internal test');
 
-        test.beforeEach(async ({kpiPage})=> {
-            settingsPage = await kpiPage.openSettings();
-            modal = await settingsPage.openAbTestsAddModal();
-        })
+      await modal.assertAbTestsActionTypeStep();
+      await modal.selectActionType('Internal test');
+      await modal.goToValueStep();
+      await modal.selectValueType('Completed with a success over N%');
+      await modal.fillValue(value);
+      await modal.goToPointsStep();
+    });
 
-        test('содержит все шаги и базовые контролы', async () => {
-            await allure.allureId('823');
-            const value = await pickAvailableAbTestPercent(settingsPage, 'Internal test');
+    test('переключает шаги Next и Back', async () => {
+      await allure.allureId('824');
+      const value = await pickAvailableAbTestPercent(settingsPage, 'External test');
 
-            await modal.assertAbTestsActionTypeStep();
-            await modal.selectActionType('Internal test');
-            await modal.goToValueStep();
-            await modal.selectValueType('Completed with a success over N%');
-            await modal.fillValue(value);
-            await modal.goToPointsStep();
+      await modal.assertAbTestsActionTypeStep();
+      await modal.selectActionType('External test');
+      await modal.goToValueStep();
+      await modal.selectValueType('Completed with a success over N%');
+      await modal.fillValue(value);
+      await modal.goToPointsStep();
+      await modal.goBackToValueStep();
+    });
+  });
+
+  test.describe('add-modal для total-mrr', () => {
+    let settingsPage: KpiSettingsPage;
+    let modal: KpiSettingsAddValueModal;
+
+    test.beforeEach(async ({ kpiPage }) => {
+      settingsPage = await kpiPage.openSettings();
+      modal = await settingsPage.openTotalMrrAddModal();
+    });
+
+    test('содержит все шаги и базовые контролы', async () => {
+      await allure.allureId('825');
+      const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+
+      await modal.assertTotalMrrActionTypeStep();
+      await modal.selectActionType('Change of SUM MRR');
+      await modal.goToValueStep();
+      await modal.assertTotalMrrValueStep();
+      await modal.selectValueType('Reached $N');
+      await modal.fillValue(value);
+      await modal.goToPointsStep();
+    });
+
+    test('переключает шаги Next и Back', async () => {
+      await allure.allureId('826');
+      const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+
+      await modal.assertTotalMrrActionTypeStep();
+      await modal.selectActionType('Change of SUM MRR');
+      await modal.goToValueStep();
+      await modal.assertTotalMrrValueStep();
+      await modal.selectValueType('Reached $N');
+      await modal.fillValue(value);
+      await modal.goToPointsStep();
+      await modal.goBackToValueStep();
+    });
+  });
+
+  test('Score-таблица отображается и edit-кнопки недоступны', async ({ kpiPage }) => {
+    await allure.allureId('827');
+    const settingsPage = await kpiPage.openSettings();
+    await settingsPage.scoreTable.expectReadOnlyShellVisible();
+  });
+
+  test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+    await allure.allureId('828');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableAbTestPercent(settingsPage);
+    const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+
+    await test.step('Создаём, редактируем и удаляем уникальное значение', async () => {
+      await createEditDeleteKpiSettingsAction({
+        settingsPage,
+        row,
+        openModal: () => settingsPage.openAbTestsAddModal(),
+        fillModal: (modal) =>
+          modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value),
+        createPoints: '11',
+        editPoints: '12',
+      });
+    });
+  });
+
+  test('Total MRR: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+    await allure.allureId('829');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+    const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
+
+    await test.step('Создаём, редактируем и удаляем уникальное значение', async () => {
+      await createEditDeleteKpiSettingsAction({
+        settingsPage,
+        row,
+        openModal: () => settingsPage.openTotalMrrAddModal(),
+        fillModal: (modal) => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
+        createPoints: '13',
+        editPoints: '14',
+      });
+    });
+  });
+
+  test('A/B tests: отмена удаления не удаляет тестовое значение', async ({ kpiPage }) => {
+    await allure.allureId('830');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableAbTestPercent(settingsPage);
+    const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+
+    try {
+      await test.step('Создаём уникальное значение', async () => {
+        await createKpiSettingsAction({
+          settingsPage,
+          row,
+          openModal: () => settingsPage.openAbTestsAddModal(),
+          fillModal: (modal) =>
+            modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value),
+          createPoints: '15',
         });
+      });
 
-        test('переключает шаги Next и Back', async () => {
-            await allure.allureId('824');
-            const value = await pickAvailableAbTestPercent(settingsPage, 'External test');
+      await test.step('Отменяем удаление и проверяем, что строка осталась', async () => {
+        await row.openDeleteModal();
+        await row.cancelDelete();
+        await row.expectEditable();
+      });
+    } finally {
+      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+    }
 
-            await modal.assertAbTestsActionTypeStep();
-            await modal.selectActionType('External test');
-            await modal.goToValueStep();
-            await modal.selectValueType('Completed with a success over N%');
-            await modal.fillValue(value);
-            await modal.goToPointsStep();
-            await modal.goBackToValueStep();
-        });
-    })
+    await row.expectDeleted();
+  });
 
-    test.describe("add-modal для total-mrr", () => {
-        let settingsPage: KpiSettingsPage;
-        let modal: KpiSettingsAddValueModal;
+  test('A/B tests: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
+    await allure.allureId('831');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableAbTestPercent(settingsPage);
+    const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
 
-        test.beforeEach(async ({kpiPage}) => {
-             settingsPage = await kpiPage.openSettings();
-             modal = await settingsPage.openTotalMrrAddModal();
-        })
+    const modal = await settingsPage.openAbTestsAddModal();
+    await modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value);
+    await modal.selectPointsType('plus');
+    await modal.fillPoints('16');
 
-        test('содержит все шаги и базовые контролы', async () => {
-            await allure.allureId('825');
-            const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+    await failNextSettingsAction(settingsPage, 'POST');
+    const failedCreate = waitForFailedSettingsAction(settingsPage, 'POST');
 
-            await modal.assertTotalMrrActionTypeStep();
-            await modal.selectActionType('Change of SUM MRR');
-            await modal.goToValueStep();
-            await modal.assertTotalMrrValueStep();
-            await modal.selectValueType('Reached $N');
-            await modal.fillValue(value);
-            await modal.goToPointsStep();
-        });
+    await modal.submitCreate();
+    await failedCreate;
 
-        test('переключает шаги Next и Back', async () => {
-            await allure.allureId('826');
-            const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+    await expect(modal.modal).toBeVisible();
+    await expect(modal.errorBlock).toBeVisible();
+    await row.expectDeleted();
+  });
 
-            await modal.assertTotalMrrActionTypeStep();
-            await modal.selectActionType('Change of SUM MRR');
-            await modal.goToValueStep();
-            await modal.assertTotalMrrValueStep();
-            await modal.selectValueType('Reached $N');
-            await modal.fillValue(value);
-            await modal.goToPointsStep();
-            await modal.goBackToValueStep();
-        });
-    })
+  test('A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку', async ({
+    kpiPage,
+  }) => {
+    await allure.allureId('832');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableAbTestPercent(settingsPage);
+    const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
 
+    try {
+      await createKpiSettingsAction({
+        settingsPage,
+        row,
+        openModal: () => settingsPage.openAbTestsAddModal(),
+        fillModal: (modal) =>
+          modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value),
+        createPoints: '17',
+      });
 
-    test('Score-таблица отображается и edit-кнопки недоступны', async ({ kpiPage }) => {
-        await allure.allureId('827');
-        const settingsPage = await kpiPage.openSettings();
-        await settingsPage.scoreTable.expectReadOnlyShellVisible();
-    });
+      await row.openEditModal();
+      await row.selectEditPointsType('minus');
+      await row.fillEditPoints('18');
 
-    test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
-        await allure.allureId('828');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableAbTestPercent(settingsPage);
-        const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+      await failNextSettingsAction(settingsPage, 'PATCH');
+      const failedEdit = waitForFailedSettingsAction(settingsPage, 'PATCH');
 
-        await test.step('Создаём, редактируем и удаляем уникальное значение', async () => {
-            await createEditDeleteKpiSettingsAction({
-                settingsPage,
-                row,
-                openModal: () => settingsPage.openAbTestsAddModal(),
-                fillModal: modal => modal.runAbTestsAddModalFlow(
-                    'Internal test',
-                    'Completed with a success over N%',
-                    value
-                ),
-                createPoints: '11',
-                editPoints: '12',
-            });
-        });
-    });
+      await row.saveEdit();
+      await failedEdit;
 
-    test('Total MRR: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
-        await allure.allureId('829');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableTotalMrrReachedValue(settingsPage);
-        const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
+      await row.expectEditModalVisible();
+      await expect(row.errorBlock).toBeVisible();
+      await row.expectEditable();
+    } finally {
+      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+    }
 
-        await test.step('Создаём, редактируем и удаляем уникальное значение', async () => {
-            await createEditDeleteKpiSettingsAction({
-                settingsPage,
-                row,
-                openModal: () => settingsPage.openTotalMrrAddModal(),
-                fillModal: modal => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
-                createPoints: '13',
-                editPoints: '14',
-            });
-        });
-    });
+    await row.expectDeleted();
+  });
 
-    test('A/B tests: отмена удаления не удаляет тестовое значение', async ({ kpiPage }) => {
-        await allure.allureId('830');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableAbTestPercent(settingsPage);
-        const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
-        let created = false;
+  test('Total MRR: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
+    await allure.allureId('833');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+    const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
 
-        try {
-            await test.step('Создаём уникальное значение', async () => {
-                await createKpiSettingsAction({
-                    settingsPage,
-                    row,
-                    openModal: () => settingsPage.openAbTestsAddModal(),
-                    fillModal: modal => modal.runAbTestsAddModalFlow(
-                        'Internal test',
-                        'Completed with a success over N%',
-                        value
-                    ),
-                    createPoints: '15',
-                });
-                created = true;
-            });
+    const modal = await settingsPage.openTotalMrrAddModal();
+    await modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value);
+    await modal.selectPointsType('plus');
+    await modal.fillPoints('19');
 
-            await test.step('Отменяем удаление и проверяем, что строка осталась', async () => {
-                await row.openDeleteModal();
-                await row.cancelDelete();
-                await row.expectEditable();
-            });
-        } finally {
-            if (created) {
-                await deleteKpiSettingsActionIfPresent(settingsPage, row);
-            }
-        }
+    await failNextSettingsAction(settingsPage, 'POST');
+    const failedCreate = waitForFailedSettingsAction(settingsPage, 'POST');
 
-        await row.expectDeleted();
-    });
+    await modal.submitCreate();
+    await failedCreate;
 
-    test('A/B tests: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
-        await allure.allureId('831');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableAbTestPercent(settingsPage);
-        const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+    await expect(modal.modal).toBeVisible();
+    await expect(modal.errorBlock).toBeVisible();
+    await row.expectDeleted();
+  });
 
-        const modal = await settingsPage.openAbTestsAddModal();
-        await modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value);
-        await modal.selectPointsType('plus');
-        await modal.fillPoints('16');
+  test('Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку', async ({
+    kpiPage,
+  }) => {
+    await allure.allureId('834');
+    const settingsPage = await kpiPage.openSettings();
+    const value = await pickAvailableTotalMrrReachedValue(settingsPage);
+    const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
 
-        await failNextSettingsAction(settingsPage, 'POST');
-        const failedCreate = waitForFailedSettingsAction(settingsPage, 'POST');
+    try {
+      await createKpiSettingsAction({
+        settingsPage,
+        row,
+        openModal: () => settingsPage.openTotalMrrAddModal(),
+        fillModal: (modal) => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
+        createPoints: '20',
+      });
 
-        await modal.submitCreate();
-        await failedCreate;
+      await row.openEditModal();
+      await row.selectEditPointsType('minus');
+      await row.fillEditPoints('21');
 
-        await expect(modal.modal).toBeVisible();
-        await expect(modal.errorBlock).toBeVisible();
-        await row.expectDeleted();
-    });
+      await failNextSettingsAction(settingsPage, 'PATCH');
+      const failedEdit = waitForFailedSettingsAction(settingsPage, 'PATCH');
 
-    test('A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку', async ({ kpiPage }) => {
-        await allure.allureId('832');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableAbTestPercent(settingsPage);
-        const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
-        let created = false;
+      await row.saveEdit();
+      await failedEdit;
 
-        try {
-            await createKpiSettingsAction({
-                settingsPage,
-                row,
-                openModal: () => settingsPage.openAbTestsAddModal(),
-                fillModal: modal => modal.runAbTestsAddModalFlow(
-                    'Internal test',
-                    'Completed with a success over N%',
-                    value
-                ),
-                createPoints: '17',
-            });
-            created = true;
+      await row.expectEditModalVisible();
+      await expect(row.errorBlock).toBeVisible();
+      await row.expectEditable();
+    } finally {
+      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+    }
 
-            await row.openEditModal();
-            await row.selectEditPointsType('minus');
-            await row.fillEditPoints('18');
-
-            await failNextSettingsAction(settingsPage, 'PATCH');
-            const failedEdit = waitForFailedSettingsAction(settingsPage, 'PATCH');
-
-            await row.saveEdit();
-            await failedEdit;
-
-            await row.expectEditModalVisible();
-            await expect(row.errorBlock).toBeVisible();
-            await row.expectEditable();
-        } finally {
-            if (created) {
-                await deleteKpiSettingsActionIfPresent(settingsPage, row);
-            }
-        }
-
-        await row.expectDeleted();
-    });
-
-    test('Total MRR: ошибка сервера при создании показывает error и не создаёт строку', async ({ kpiPage }) => {
-        await allure.allureId('833');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableTotalMrrReachedValue(settingsPage);
-        const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
-
-        const modal = await settingsPage.openTotalMrrAddModal();
-        await modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value);
-        await modal.selectPointsType('plus');
-        await modal.fillPoints('19');
-
-        await failNextSettingsAction(settingsPage, 'POST');
-        const failedCreate = waitForFailedSettingsAction(settingsPage, 'POST');
-
-        await modal.submitCreate();
-        await failedCreate;
-
-        await expect(modal.modal).toBeVisible();
-        await expect(modal.errorBlock).toBeVisible();
-        await row.expectDeleted();
-    });
-
-    test('Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку', async ({ kpiPage }) => {
-        await allure.allureId('834');
-        const settingsPage = await kpiPage.openSettings();
-        const value = await pickAvailableTotalMrrReachedValue(settingsPage);
-        const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
-        let created = false;
-
-        try {
-            await createKpiSettingsAction({
-                settingsPage,
-                row,
-                openModal: () => settingsPage.openTotalMrrAddModal(),
-                fillModal: modal => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
-                createPoints: '20',
-            });
-            created = true;
-
-            await row.openEditModal();
-            await row.selectEditPointsType('minus');
-            await row.fillEditPoints('21');
-
-            await failNextSettingsAction(settingsPage, 'PATCH');
-            const failedEdit = waitForFailedSettingsAction(settingsPage, 'PATCH');
-
-            await row.saveEdit();
-            await failedEdit;
-
-            await row.expectEditModalVisible();
-            await expect(row.errorBlock).toBeVisible();
-            await row.expectEditable();
-        } finally {
-            if (created) {
-                await deleteKpiSettingsActionIfPresent(settingsPage, row);
-            }
-        }
-
-        await row.expectDeleted();
-    });
+    await row.expectDeleted();
+  });
 });
