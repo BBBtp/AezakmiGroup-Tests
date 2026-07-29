@@ -30,6 +30,7 @@ npm run test:smoke       # 8 критических пользовательск
 npm run test:regression  # подробный regression-набор
 npm run test:auth        # тесты авторизации и сессии
 npm run doqa:run -- --project=regression --workers=1
+npm run doqa:publish     # публикация уже собранного Allure-каталога
 ```
 
 `doqa:run` запускает тесты и публикует свежие Allure results в DoQA. Публикация выполняется только
@@ -72,6 +73,21 @@ MCP не принимает токены в аргументах инструм�
 ## CI
 
 GitHub Actions выполняет статический quality gate для pull request. После push в `main` дополнительно запускается smoke-набор.
+
+Каждую ночь в 01:00 МСК workflow `Nightly regression` запускает три независимые read-only группы
+параллельно, затем отдельно выполняет сценарии с общими KPI Settings. Каждый job сохраняет
+Allure, blob, HTML, JSON, JUnit, traces, screenshots и videos на 14 дней. Тест, прошедший только
+после retry, отмечается как flaky и делает соответствующую CI job красной.
+
+Nightly-прогон сам по себе ничего не публикует в DoQA. Для публикации запустите workflow вручную
+с параметром `publish_to_doqa=true`. Job публикации использует GitHub Environment
+`doqa-production`; настройте для него required reviewers и environment secrets:
+
+- `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, опционально `DOQA_PROJECT_ID`;
+- `DOQA_TOKEN`, `DOQA_AUTOTEST_TOKEN`.
+
+Публикация начинается только после успешного завершения всех regression-групп, объединяет их
+Allure results и повторно выполняет preflight и post-upload verification.
 
 Для smoke job настройте repository secrets:
 

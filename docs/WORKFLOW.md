@@ -27,6 +27,7 @@ npm run test:types
 npm run quality
 npx playwright test <file> --project=regression --workers=1
 npm run doqa:run -- --project=regression --workers=1
+npm run doqa:publish
 ```
 
 Для адресной публикации нескольких тестов:
@@ -34,6 +35,21 @@ npm run doqa:run -- --project=regression --workers=1
 ```bash
 npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regression --workers=1
 ```
+
+`doqa:publish` не запускает Playwright и предназначен для approval-gated CI job, которая
+предварительно скачала и объединила raw Allure results. Команда применяет те же проверки
+непустого отчёта, ID и созданного DoQA run, что и `doqa:run`.
+
+## Nightly regression
+
+- Расписание: ежедневно в 01:00 МСК.
+- Параллельные группы: auth, KPI read-only, navigation/session.
+- KPI Settings запускается после них, потому что сценарии меняют общие настройки CRM.
+- Все диагностические результаты сохраняются при любом исходе.
+- Retry остаётся диагностическим механизмом: тест, прошедший со второй попытки, считается flaky и
+  проваливает job.
+- Публикация в DoQA доступна только при ручном запуске с `publish_to_doqa=true`, после зелёных
+  regression jobs и approval в GitHub Environment `doqa-production`.
 
 ## Правила безопасности
 
