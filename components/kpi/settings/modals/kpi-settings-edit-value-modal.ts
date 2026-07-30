@@ -1,7 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 import { KpiSettingsEditValueForm } from '../forms/kpi-settings-edit-value-form';
-import { composeTestId, requireTestId } from '../../../../utils/test-id';
 
 export class KpiSettingsEditValueModal extends UiObject {
   readonly tableName: string;
@@ -19,13 +19,10 @@ export class KpiSettingsEditValueModal extends UiObject {
     this.actionType = actionType;
     this.value = value;
 
-    const baseTestId = requireTestId(
-      composeTestId([tableName, actionType, value]),
-      'KpiSettingsEditValueModal',
-    );
-    this.trigger = this.locate.testId(`${baseTestId}__edit`);
-    this.modal = this.locate.testId(`${baseTestId}__edit-modal`);
-    this.deleteButton = this.locate.testId(`${baseTestId}__delete`);
+    const testIds = kpiSettingsTestIds.row(tableName, actionType, value);
+    this.trigger = this.locate.testId(testIds.editButton);
+    this.modal = this.locate.testId(testIds.editModal);
+    this.deleteButton = this.locate.testId(testIds.deleteButton);
     this.form = new KpiSettingsEditValueForm(page, tableName, actionType, value);
   }
 }

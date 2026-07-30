@@ -1,14 +1,11 @@
-import { type Locator, type Page, expect } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { UiObject } from '@framework/ui';
-import { kpiTestIds } from '@locators/kpi';
-import { composeTestId, requireTestId } from '../../../utils/test-id';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 
 export class KpiSettingsActionRowComponent extends UiObject {
   readonly tableName: string;
   readonly actionType: string;
   readonly value: string;
-  readonly baseTestId: string;
-  readonly alternateBaseTestId?: string;
   readonly root: Locator;
   readonly editButton: Locator;
   readonly deleteButton: Locator;
@@ -31,78 +28,78 @@ export class KpiSettingsActionRowComponent extends UiObject {
     this.tableName = tableName;
     this.actionType = actionType;
     this.value = value;
-    this.baseTestId = requireTestId(
-      composeTestId([tableName, actionType, value]),
-      'KpiSettingsActionRowComponent',
+    const testIds = kpiSettingsTestIds.row(tableName, actionType, value);
+    const alternateValue = this.createAlternateValue();
+    const alternateTestIds = alternateValue
+      ? kpiSettingsTestIds.row(tableName, actionType, alternateValue)
+      : undefined;
+    this.root = this.locatorByTestIds(testIds.root, alternateTestIds?.root);
+    this.editButton = this.locatorByTestIds(testIds.editButton, alternateTestIds?.editButton);
+    this.deleteButton = this.locatorByTestIds(testIds.deleteButton, alternateTestIds?.deleteButton);
+    this.actionButtons = this.locatorByTestIds(testIds.actionButtons, alternateTestIds?.actionButtons);
+    this.toast = this.locatorByTestIds(testIds.toast, alternateTestIds?.toast);
+    this.toastTitle = this.locatorByTestIds(testIds.toastTitle, alternateTestIds?.toastTitle);
+    this.toastSubtitle = this.locatorByTestIds(testIds.toastSubtitle, alternateTestIds?.toastSubtitle);
+    this.editModal = this.locatorByTestIds(testIds.editModal, alternateTestIds?.editModal);
+    this.editForm = this.locatorByTestIds(testIds.editForm, alternateTestIds?.editForm);
+    this.deleteModal = this.locatorByTestIds(testIds.deleteModal, alternateTestIds?.deleteModal);
+    this.pointsRadioGroup = this.locatorByTestIds(testIds.pointsRadio, alternateTestIds?.pointsRadio);
+    this.pointsRadioPlus = this.locatorByTestIds(testIds.pointsRadioPlus, alternateTestIds?.pointsRadioPlus);
+    this.pointsRadioMinus = this.locatorByTestIds(
+      testIds.pointsRadioMinus,
+      alternateTestIds?.pointsRadioMinus,
     );
-    this.alternateBaseTestId = this.createAlternateBaseTestId();
-    this.root = this.locatorByTestId();
-    this.editButton = this.locatorByTestId('__edit');
-    this.deleteButton = this.locatorByTestId('__delete');
-    this.actionButtons = this.locatorByTestId('__action-buttons');
-    this.toast = this.locatorByTestId('__alert');
-    this.toastTitle = this.locatorByTestId('__alert-title');
-    this.toastSubtitle = this.locatorByTestId('__alert-subtitle');
-    this.editModal = this.locatorByTestId('__edit-modal');
-    this.editForm = this.locatorByTestId('__edit-form');
-    this.deleteModal = this.locatorByTestId('__delete-modal');
-    this.pointsRadioGroup = this.locatorByTestId('__points-radio');
-    this.pointsRadioPlus = this.locatorByTestId('__points-radio__plus');
-    this.pointsRadioMinus = this.locatorByTestId('__points-radio__minus');
-    this.pointsInput = this.locatorByTestId('__points-input');
-    this.pointsInputSign = this.locatorByTestId('__points-input-sign');
-    this.saveButton = this.locatorByTestId('__save');
-    this.errorBlock = this.locatorByTestId('__error');
+    this.pointsInput = this.locatorByTestIds(testIds.pointsInput, alternateTestIds?.pointsInput);
+    this.pointsInputSign = this.locatorByTestIds(testIds.pointsInputSign, alternateTestIds?.pointsInputSign);
+    this.saveButton = this.locatorByTestIds(testIds.saveButton, alternateTestIds?.saveButton);
+    this.errorBlock = this.locatorByTestIds(testIds.error, alternateTestIds?.error);
   }
 
-  private createAlternateBaseTestId(): string | undefined {
+  private createAlternateValue(): string | undefined {
     const reachedValue = this.value.match(/^Reached \$(\d+)$/)?.[1];
 
     if (this.tableName !== 'total-mrr' || !reachedValue) {
       return undefined;
     }
 
-    return requireTestId(
-      composeTestId([this.tableName, this.actionType, `Reached $ ${reachedValue}`]),
-      'KpiSettingsActionRowComponent',
-    );
+    return `Reached $ ${reachedValue}`;
   }
 
-  private locatorByTestId(suffix = ''): Locator {
-    const primary = this.locate.testId(`${this.baseTestId}${suffix}`);
+  private locatorByTestIds(primaryTestId: string, alternateTestId?: string): Locator {
+    const primary = this.locate.testId(primaryTestId);
 
-    if (!this.alternateBaseTestId) {
+    if (!alternateTestId) {
       return primary;
     }
 
-    return primary.or(this.locate.testId(`${this.alternateBaseTestId}${suffix}`)).first();
+    return primary.or(this.locate.testId(alternateTestId)).first();
   }
 
   async expectVisible(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.editButton).toBeVisible();
-    await expect(this.deleteButton).toBeVisible();
+    await this.expectations.visible('KPI settings action row', this.root);
+    await this.expectations.visible('KPI settings edit action', this.editButton);
+    await this.expectations.visible('KPI settings delete action', this.deleteButton);
   }
 
   async expectEditable(): Promise<void> {
-    await expect(this.editButton).toBeVisible();
-    await expect(this.deleteButton).toBeEnabled();
+    await this.expectations.visible('KPI settings edit action', this.editButton);
+    await this.expectations.enabled('KPI settings delete action', this.deleteButton);
   }
 
   async openEditModal(): Promise<void> {
-    await expect(this.editButton).toBeEnabled();
+    await this.expectations.enabled('KPI settings edit action', this.editButton);
     await this.actions.click(`KPI settings: edit ${this.actionType}/${this.value}`, this.editButton);
     await this.expectEditModalVisible();
   }
 
   async expectEditModalVisible(): Promise<void> {
-    await expect(this.editModal).toBeVisible();
-    await expect(this.editForm).toBeVisible();
-    await expect(this.pointsRadioGroup).toBeVisible();
-    await expect(this.pointsRadioPlus).toBeVisible();
-    await expect(this.pointsRadioMinus).toBeVisible();
-    await expect(this.pointsInput).toBeVisible();
-    await expect(this.saveButton).toBeVisible();
+    await this.expectations.visible('KPI settings edit modal', this.editModal);
+    await this.expectations.visible('KPI settings edit form', this.editForm);
+    await this.expectations.visible('KPI settings points radio group', this.pointsRadioGroup);
+    await this.expectations.visible('KPI settings plus points', this.pointsRadioPlus);
+    await this.expectations.visible('KPI settings minus points', this.pointsRadioMinus);
+    await this.expectations.visible('KPI settings points input', this.pointsInput);
+    await this.expectations.visible('KPI settings save action', this.saveButton);
   }
 
   async selectEditPointsType(type: 'plus' | 'minus'): Promise<void> {
@@ -116,36 +113,36 @@ export class KpiSettingsActionRowComponent extends UiObject {
       this.pointsInput,
       value,
     );
-    await expect(this.saveButton).toBeEnabled();
+    await this.expectations.enabled('KPI settings save action', this.saveButton);
   }
 
   async saveEdit(): Promise<void> {
-    await expect(this.saveButton).toBeEnabled();
+    await this.expectations.enabled('KPI settings save action', this.saveButton);
     await this.actions.click(`KPI settings: save ${this.actionType}/${this.value}`, this.saveButton);
   }
 
   async expectEditModalHidden(): Promise<void> {
-    await expect(this.editModal).toBeHidden();
+    await this.expectations.hidden('KPI settings edit modal', this.editModal);
   }
 
   async openDeleteModal(): Promise<void> {
-    await expect(this.deleteButton).toBeEnabled();
+    await this.expectations.enabled('KPI settings delete action', this.deleteButton);
     await this.actions.click(`KPI settings: open delete ${this.actionType}/${this.value}`, this.deleteButton);
-    await expect(this.deleteModal).toBeVisible();
+    await this.expectations.visible('KPI settings delete modal', this.deleteModal);
   }
 
   async confirmDelete(): Promise<void> {
-    const confirmButton = this.locate.testId(kpiTestIds.settings.deleteConfirm);
+    const confirmButton = this.locate.testId(kpiSettingsTestIds.deleteConfirm);
     await this.actions.click('KPI settings: confirm delete', confirmButton);
   }
 
   async cancelDelete(): Promise<void> {
-    const cancelButton = this.locate.testId(kpiTestIds.settings.deleteCancel);
+    const cancelButton = this.locate.testId(kpiSettingsTestIds.deleteCancel);
     await this.actions.click('KPI settings: cancel delete', cancelButton);
-    await expect(this.deleteModal).toBeHidden();
+    await this.expectations.hidden('KPI settings delete modal', this.deleteModal);
   }
 
   async expectDeleted(): Promise<void> {
-    await expect(this.deleteButton).toHaveCount(0);
+    await this.expectations.count('KPI settings deleted row action', this.deleteButton, 0);
   }
 }

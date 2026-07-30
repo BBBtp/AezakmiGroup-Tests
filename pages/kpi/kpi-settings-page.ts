@@ -1,5 +1,6 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { kpiTestIds } from '@locators/kpi';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 import { BasePage } from '../base-page';
 import { KpiSettingsScoreComponent } from '../../components/kpi/settings/kpi-settings-score-component';
 import { KpiSettingsTableComponent } from '../../components/kpi/settings/kpi-settings-table-component';
@@ -23,10 +24,10 @@ export class KpiSettingsPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.testId(kpiTestIds.settings.page);
-    this.loadingState = this.locate.testId(kpiTestIds.settings.loading);
+    this.root = this.locate.testId(kpiSettingsTestIds.page);
+    this.loadingState = this.locate.testId(kpiSettingsTestIds.loading);
     this.errorContent = this.locate.testId(kpiTestIds.errorContent);
-    this.breadcrumbs = this.locate.testId(kpiTestIds.settings.breadcrumbs);
+    this.breadcrumbs = this.locate.testId(kpiSettingsTestIds.breadcrumbs);
     this.scoreTable = new KpiSettingsScoreComponent(page);
     this.abTestsTable = new KpiSettingsTableComponent(page, 'ab-tests');
     this.totalMrrTable = new KpiSettingsTableComponent(page, 'total-mrr');
@@ -73,15 +74,15 @@ export class KpiSettingsPage extends BasePage {
   }
 
   async expectShellVisible(): Promise<void> {
-    await expect(this.page).toHaveURL(/\/kpi\/settings/);
-    await expect(this.root).toBeVisible();
-    await expect(this.loadingState).toBeHidden();
-    await expect(this.breadcrumbs.first()).toBeVisible();
+    await this.expectations.url('KPI settings URL', /\/kpi\/settings/);
+    await this.expectations.visible('KPI settings root', this.root);
+    await this.expectations.hidden('KPI settings loading state', this.loadingState);
+    await this.expectations.visible('KPI settings breadcrumbs', this.breadcrumbs.first());
     await this.scoreTable.expectShellVisible();
   }
 
   async expectBaseTablesVisible(): Promise<void> {
-    await expect(this.root).toBeVisible();
+    await this.expectations.visible('KPI settings root', this.root);
     await this.scoreTable.expectShellVisible();
     await this.abTestsTable.expectEditableShellVisible();
     await this.totalMrrTable.expectEditableShellVisible();
@@ -89,7 +90,9 @@ export class KpiSettingsPage extends BasePage {
 
   async waitForPageLoad(): Promise<void> {
     await this.waitForLoad();
-    await expect(this.root).toBeVisible();
-    await expect(this.loadingState).toBeHidden({ timeout: 15000 });
+    await this.expectations.visible('KPI settings root', this.root);
+    await this.expectations.hidden('KPI settings loading state', this.loadingState, {
+      timeout: 15000,
+    });
   }
 }

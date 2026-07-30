@@ -1,11 +1,11 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 import { KpiSettingsActionRowComponent } from './kpi-settings-action-row-component';
 import {
   KpiSettingsAddValueModal,
   KpiSettingsAddValueTableName,
 } from './modals/kpi-settings-add-value-modal';
-import { requireTestId } from '../../../utils/test-id';
 
 export type KpiSettingsTableOptions = {
   hasValueColumn?: boolean;
@@ -37,37 +37,39 @@ export class KpiSettingsTableComponent extends UiObject {
 
   constructor(page: Page, tableName: string, options: KpiSettingsTableOptions = {}) {
     super(page);
-    this.tableName = requireTestId(tableName, 'KpiSettingsTableComponent');
+    const testIds = kpiSettingsTestIds.table(tableName);
+    this.tableName = testIds.root;
     this.options = {
       hasValueColumn: options.hasValueColumn ?? true,
       hasFooterBar: options.hasFooterBar ?? true,
     };
-    this.root = this.locate.testId(this.tableName);
-    this.table = this.locate.testId(`${this.tableName}__table`);
-    this.headerRow = this.locate.testId(`${this.tableName}__table-header-row`);
-    this.actionTypeHeader = this.locate.testId(`${this.tableName}__action-type-header`);
-    this.pointsHeader = this.locate.testId(`${this.tableName}__points-header`);
-    this.pointsLabel = this.locate.testId(`${this.tableName}__points-label`);
-    this.tableBody = this.locate.testId(`${this.tableName}__table-body`);
+    this.root = this.locate.testId(testIds.root);
+    this.table = this.locate.testId(testIds.table);
+    this.headerRow = this.locate.testId(testIds.headerRow);
+    this.actionTypeHeader = this.locate.testId(testIds.actionTypeHeader);
+    this.pointsHeader = this.locate.testId(testIds.pointsHeader);
+    this.pointsLabel = this.locate.testId(testIds.pointsLabel);
+    this.tableBody = this.locate.testId(testIds.body);
 
     if (this.options.hasValueColumn) {
-      this.valueHeader = this.locate.testId(`${this.tableName}__value-header`);
+      this.valueHeader = this.locate.testId(testIds.valueHeader);
     }
 
     if (this.options.hasFooterBar) {
-      this.footerBar = this.locate.testId(`${this.tableName}__table-bar`);
+      this.footerBar = this.locate.testId(testIds.footer);
     }
 
-    this.addValueButton = this.locate.testId(`${this.tableName}__add-value`);
-    this.addModal = this.locate.testId(`${this.tableName}__add-modal`);
-    this.addForm = this.locate.testId(`${this.tableName}__add-form`);
-    this.addModalStepActionType = this.locate.testId(`${this.tableName}-Action type`);
-    this.addModalStepValue = this.locate.testId(`${this.tableName}-Value`);
-    this.addModalStepPoints = this.locate.testId(`${this.tableName}-Points`);
-    this.addModalPrevButton = this.locate.testId(`${this.tableName}__button-prev`);
-    this.addModalNextButton = this.locate.testId(`${this.tableName}__button-next`);
-    this.addModalLoading = this.locate.testId(`${this.tableName}__loading`);
-    this.addModalError = this.locate.testId(`${this.tableName}__error`);
+    const modalTestIds = kpiSettingsTestIds.addModal(this.tableName);
+    this.addValueButton = this.locate.testId(testIds.addValue);
+    this.addModal = this.locate.testId(modalTestIds.root);
+    this.addForm = this.locate.testId(kpiSettingsTestIds.addForm(this.tableName).root);
+    this.addModalStepActionType = this.locate.testId(modalTestIds.actionTypeStep);
+    this.addModalStepValue = this.locate.testId(modalTestIds.valueStep);
+    this.addModalStepPoints = this.locate.testId(modalTestIds.pointsStep);
+    this.addModalPrevButton = this.locate.testId(modalTestIds.backButton);
+    this.addModalNextButton = this.locate.testId(modalTestIds.nextButton);
+    this.addModalLoading = this.locate.testId(modalTestIds.loading);
+    this.addModalError = this.locate.testId(modalTestIds.error);
   }
 
   createActionRow(actionType: string, value: string): KpiSettingsActionRowComponent {
@@ -75,9 +77,10 @@ export class KpiSettingsTableComponent extends UiObject {
   }
 
   async listEditButtonTestIds(prefix: string): Promise<string[]> {
+    const testIds = kpiSettingsTestIds.table(this.tableName);
     return this.locate
       .within(this.root)
-      .css(`[data-testid^="${prefix}"][data-testid$="__edit"]`)
+      .css(testIds.editButtonPattern(prefix))
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-testid') ?? ''));
   }
 
@@ -90,25 +93,25 @@ export class KpiSettingsTableComponent extends UiObject {
   }
 
   async expectShellVisible(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.table).toBeVisible();
-    await expect(this.headerRow).toBeVisible();
-    await expect(this.actionTypeHeader).toBeVisible();
-    await expect(this.pointsHeader).toBeVisible();
-    await expect(this.tableBody).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: root`, this.root);
+    await this.expectations.visible(`${this.tableName}: table`, this.table);
+    await this.expectations.visible(`${this.tableName}: header row`, this.headerRow);
+    await this.expectations.visible(`${this.tableName}: action type header`, this.actionTypeHeader);
+    await this.expectations.visible(`${this.tableName}: points header`, this.pointsHeader);
+    await this.expectations.visible(`${this.tableName}: body`, this.tableBody);
 
     if (this.options.hasValueColumn) {
       await this.expectValueHeaderVisible();
     }
 
     if (this.options.hasFooterBar && this.footerBar) {
-      await expect(this.footerBar).toBeVisible();
+      await this.expectations.visible(`${this.tableName}: footer`, this.footerBar);
     }
   }
 
   async expectEditableShellVisible(): Promise<void> {
     await this.expectShellVisible();
-    await expect(this.addValueButton).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: add value`, this.addValueButton);
   }
 
   async expectValueHeaderVisible(): Promise<void> {
@@ -116,6 +119,6 @@ export class KpiSettingsTableComponent extends UiObject {
       throw new Error(`${this.tableName} table does not have a value column`);
     }
 
-    await expect(this.valueHeader).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value header`, this.valueHeader);
   }
 }

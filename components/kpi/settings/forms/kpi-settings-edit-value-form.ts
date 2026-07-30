@@ -1,6 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { UiObject } from '@framework/ui';
-import { composeTestId, requireTestId } from '../../../../utils/test-id';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 
 export class KpiSettingsEditValueForm extends UiObject {
   readonly baseTestId: string;
@@ -16,19 +16,17 @@ export class KpiSettingsEditValueForm extends UiObject {
   readonly errorBlock: Locator;
   constructor(page: Page, tableName: string, actionType: string, value: string) {
     super(page);
-    this.baseTestId = requireTestId(
-      composeTestId([tableName, actionType, value]),
-      'KpiSettingsEditValueForm',
-    );
-    this.root = this.locate.testId(`${this.baseTestId}__edit-form`);
-    this.actionType = this.locate.testId(`${this.baseTestId}__actionType`);
-    this.valueType = this.locate.testId(`${this.baseTestId}__valueType`);
-    this.pointsRadio = this.locate.testId(`${this.baseTestId}__points-radio`);
-    this.pointsRadioPlus = this.locate.testId(`${this.baseTestId}__points-radio__plus`);
-    this.pointsRadioMinus = this.locate.testId(`${this.baseTestId}__points-radio__minus`);
-    this.pointsInput = this.locate.testId(`${this.baseTestId}__points-input`);
-    this.pointsInputSign = this.locate.testId(`${this.baseTestId}__points-input-sign`);
-    this.saveButton = this.locate.testId(`${this.baseTestId}__save`);
-    this.errorBlock = this.locate.testId(`${this.baseTestId}__error`);
+    const testIds = kpiSettingsTestIds.row(tableName, actionType, value);
+    this.baseTestId = testIds.base;
+    this.root = this.locate.testId(testIds.editForm);
+    this.actionType = this.locate.testId(testIds.actionType);
+    this.valueType = this.locate.testId(testIds.valueType);
+    this.pointsRadio = this.locate.testId(testIds.pointsRadio);
+    this.pointsRadioPlus = this.locate.testId(testIds.pointsRadioPlus);
+    this.pointsRadioMinus = this.locate.testId(testIds.pointsRadioMinus);
+    this.pointsInput = this.locate.testId(testIds.pointsInput);
+    this.pointsInputSign = this.locate.testId(testIds.pointsInputSign);
+    this.saveButton = this.locate.testId(testIds.saveButton);
+    this.errorBlock = this.locate.testId(testIds.error);
   }
 }

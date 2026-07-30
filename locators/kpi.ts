@@ -6,13 +6,6 @@ export const kpiTestIds = {
   errorContent: 'error-content',
   mainContent: 'main-content',
   monthEndWarning: 'month-end-warning',
-  settings: {
-    page: 'kpi-settings',
-    loading: 'kpi-settings-loading',
-    breadcrumbs: 'bread-crumbs',
-    deleteConfirm: 'delete-item__del-btn',
-    deleteCancel: 'delete-item__cancel-btn',
-  },
 } as const;
 
 export const kpiManagerText = {
