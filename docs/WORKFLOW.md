@@ -50,7 +50,8 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 `doqa:publish` не запускает Playwright и предназначен для approval-gated CI job, которая
 предварительно скачала и объединила raw Allure results. Команда применяет те же проверки
 непустого отчёта, ID и созданного DoQA run, что и `doqa:run`. Failed/broken результаты
-публикуются и остаются красными в CI.
+публикуются и остаются красными в CI. Для retry одного теста публикуется только последняя
+попытка; одинаковый Allure ID у разных тестовых историй остаётся блокирующей ошибкой.
 
 ## Nightly regression
 
