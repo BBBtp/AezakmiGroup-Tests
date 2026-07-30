@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
 
 /**
@@ -13,7 +14,7 @@ import { requireTestId } from '../../utils/test-id';
  * - инструкций;
  * - информационных карточек.
  */
-export class DescriptionComponent {
+export class DescriptionComponent extends UiObject {
   /**
    * Корневой элемент компонента
    */
@@ -39,9 +40,11 @@ export class DescriptionComponent {
    * - `${testId}__message`
    */
   constructor(page: Page, testId: string) {
+    super(page);
     const normalizedTestId = requireTestId(testId, 'DescriptionComponent');
-    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-    this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
-    this.message = this.root.locator(`[data-testid="${normalizedTestId}__message"]`);
+    this.root = this.locate.testId(normalizedTestId);
+    const description = this.locate.within(this.root);
+    this.title = description.testId(`${normalizedTestId}__title`);
+    this.message = description.testId(`${normalizedTestId}__message`);
   }
 }

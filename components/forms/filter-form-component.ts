@@ -1,6 +1,7 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { requireTestId } from '../../utils/test-id';
-import { loggedClick, loggedFill, loggedSelectOption } from '../../utils/playwright-logger';
 
 /**
  * Компонент формы фильтров.
@@ -19,12 +20,7 @@ import { loggedClick, loggedFill, loggedSelectOption } from '../../utils/playwri
  * - `${testId}__input-<name>` — текстовые поля
  * - `${testId}__select-<name>` — селекты
  */
-export class FilterFormComponent {
-  /**
-   * Экземпляр страницы Playwright
-   */
-  readonly page: Page;
-
+export class FilterFormComponent extends UiObject {
   /**
    * Корневой элемент формы фильтров
    */
@@ -50,11 +46,11 @@ export class FilterFormComponent {
    * @param testId Базовый data-testid формы фильтров (по умолчанию "filter-form")
    */
   constructor(page: Page, testId: string = 'filter-form') {
-    this.page = page;
+    super(page);
     this.testId = requireTestId(testId, 'FilterFormComponent');
-    this.root = page.locator(`[data-testid="${this.testId}"]`);
-    this.applyButton = page.locator(`[data-testid="${this.testId}__apply"]`);
-    this.resetButton = page.locator(`[data-testid="${this.testId}__reset"]`);
+    this.root = this.locate.testId(this.testId);
+    this.applyButton = this.locate.testId(`${this.testId}__apply`);
+    this.resetButton = this.locate.testId(`${this.testId}__reset`);
   }
 
   /**
@@ -71,8 +67,8 @@ export class FilterFormComponent {
    * @param value значение для ввода
    */
   async setInputValue(name: string, value: string): Promise<void> {
-    const input = this.page.locator(`[data-testid="${this.testId}__input-${name}"]`);
-    await loggedFill(this.page, `filter ${name}: fill value`, input, value);
+    const input = this.locate.testId(`${this.testId}__input-${name}`);
+    await this.actions.fill(`filter ${name}: fill value`, input, value);
   }
 
   /**
@@ -82,22 +78,22 @@ export class FilterFormComponent {
    * @param value значение для выбора (label)
    */
   async selectValue(name: string, value: string): Promise<void> {
-    const select = this.page.locator(`[data-testid="${this.testId}__select-${name}"]`);
-    await loggedSelectOption(this.page, `filter ${name}: select ${value}`, select, { label: value });
+    const select = this.locate.testId(`${this.testId}__select-${name}`);
+    await this.actions.select(`filter ${name}: select ${value}`, select, { label: value });
   }
 
   /**
    * Применяет фильтры (нажатие кнопки Apply)
    */
   async apply(): Promise<void> {
-    await loggedClick(this.page, 'filters: apply', this.applyButton);
+    await this.actions.click('filters: apply', this.applyButton);
   }
 
   /**
    * Сбрасывает фильтры (нажатие кнопки Reset)
    */
   async reset(): Promise<void> {
-    await loggedClick(this.page, 'filters: reset', this.resetButton);
+    await this.actions.click('filters: reset', this.resetButton);
   }
 
   /**
@@ -106,6 +102,6 @@ export class FilterFormComponent {
    * По умолчанию проверяется видимость основного контента страницы.
    */
   async verifyFiltersApplied(): Promise<void> {
-    await expect(this.page.locator('[data-testid="main-content"]')).toBeVisible();
+    await expect(this.locate.testId(kpiTestIds.mainContent)).toBeVisible();
   }
 }

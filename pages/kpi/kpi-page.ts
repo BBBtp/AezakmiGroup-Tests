@@ -1,6 +1,8 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
+import { kpiTestIds } from '@locators/kpi';
 import { BasePage } from '../base-page';
 import { KpiSettingsPage } from './kpi-settings-page';
+import { KpiManagerPage } from './kpi-manager-page';
 
 // Common + KPI-specific components
 import { KpiHeaderComponent } from '../../components/kpi/kpi-header-component';
@@ -10,7 +12,6 @@ import { KpiPerformanceChartComponent } from '../../components/kpi/kpi-performan
 import { KpiTopEmployeesComponent } from '../../components/kpi/kpi-top-employees-component';
 import { KpiEmployeesTableComponent } from '../../components/kpi/kpi-employees-table-component';
 import { FilterFormComponent } from '../../components/forms/filter-form-component';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Страница KPI
@@ -58,7 +59,7 @@ export class KpiPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.root = page.locator('[data-testid="kpi"]');
+    this.root = this.locate.testId(kpiTestIds.page);
     this.header = new KpiHeaderComponent(page);
     this.cards = new KpiCardGroupComponent(page);
     this.filters = new KpiMonthFiltersComponent(page, 'kpi-month-filters');
@@ -66,11 +67,14 @@ export class KpiPage extends BasePage {
     this.topEmployees = new KpiTopEmployeesComponent(page);
     this.employeesTable = new KpiEmployeesTableComponent(page);
     this.filterForm = new FilterFormComponent(page, 'kpi-filter-form');
-    this.settingsButton = page.locator('[data-testid="settings-button"]');
-    this.subtitle = page.locator('[data-testid="kpi-page-title__desc"], [data-testid="subtitle"]');
-    this.errorContent = page.locator('[data-testid="error-content"]');
-    this.mainContent = page.locator('[data-testid="main-content"]');
-    this.monthEndWarning = page.locator('[data-testid="month-end-warning"]');
+    this.settingsButton = this.locate.testId(kpiTestIds.settingsButton);
+    this.subtitle = this.locate
+      .testId(kpiTestIds.pageSubtitle)
+      .or(this.locate.testId(kpiTestIds.subtitle))
+      .first();
+    this.errorContent = this.locate.testId(kpiTestIds.errorContent);
+    this.mainContent = this.locate.testId(kpiTestIds.mainContent);
+    this.monthEndWarning = this.locate.testId(kpiTestIds.monthEndWarning);
   }
 
   /** Переход на страницу KPI */
@@ -83,7 +87,7 @@ export class KpiPage extends BasePage {
   async openSettings(): Promise<KpiSettingsPage> {
     await Promise.all([
       this.page.waitForURL(/\/kpi\/settings/),
-      loggedClick(this.page, 'KPI: open settings', this.settingsButton),
+      this.actions.click('KPI: open settings', this.settingsButton),
     ]);
 
     const settingsPage = new KpiSettingsPage(this.page);
@@ -91,9 +95,19 @@ export class KpiPage extends BasePage {
     return settingsPage;
   }
 
+  manager(employeeId: string): KpiManagerPage {
+    return new KpiManagerPage(this.page, employeeId);
+  }
+
+  async navigateSettings(): Promise<KpiSettingsPage> {
+    const settingsPage = new KpiSettingsPage(this.page);
+    await settingsPage.navigate();
+    return settingsPage;
+  }
+
   /** Ожидание полной загрузки KPI страницы */
   async waitForPageLoad(): Promise<void> {
     await this.waitForLoad();
-    await expect(this.mainContent).toBeVisible();
+    await this.expectations.visible('KPI main content', this.mainContent, { timeout: 30000 });
   }
 }

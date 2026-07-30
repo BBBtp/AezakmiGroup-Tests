@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 
 /**
  * Компонент предупреждения (Warning).
@@ -12,7 +13,7 @@ import { Page, Locator } from '@playwright/test';
  *
  * По умолчанию используется testId = "month-end-warning".
  */
-export class WarningComponent {
+export class WarningComponent extends UiObject {
   /**
    * Корневой элемент предупреждения
    */
@@ -23,6 +24,7 @@ export class WarningComponent {
    * @param testId data-testid предупреждающего блока (по умолчанию "month-end-warning")
    */
   constructor(page: Page, testId = 'month-end-warning') {
-    this.root = page.locator(`[data-testid="${testId}"]`);
+    super(page);
+    this.root = this.locate.testId(testId);
   }
 }

@@ -1,4 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 
 /**
  * Компонент графика KPI Performance.
@@ -9,7 +10,7 @@ import { Page, Locator, expect } from '@playwright/test';
  * - работу с вкладками графика (Score и MRR);
  * - получение заголовка графика.
  */
-export class KpiPerformanceChartComponent {
+export class KpiPerformanceChartComponent extends UiObject {
   /** Корневой элемент графика KPI */
   readonly root: Locator;
 
@@ -29,11 +30,13 @@ export class KpiPerformanceChartComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.root = page.locator('[data-testid="performance-chart"]');
-    this.title = this.root.locator('[data-testid="chart-title"]');
-    this.tabs = this.root.locator('[data-testid="chart-tabs"]');
-    this.scoreTab = this.root.locator('[data-testid="chart-tabs__Score"]');
-    this.mrrTab = this.root.locator('[data-testid="chart-tabs__MRR"]');
+    super(page);
+    this.root = this.locate.testId('performance-chart');
+    const chart = this.locate.within(this.root);
+    this.title = chart.testId('chart-title');
+    this.tabs = chart.testId('chart-tabs');
+    this.scoreTab = chart.testId('chart-tabs__Score');
+    this.mrrTab = chart.testId('chart-tabs__MRR');
   }
 
   /**
@@ -43,5 +46,13 @@ export class KpiPerformanceChartComponent {
     await expect(this.root).toBeVisible();
     await expect(this.scoreTab).toBeVisible();
     await expect(this.mrrTab).toBeVisible();
+  }
+
+  async selectScore(): Promise<void> {
+    await this.actions.click('KPI chart: Score tab', this.scoreTab);
+  }
+
+  async selectMrr(): Promise<void> {
+    await this.actions.click('KPI chart: MRR tab', this.mrrTab);
   }
 }

@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
 
 /**
@@ -14,7 +15,7 @@ import { requireTestId } from '../../utils/test-id';
  * Компонент ориентирован на использование в автотестах
  * аналитических и дашбордных страниц.
  */
-export class CardComponent {
+export class CardComponent extends UiObject {
   /**
    * Корневой элемент карточки
    */
@@ -64,15 +65,17 @@ export class CardComponent {
    * - `${testId}__*main`
    */
   constructor(page: Page, testId: string) {
+    super(page);
     const normalizedTestId = requireTestId(testId, 'CardComponent');
-    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-    this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
-    this.mainValue = this.root.locator(
+    this.root = this.locate.testId(normalizedTestId);
+    const card = this.locate.within(this.root);
+    this.title = card.testId(`${normalizedTestId}__title`);
+    this.mainValue = card.css(
       `[data-testid^="${normalizedTestId}__"][data-testid$="currency"], [data-testid$="main"]`,
     );
-    this.absValue = this.root.locator(`[data-testid="${normalizedTestId}__abs"]`);
-    this.percentValue = this.root.locator(`[data-testid="${normalizedTestId}__percentage-value"]`);
-    this.period = this.root.locator(`[data-testid="${normalizedTestId}__period"]`);
+    this.absValue = card.testId(`${normalizedTestId}__abs`);
+    this.percentValue = card.testId(`${normalizedTestId}__percentage-value`);
+    this.period = card.testId(`${normalizedTestId}__period`);
   }
 
   /**

@@ -1,4 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { kpiTestIds } from '@locators/kpi';
 import { BasePage } from '../base-page';
 import { KpiSettingsScoreComponent } from '../../components/kpi/settings/kpi-settings-score-component';
 import { KpiSettingsTableComponent } from '../../components/kpi/settings/kpi-settings-table-component';
@@ -22,10 +23,10 @@ export class KpiSettingsPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.root = page.locator('[data-testid="kpi-settings"]');
-    this.loadingState = page.locator('[data-testid="kpi-settings-loading"]');
-    this.errorContent = page.locator('[data-testid="error-content"]');
-    this.breadcrumbs = page.locator('[data-testid="bread-crumbs"]');
+    this.root = this.locate.testId(kpiTestIds.settings.page);
+    this.loadingState = this.locate.testId(kpiTestIds.settings.loading);
+    this.errorContent = this.locate.testId(kpiTestIds.errorContent);
+    this.breadcrumbs = this.locate.testId(kpiTestIds.settings.breadcrumbs);
     this.scoreTable = new KpiSettingsScoreComponent(page);
     this.abTestsTable = new KpiSettingsTableComponent(page, 'ab-tests');
     this.totalMrrTable = new KpiSettingsTableComponent(page, 'total-mrr');

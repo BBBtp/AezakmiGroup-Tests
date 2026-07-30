@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { PodiumItemComponent } from './podium-item-component';
 import { ContenderItemComponent } from './contender-item-component';
 
@@ -12,7 +13,7 @@ import { ContenderItemComponent } from './contender-item-component';
  * - список претендентов (contenders) с ContenderItemComponent;
  * - проверки видимости и правильности отображения элементов.
  */
-export class KpiTopEmployeesComponent {
+export class KpiTopEmployeesComponent extends UiObject {
   /** Корневой элемент блока Top Employees */
   readonly root: Locator;
 
@@ -32,9 +33,11 @@ export class KpiTopEmployeesComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.root = page.locator('[data-testid="top-employees"]');
-    this.title = this.root.locator('[data-testid="top-employees__title"]');
-    this.podium = this.root.locator('[data-testid="top-employees__podium"]');
+    super(page);
+    this.root = this.locate.testId('top-employees');
+    const topEmployees = this.locate.within(this.root);
+    this.title = topEmployees.testId('top-employees__title');
+    this.podium = topEmployees.testId('top-employees__podium');
 
     this.podiumItems = [
       new PodiumItemComponent(this.podium, 0),
@@ -42,15 +45,16 @@ export class KpiTopEmployeesComponent {
       new PodiumItemComponent(this.podium, 2),
     ];
 
-    this.contendersRoot = this.root.locator('[data-testid="top-employees__contenders"]');
+    this.contendersRoot = topEmployees.testId('top-employees__contenders');
   }
 
   /**
    * Возвращает количество претендентов
    */
   async getContendersCount(): Promise<number> {
-    return this.contendersRoot
-      .locator(
+    return this.locate
+      .within(this.contendersRoot)
+      .css(
         '[data-testid^="contender-"]:not([data-testid*="avatar"]):not([data-testid*="name"]):not([data-testid*="currency"])',
       )
       .count();

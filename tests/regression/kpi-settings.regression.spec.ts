@@ -5,10 +5,10 @@ import { allure } from 'allure-playwright';
 import {
   createEditDeleteKpiSettingsAction,
   createKpiSettingsAction,
-  deleteKpiSettingsActionIfPresent,
   failNextSettingsAction,
   pickAvailableAbTestPercent,
   pickAvailableTotalMrrReachedValue,
+  registerKpiSettingsCleanup,
   waitForFailedSettingsAction,
 } from '@support/kpi';
 
@@ -98,7 +98,7 @@ test.describe('Страница KPI Settings', () => {
     await settingsPage.scoreTable.expectReadOnlyShellVisible();
   });
 
-  test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+  test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage, cleanup }) => {
     await allure.allureId('828');
     const settingsPage = await kpiPage.openSettings();
     const value = await pickAvailableAbTestPercent(settingsPage);
@@ -113,11 +113,12 @@ test.describe('Страница KPI Settings', () => {
           modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value),
         createPoints: '11',
         editPoints: '12',
+        cleanup,
       });
     });
   });
 
-  test('Total MRR: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage }) => {
+  test('Total MRR: создаёт, редактирует и удаляет тестовое значение', async ({ kpiPage, cleanup }) => {
     await allure.allureId('829');
     const settingsPage = await kpiPage.openSettings();
     const value = await pickAvailableTotalMrrReachedValue(settingsPage);
@@ -131,15 +132,17 @@ test.describe('Страница KPI Settings', () => {
         fillModal: (modal) => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
         createPoints: '13',
         editPoints: '14',
+        cleanup,
       });
     });
   });
 
-  test('A/B tests: отмена удаления не удаляет тестовое значение', async ({ kpiPage }) => {
+  test('A/B tests: отмена удаления не удаляет тестовое значение', async ({ kpiPage, cleanup }) => {
     await allure.allureId('830');
     const settingsPage = await kpiPage.openSettings();
     const value = await pickAvailableAbTestPercent(settingsPage);
     const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+    const cleanupHandle = registerKpiSettingsCleanup(cleanup, settingsPage, row);
 
     try {
       await test.step('Создаём уникальное значение', async () => {
@@ -159,7 +162,7 @@ test.describe('Страница KPI Settings', () => {
         await row.expectEditable();
       });
     } finally {
-      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+      await cleanupHandle.runNow();
     }
 
     await row.expectDeleted();
@@ -189,11 +192,13 @@ test.describe('Страница KPI Settings', () => {
 
   test('A/B tests: ошибка сервера при редактировании показывает error и сохраняет строку', async ({
     kpiPage,
+    cleanup,
   }) => {
     await allure.allureId('832');
     const settingsPage = await kpiPage.openSettings();
     const value = await pickAvailableAbTestPercent(settingsPage);
     const row = settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+    const cleanupHandle = registerKpiSettingsCleanup(cleanup, settingsPage, row);
 
     try {
       await createKpiSettingsAction({
@@ -219,7 +224,7 @@ test.describe('Страница KPI Settings', () => {
       await expect(row.errorBlock).toBeVisible();
       await row.expectEditable();
     } finally {
-      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+      await cleanupHandle.runNow();
     }
 
     await row.expectDeleted();
@@ -249,11 +254,13 @@ test.describe('Страница KPI Settings', () => {
 
   test('Total MRR: ошибка сервера при редактировании показывает error и сохраняет строку', async ({
     kpiPage,
+    cleanup,
   }) => {
     await allure.allureId('834');
     const settingsPage = await kpiPage.openSettings();
     const value = await pickAvailableTotalMrrReachedValue(settingsPage);
     const row = settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
+    const cleanupHandle = registerKpiSettingsCleanup(cleanup, settingsPage, row);
 
     try {
       await createKpiSettingsAction({
@@ -278,7 +285,7 @@ test.describe('Страница KPI Settings', () => {
       await expect(row.errorBlock).toBeVisible();
       await row.expectEditable();
     } finally {
-      await deleteKpiSettingsActionIfPresent(settingsPage, row);
+      await cleanupHandle.runNow();
     }
 
     await row.expectDeleted();

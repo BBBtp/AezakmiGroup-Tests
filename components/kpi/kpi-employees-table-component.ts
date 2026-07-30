@@ -1,6 +1,6 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { EmployeeRowComponent } from './employee-row-component';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Структура данных сотрудника для KPI таблицы
@@ -26,7 +26,7 @@ export interface EmployeeData {
  * - проверку валидности данных;
  * - ассерты на сортировку.
  */
-export class KpiEmployeesTableComponent {
+export class KpiEmployeesTableComponent extends UiObject {
   /** Корневой элемент таблицы */
   readonly root: Locator;
 
@@ -40,9 +40,11 @@ export class KpiEmployeesTableComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.root = page.locator('[data-testid="employees-table__main"]');
-    this.rowsRoot = this.root.locator('tbody tr');
-    this.header = this.root.locator('thead tr');
+    super(page);
+    this.root = this.locate.testId('employees-table__main');
+    const table = this.locate.within(this.root);
+    this.rowsRoot = table.css('tbody tr');
+    this.header = table.css('thead tr');
   }
 
   /**
@@ -74,6 +76,12 @@ export class KpiEmployeesTableComponent {
     return rows;
   }
 
+  async openFirstEmployee(): Promise<void> {
+    const rows = await this.getRows();
+    if (!rows.length) throw new Error('Employee table has no rows to open');
+    await rows[0].open();
+  }
+
   /**
    * Возвращает локатор ячейки заголовка по имени столбца
    * @param columnName название столбца
@@ -92,7 +100,7 @@ export class KpiEmployeesTableComponent {
       throw new Error(`Unknown column: ${columnName}`);
     }
 
-    return this.header.locator(`[data-testid="${testId}"]`);
+    return this.locate.within(this.header).testId(testId);
   }
 
   /**
@@ -101,7 +109,7 @@ export class KpiEmployeesTableComponent {
    */
   async sortBy(columnName: string): Promise<void> {
     const cell = await this.getHeaderCell(columnName);
-    await loggedClick(this.root.page(), `employees table: sort ${columnName}`, cell);
+    await this.actions.click(`employees table: sort ${columnName}`, cell);
     await this.waitForTableStable();
     await this.verifyTableDataValid();
   }

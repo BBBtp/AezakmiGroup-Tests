@@ -1,7 +1,6 @@
 import { test, testData } from '@fixtures';
 import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
   test.beforeEach(async ({ kpiPage }) => {
@@ -68,9 +67,9 @@ test.describe('Страница KPI', () => {
     await chart.verifyVisible();
     const errors: string[] = [];
     kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-    await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
+    await chart.selectMrr();
     expect(errors).toHaveLength(0);
-    await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
+    await chart.selectScore();
     expect(errors).toHaveLength(0);
   });
 
@@ -91,10 +90,7 @@ test.describe('Страница KPI', () => {
     expect(rows.length).toBeGreaterThan(0);
     const firstRow = rows[0];
     const baseUrl = kpiPage.page.url();
-    await Promise.all([
-      kpiPage.page.waitForURL(/\/kpi\/.+/),
-      loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton),
-    ]);
+    await firstRow.open();
     const newUrl = kpiPage.page.url();
     expect(newUrl).not.toBe(baseUrl);
   });

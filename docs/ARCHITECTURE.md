@@ -10,9 +10,17 @@
 flowchart TD
   DoQA[DoQA: кейсы и статусы] --> MCP[MCP DoQA client]
   MCP --> Queue[Очередь кандидатов]
-  Queue --> Tests[Playwright tests]
-  Tests --> PO[Page Objects и Components]
-  PO --> CRM[CRM web application]
+  Queue --> Tests[Business tests]
+  Tests --> Fixtures[Fixtures]
+  Tests --> Modules[Domain modules]
+  Fixtures --> Modules
+  Modules --> Pages[Pages: domain flows]
+  Pages --> Components[Components: local UI behavior]
+  Pages --> UI[framework/ui]
+  Components --> UI
+  UI --> Locators[Domain locator catalogs]
+  UI --> CRM[CRM web application]
+  Fixtures --> Lifecycle[Cleanup registry and test sessions]
   Tests --> Allure[Allure raw results]
   Allure --> Upload[POST /api/autotests/report]
   Upload --> DoQA
@@ -20,15 +28,57 @@ flowchart TD
 
 ### `tests/`
 
-Сценарии smoke/regression. Каждый автоматизированный тест должен содержать `allure.allureId('<DoQA case id>')`.
+Сценарии smoke/regression содержат бизнес-шаги и проверки, но не создают локаторы напрямую.
+UI доступен только через публичный API `@modules/*`. Каждый автоматизированный тест содержит
+ровно один уникальный числовой `allure.allureId('<DoQA case id>')`.
+
+### `modules/`
+
+Публичная граница домена. Только этот слой экспортирует страницы и публичные компоненты в тесты
+и fixtures. Внутреннюю структуру `pages/` и `components/` можно менять без массового изменения
+сценариев.
 
 ### `pages/` и `components/`
 
-Page Objects описывают страницы, компоненты — переиспользуемые блоки. Селекторы хранятся рядом с объектом, который ими управляет. Предпочтительный селектор — `data-testid`, затем role/label, затем URL или устойчивый CSS.
+Page Objects собирают пользовательские и доменные потоки, компоненты владеют локальными
+действиями и структурой своего блока. Они наследуют `UiObject` и получают единый API:
+`locate`, `actions`, `expectations`. Вызов raw Playwright locator API и диагностического logger
+за пределами `framework/ui` запрещён архитектурной проверкой.
+
+### `locators/`
+
+Доменные каталоги устойчивых публичных `data-testid` и доступных имён. Здесь хранятся идентификаторы,
+которые используются несколькими UI-объектами. Динамические и строго локальные идентификаторы
+формируются внутри владеющего ими компонента через `LocatorFactory`; глобального «мешка селекторов»
+нет. Приоритет: `data-testid`, затем role/label, затем документированный устойчивый CSS.
+
+### `framework/ui/`
+
+Единый адаптер над Playwright:
+
+- `LocatorFactory` создаёт локаторы из Page или корневого Locator;
+- `UiActions` выполняет действия с диагностическими вложениями;
+- `UiExpectations` ждёт наблюдаемое состояние;
+- `UiObject` предоставляет эти зависимости каждой странице и компоненту.
+
+Изменение логирования, ожиданий или политики локаторов выполняется в одном месте.
 
 ### `fixtures/`
 
-Подготавливают пользователей и Page Objects поверх `page` текущего Playwright project. `tests/setup/auth.setup.ts` создаёт admin storage state только для авторизованных проектов. Проверки логина и контроля доступа запускаются отдельными проектами без этой зависимости.
+Подготавливают пользователей и публичные доменные объекты поверх `page` текущего Playwright
+project. Fixture `cleanup` регистрирует компенсирующие операции до мутации и выполняет их в LIFO
+порядке даже при падении теста. `sessions` создаёт дополнительные BrowserContext и автоматически
+закрывает их через тот же registry. Явная успешная уборка вызывает `runNow`; если она упала,
+задача остаётся активной и повторяется в fixture teardown.
+
+`tests/setup/auth.setup.ts` создаёт admin storage state только для авторизованных проектов.
+Проверки логина и контроля доступа запускаются отдельными проектами без этой зависимости.
+
+### `tests/support/<domain>/`
+
+Общие API-контракты, генераторы уникальных данных, lifecycle-функции и доменные helpers. Helper,
+который изменяет данные, принимает `CleanupRegistry` или возвращает cleanup handle; сценарий не
+должен вручную дублировать протокол удаления.
 
 ### `mcp/`
 

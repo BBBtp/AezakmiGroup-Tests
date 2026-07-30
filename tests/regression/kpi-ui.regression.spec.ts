@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test, testData } from '@fixtures';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('KPI UI', () => {
   test.beforeEach(async ({ kpiPage }) => {
@@ -60,9 +59,9 @@ test.describe('KPI UI', () => {
     kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
 
     await chart.verifyVisible();
-    await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
+    await chart.selectMrr();
     expect(errors).toEqual([]);
-    await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
+    await chart.selectScore();
     expect(errors).toEqual([]);
   });
 

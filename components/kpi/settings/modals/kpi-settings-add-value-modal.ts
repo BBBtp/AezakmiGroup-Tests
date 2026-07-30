@@ -1,12 +1,11 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { KpiSettingsAddValueForm } from '../forms/kpi-settings-add-value-form';
 import { requireTestId } from '../../../../utils/test-id';
-import { loggedClick, loggedFill } from '../../../../utils/playwright-logger';
 
 export type KpiSettingsAddValueTableName = 'ab-tests' | 'total-mrr';
 
-export class KpiSettingsAddValueModal {
-  readonly page: Page;
+export class KpiSettingsAddValueModal extends UiObject {
   readonly tableName: KpiSettingsAddValueTableName;
 
   readonly trigger: Locator;
@@ -21,20 +20,21 @@ export class KpiSettingsAddValueModal {
   readonly form: KpiSettingsAddValueForm;
 
   constructor(page: Page, tableName: KpiSettingsAddValueTableName) {
-    this.page = page;
+    super(page);
     this.tableName = requireTestId(tableName, 'KpiSettingsAddValueModal') as KpiSettingsAddValueTableName;
 
-    this.trigger = page.locator(`[data-testid="${this.tableName}__add-value"]`);
-    this.modal = page.locator(`[data-testid="${this.tableName}__add-modal"]`);
-    this.progressStepActionType = page.locator(`[data-testid="${this.tableName}-Action type"]`);
-    this.progressStepValue = page.locator(`[data-testid="${this.tableName}-Value"]`);
-    this.progressStepPoints = page.locator(`[data-testid="${this.tableName}-Points"]`);
-    this.backButton = page.locator(`[data-testid="${this.tableName}__button-prev"]`);
-    this.nextButton = page.locator(`[data-testid="${this.tableName}__button-next"]`);
-    this.loadingIndicator = page.locator(`[data-testid="${this.tableName}__loading"]`);
-    this.errorBlock = this.modal
-      .locator(`[data-testid="${this.tableName}__error"]`)
-      .or(this.modal.getByText('Failed to create value'))
+    this.trigger = this.locate.testId(`${this.tableName}__add-value`);
+    this.modal = this.locate.testId(`${this.tableName}__add-modal`);
+    this.progressStepActionType = this.locate.testId(`${this.tableName}-Action type`);
+    this.progressStepValue = this.locate.testId(`${this.tableName}-Value`);
+    this.progressStepPoints = this.locate.testId(`${this.tableName}-Points`);
+    this.backButton = this.locate.testId(`${this.tableName}__button-prev`);
+    this.nextButton = this.locate.testId(`${this.tableName}__button-next`);
+    this.loadingIndicator = this.locate.testId(`${this.tableName}__loading`);
+    const modal = this.locate.within(this.modal);
+    this.errorBlock = modal
+      .testId(`${this.tableName}__error`)
+      .or(modal.text('Failed to create value'))
       .first();
 
     this.form = new KpiSettingsAddValueForm(page, this.tableName);
@@ -57,12 +57,12 @@ export class KpiSettingsAddValueModal {
 
   async clickNextSafely(): Promise<void> {
     await expect(this.nextButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings ${this.tableName}: next`, this.nextButton);
+    await this.actions.click(`KPI settings ${this.tableName}: next`, this.nextButton);
   }
 
   async clickBackSafely(): Promise<void> {
     await expect(this.backButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings ${this.tableName}: back`, this.backButton);
+    await this.actions.click(`KPI settings ${this.tableName}: back`, this.backButton);
   }
 
   async assertNextEnabled(): Promise<void> {
@@ -179,8 +179,7 @@ export class KpiSettingsAddValueModal {
       await this.form.expectValueTypeOptionsVisible(['Reached $N', 'Increased by N%', 'Fell by N%']);
     }
 
-    await loggedClick(
-      this.page,
+    await this.actions.click(
       `KPI settings ${this.tableName}: select value type ${value}`,
       this.form.valueTypeOption(value),
     );
@@ -196,11 +195,11 @@ export class KpiSettingsAddValueModal {
 
   async selectPointsType(type: 'plus' | 'minus'): Promise<void> {
     const option = type === 'plus' ? this.form.pointsRadioPlus : this.form.pointsRadioMinus;
-    await loggedClick(this.page, `KPI settings ${this.tableName}: select points ${type}`, option);
+    await this.actions.click(`KPI settings ${this.tableName}: select points ${type}`, option);
   }
 
   async fillPoints(value: string): Promise<void> {
-    await loggedFill(this.page, `KPI settings ${this.tableName}: fill points`, this.form.pointsInput, value);
+    await this.actions.fill(`KPI settings ${this.tableName}: fill points`, this.form.pointsInput, value);
     await this.assertNextEnabled();
   }
 

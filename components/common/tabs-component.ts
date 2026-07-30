@@ -1,6 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент вкладок (Tabs).
@@ -14,7 +14,7 @@ import { loggedClick } from '../../utils/playwright-logger';
  * Таб должен иметь data-testid в формате:
  * `${testId}__<value>` для каждой вкладки.
  */
-export class TabsComponent {
+export class TabsComponent extends UiObject {
   /**
    * Корневой элемент компонента табов
    */
@@ -34,8 +34,9 @@ export class TabsComponent {
    * то отдельный таб имеет testId = "profile-tabs__settings"
    */
   constructor(page: Page, testId: string) {
+    super(page);
     this.testId = requireTestId(testId, 'TabsComponent');
-    this.root = page.locator(`[data-testid="${this.testId}"]`);
+    this.root = this.locate.testId(this.testId);
   }
 
   /**
@@ -45,7 +46,7 @@ export class TabsComponent {
    * @returns локатор вкладки
    */
   getTab(value: string): Locator {
-    return this.root.locator(`[data-testid="${this.testId}__${value}"]`);
+    return this.locate.within(this.root).testId(`${this.testId}__${value}`);
   }
 
   /**
@@ -54,10 +55,9 @@ export class TabsComponent {
    * @param value значение таба (суффикс в data-testid)
    */
   async clickTab(value: string): Promise<void> {
-    await loggedClick(
-      this.root.page(),
+    await this.actions.click(
       `tabs ${this.testId}: ${value}`,
-      this.root.locator(`[data-testid$="__${value}"]`),
+      this.locate.within(this.root).css(`[data-testid$="__${value}"]`),
     );
   }
 
@@ -68,7 +68,7 @@ export class TabsComponent {
    */
   async verifyTabsVisible(values: string[]): Promise<void> {
     for (const v of values) {
-      await expect(this.root.locator(`[data-testid$="__${v}"]`)).toBeVisible();
+      await expect(this.locate.within(this.root).css(`[data-testid$="__${v}"]`)).toBeVisible();
     }
   }
 }

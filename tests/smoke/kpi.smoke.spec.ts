@@ -1,7 +1,6 @@
 import { test } from '@fixtures';
 import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
   test.beforeEach(async ({ kpiPage }) => {
@@ -10,12 +9,10 @@ test.describe('Страница KPI', () => {
 
   test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
     await allure.allureId('803');
-    const btn = kpiPage.settingsButton;
-    await expect(btn).toBeVisible();
+    await expect(kpiPage.settingsButton).toBeVisible();
     const errors: string[] = [];
     kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-    await loggedClick(kpiPage.page, 'KPI: open settings', btn);
-    await kpiPage.page.waitForURL(/\/kpi\/settings/);
+    await kpiPage.openSettings();
     expect(errors.length).toBe(0);
   });
 
@@ -37,13 +34,8 @@ test.describe('Страница KPI', () => {
       expect(count).toBeGreaterThan(0);
     });
     await test.step('Кнопка Open открывает страницу сотрудника', async () => {
-      const rows = await table.getRows();
-      const firstRow = rows[0];
       const oldUrl = kpiPage.page.url();
-      await Promise.all([
-        kpiPage.page.waitForURL(/\/kpi\/.+/),
-        loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton),
-      ]);
+      await table.openFirstEmployee();
       await expect(kpiPage.page).toHaveURL(/\/kpi\/.+/);
       expect(kpiPage.page.url()).not.toBe(oldUrl);
     });

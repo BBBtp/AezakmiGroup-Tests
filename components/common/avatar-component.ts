@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
 
 /**
@@ -16,7 +17,7 @@ import { requireTestId } from '../../utils/test-id';
  * Все элементы ищутся по `data-testid`, формируемым
  * на основе базового `testId`.
  */
-export class AvatarComponent {
+export class AvatarComponent extends UiObject {
   /**
    * Корневой элемент компонента аватара
    */
@@ -54,11 +55,12 @@ export class AvatarComponent {
    * - `${testId}-sublink_tooltip`
    */
   constructor(page: Page, testId: string) {
+    super(page);
     const normalizedTestId = requireTestId(testId, 'AvatarComponent');
-    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-    this.title = page.locator(`[data-testid="${normalizedTestId}-title"]`);
-    this.subtitle = page.locator(`[data-testid="${normalizedTestId}-subtitle"]`);
-    this.sublink = page.locator(`[data-testid="${normalizedTestId}-sublink"]`);
-    this.tooltip = page.locator(`[data-testid="${normalizedTestId}-sublink_tooltip"]`);
+    this.root = this.locate.testId(normalizedTestId);
+    this.title = this.locate.testId(`${normalizedTestId}-title`);
+    this.subtitle = this.locate.testId(`${normalizedTestId}-subtitle`);
+    this.sublink = this.locate.testId(`${normalizedTestId}-sublink`);
+    this.tooltip = this.locate.testId(`${normalizedTestId}-sublink_tooltip`);
   }
 }

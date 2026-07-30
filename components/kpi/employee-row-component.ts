@@ -1,4 +1,5 @@
 import { Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { EmployeeData } from './kpi-employees-table-component';
 import { parseCurrency } from '../../utils/parser';
 
@@ -11,7 +12,7 @@ import { parseCurrency } from '../../utils/parser';
  * - извлечение данных в структуру EmployeeData;
  * - проверку соответствия аватара первой букве имени.
  */
-export class EmployeeRowComponent {
+export class EmployeeRowComponent extends UiObject {
   /** Корневой элемент конкретной строки */
   readonly row: Locator;
   /** Рейтинг сотрудника */
@@ -46,17 +47,20 @@ export class EmployeeRowComponent {
    * @param index Индекс строки сотрудника (для формирования data-testid)
    */
   constructor(root: Locator, index: number) {
-    this.row = root.locator('tbody tr').nth(index);
-    this.rating = root.locator(`[data-testid="employees-table__rating-${index}"]`);
-    this.avatarLetter = root.locator(`[data-testid="employees-table__avatar-${index}"] p`).first();
-    this.name = root.locator(`[data-testid="employees-table__avatar-${index}-title"]`);
-    this.sublink = root.locator(`[data-testid="employees-table__avatar-${index}-sublink"]`);
-    this.score = root.locator(`[data-testid="employees-table__score-${index}"]`);
-    this.mrr = root.locator(`[data-testid="employees-table__mrr-${index}"]`);
-    this.appsNumber = root.locator(`[data-testid="employees-table__apps-number-${index}"]`);
-    this.lastModified = root.locator(`[data-testid="employees-table__last-modified-${index}"]`);
-    this.openButton = this.row
-      .locator('button:has-text("Open"), a:has-text("Open"), [role="button"]:has-text("Open")')
+    super(root.page());
+    const table = this.locate.within(root);
+    this.row = table.css('tbody tr').nth(index);
+    this.rating = table.testId(`employees-table__rating-${index}`);
+    this.avatarLetter = table.css(`[data-testid="employees-table__avatar-${index}"] p`).first();
+    this.name = table.testId(`employees-table__avatar-${index}-title`);
+    this.sublink = table.testId(`employees-table__avatar-${index}-sublink`);
+    this.score = table.testId(`employees-table__score-${index}`);
+    this.mrr = table.testId(`employees-table__mrr-${index}`);
+    this.appsNumber = table.testId(`employees-table__apps-number-${index}`);
+    this.lastModified = table.testId(`employees-table__last-modified-${index}`);
+    this.openButton = this.locate
+      .within(this.row)
+      .css('button:has-text("Open"), a:has-text("Open"), [role="button"]:has-text("Open")')
       .first();
   }
 
@@ -98,5 +102,12 @@ export class EmployeeRowComponent {
     const letter = (await this.avatarLetter.textContent())?.trim() ?? '';
     const name = (await this.name.textContent())?.trim() ?? '';
     await expect(letter).toBe(name.charAt(0));
+  }
+
+  async open(): Promise<void> {
+    await Promise.all([
+      this.page.waitForURL(/\/kpi\/.+/),
+      this.actions.click('employees table: open employee', this.openButton),
+    ]);
   }
 }

@@ -1,9 +1,9 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { authSelectors, authTestIds } from '@locators/auth';
 import { BasePage } from '../base-page';
 import { LoginFormComponent } from '../../components/forms/login-form-component';
 import { ForgotPasswordModalComponent } from '../../components/auth/forgot-password-modal-component';
 import { PageHeaderComponent } from '../../components/common/login/page-header-component';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Страница логина
@@ -29,12 +29,12 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.loginContainer = page.locator('[data-testid="login"]');
+    this.loginContainer = this.locate.testId(authTestIds.page);
     this.loginForm = new LoginFormComponent(page);
     this.forgotPasswordModal = new ForgotPasswordModalComponent(page);
     this.pageHeader = new PageHeaderComponent(page, 'login');
-    this.errorMessage = page.locator('.error-message, [role="alert"]');
-    this.successMessage = page.locator('.success-message, .notification-success');
+    this.errorMessage = this.locate.css(authSelectors.errorMessage);
+    this.successMessage = this.locate.css(authSelectors.successMessage);
   }
 
   /** Переход на страницу логина */
@@ -72,7 +72,7 @@ export class LoginPage extends BasePage {
 
   /** Открыть модальное окно "Забыли пароль" */
   async openForgotPasswordModal(): Promise<void> {
-    await loggedClick(this.page, 'login: forgot password', this.loginForm.forgotPasswordButton);
+    await this.actions.click('login: forgot password', this.loginForm.forgotPasswordButton);
     await this.forgotPasswordModal.waitForOpen();
   }
 

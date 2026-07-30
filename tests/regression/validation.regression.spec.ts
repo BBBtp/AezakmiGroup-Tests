@@ -1,7 +1,6 @@
 import { invalidUsers, test, testData as TestData } from '@fixtures';
 import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 test.describe('Валидация полей авторизации', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.navigate();
@@ -9,11 +8,7 @@ test.describe('Валидация полей авторизации', () => {
 
   test('Валидация пустых полей', async ({ loginPage }) => {
     await allure.allureId('791');
-    await loggedClick(
-      loginPage.page,
-      'login validation: submit empty form',
-      loginPage.loginForm.submitButton,
-    );
+    await loginPage.loginForm.submit();
     await expect(loginPage.page).toHaveURL(/login/);
     await loginPage.loginForm.assertInvalidEmailError();
     await loginPage.loginForm.assertInvalidPasswordError();
@@ -25,11 +20,7 @@ test.describe('Валидация полей авторизации', () => {
       invalidUsers.invalidEmailFormat.email,
       invalidUsers.invalidEmailFormat.password,
     );
-    await loggedClick(
-      loginPage.page,
-      'login validation: submit invalid email',
-      loginPage.loginForm.submitButton,
-    );
+    await loginPage.loginForm.submit();
     await expect(loginPage.page).toHaveURL(/login/);
     await loginPage.loginForm.assertInvalidEmailError();
   });

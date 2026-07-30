@@ -1,8 +1,9 @@
 import { Locator, Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { composeTestId, requireTestId } from '../../../../utils/test-id';
 
-export class KpiSettingsDeleteValueModal {
-  readonly page: Page;
+export class KpiSettingsDeleteValueModal extends UiObject {
   readonly baseTestId: string;
 
   readonly modal: Locator;
@@ -11,15 +12,15 @@ export class KpiSettingsDeleteValueModal {
   readonly loader: Locator;
 
   constructor(page: Page, tableName: string, actionType: string, value: string) {
-    this.page = page;
+    super(page);
     this.baseTestId = requireTestId(
       composeTestId([tableName, actionType, value]),
       'KpiSettingsDeleteValueModal',
     );
 
-    this.modal = page.locator(`[data-testid="${this.baseTestId}__delete-modal"]`);
-    this.confirmButton = page.locator('[data-testid="delete-item__del-btn"]');
-    this.cancelButton = page.locator('[data-testid="delete-item__cancel-btn"]');
-    this.loader = page.locator('[data-testid="delete-item__loader"]');
+    this.modal = this.locate.testId(`${this.baseTestId}__delete-modal`);
+    this.confirmButton = this.locate.testId(kpiTestIds.settings.deleteConfirm);
+    this.cancelButton = this.locate.testId(kpiTestIds.settings.deleteCancel);
+    this.loader = this.locate.testId('delete-item__loader');
   }
 }

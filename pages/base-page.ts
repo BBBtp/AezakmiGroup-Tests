@@ -1,31 +1,30 @@
-import { Page, Locator } from '@playwright/test';
-import { loggedAction, loggedExpectation } from '../utils/playwright-logger';
+import type { Locator, Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 
-export class BasePage {
-  readonly page: Page;
+export class BasePage extends UiObject {
   constructor(page: Page) {
-    this.page = page;
+    super(page);
   }
+
   async navigateTo(url: string): Promise<void> {
     const timeout = process.env.CI ? 60000 : 30000;
-    await loggedAction(this.page, 'navigate', `navigation to ${url}`, this.page.locator('body'), () =>
-      this.page.goto(url, {
-        waitUntil: 'commit',
-        timeout,
-      }),
-    );
+    await this.actions.navigate(`navigation to ${url}`, url, {
+      waitUntil: 'commit',
+      timeout,
+    });
   }
+
   async getTitle(): Promise<string> {
     return await this.page.title();
   }
+
   async waitForLoad(): Promise<void> {
     await this.page.waitForLoadState('domcontentloaded');
   }
+
   async waitForElement(selector: string): Promise<Locator> {
-    const element = this.page.locator(selector);
-    await loggedExpectation(this.page, `element ${selector}`, element, 'visible', () =>
-      element.waitFor({ state: 'visible' }),
-    );
+    const element = this.locate.css(selector);
+    await this.expectations.visible(`element ${selector}`, element);
     return element;
   }
 

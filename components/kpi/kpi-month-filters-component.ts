@@ -1,6 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент фильтров KPI по месяцам.
@@ -12,7 +12,7 @@ import { loggedClick } from '../../utils/playwright-logger';
  * - выбор вкладки по индексу;
  * - проверку смены содержимого при переключении месяца.
  */
-export class KpiMonthFiltersComponent {
+export class KpiMonthFiltersComponent extends UiObject {
   /** Корневой элемент фильтров по месяцам */
   readonly root: Locator;
 
@@ -28,10 +28,12 @@ export class KpiMonthFiltersComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page, testId: string = 'month-filters') {
+    super(page);
     this.testId = requireTestId(testId, 'KpiMonthFiltersComponent');
-    this.root = page.locator(`[data-testid="${this.testId}"]`);
-    this.tabs = this.root.locator('[role="tab"]');
-    this.activeTab = this.root.locator('[role="tab"][aria-selected="true"]');
+    this.root = this.locate.testId(this.testId);
+    const filters = this.locate.within(this.root);
+    this.tabs = filters.role('tab');
+    this.activeTab = filters.css('[role="tab"][aria-selected="true"]');
   }
 
   /**
@@ -47,7 +49,7 @@ export class KpiMonthFiltersComponent {
    * Проверяет, что активная вкладка одна и видима
    */
   async verifyActiveTab(): Promise<void> {
-    const activeCount = await this.root.locator('[role="tab"][aria-selected="true"]').count();
+    const activeCount = await this.activeTab.count();
     expect(activeCount).toBe(1);
     await expect(this.activeTab).toBeVisible();
   }
@@ -58,7 +60,7 @@ export class KpiMonthFiltersComponent {
    */
   async selectTabByIndex(index: number): Promise<void> {
     const tab = this.tabs.nth(index);
-    await loggedClick(this.root.page(), `KPI month filter: tab ${index}`, tab);
+    await this.actions.click(`KPI month filter: tab ${index}`, tab);
     await expect(tab).toHaveAttribute('aria-selected', 'true');
   }
 

@@ -1,9 +1,9 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { composeTestId, requireTestId } from '../../../utils/test-id';
-import { loggedClick, loggedFill } from '../../../utils/playwright-logger';
 
-export class KpiSettingsActionRowComponent {
-  readonly page: Page;
+export class KpiSettingsActionRowComponent extends UiObject {
   readonly tableName: string;
   readonly actionType: string;
   readonly value: string;
@@ -27,7 +27,7 @@ export class KpiSettingsActionRowComponent {
   readonly saveButton: Locator;
   readonly errorBlock: Locator;
   constructor(page: Page, tableName: string, actionType: string, value: string) {
-    this.page = page;
+    super(page);
     this.tableName = tableName;
     this.actionType = actionType;
     this.value = value;
@@ -69,13 +69,13 @@ export class KpiSettingsActionRowComponent {
   }
 
   private locatorByTestId(suffix = ''): Locator {
-    const primary = this.page.locator(`[data-testid="${this.baseTestId}${suffix}"]`);
+    const primary = this.locate.testId(`${this.baseTestId}${suffix}`);
 
     if (!this.alternateBaseTestId) {
       return primary;
     }
 
-    return primary.or(this.page.locator(`[data-testid="${this.alternateBaseTestId}${suffix}"]`)).first();
+    return primary.or(this.locate.testId(`${this.alternateBaseTestId}${suffix}`)).first();
   }
 
   async expectVisible(): Promise<void> {
@@ -91,7 +91,7 @@ export class KpiSettingsActionRowComponent {
 
   async openEditModal(): Promise<void> {
     await expect(this.editButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings: edit ${this.actionType}/${this.value}`, this.editButton);
+    await this.actions.click(`KPI settings: edit ${this.actionType}/${this.value}`, this.editButton);
     await this.expectEditModalVisible();
   }
 
@@ -107,12 +107,11 @@ export class KpiSettingsActionRowComponent {
 
   async selectEditPointsType(type: 'plus' | 'minus'): Promise<void> {
     const option = type === 'plus' ? this.pointsRadioPlus : this.pointsRadioMinus;
-    await loggedClick(this.page, `KPI settings: select ${type} points`, option);
+    await this.actions.click(`KPI settings: select ${type} points`, option);
   }
 
   async fillEditPoints(value: string): Promise<void> {
-    await loggedFill(
-      this.page,
+    await this.actions.fill(
       `KPI settings: fill points ${this.actionType}/${this.value}`,
       this.pointsInput,
       value,
@@ -122,7 +121,7 @@ export class KpiSettingsActionRowComponent {
 
   async saveEdit(): Promise<void> {
     await expect(this.saveButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings: save ${this.actionType}/${this.value}`, this.saveButton);
+    await this.actions.click(`KPI settings: save ${this.actionType}/${this.value}`, this.saveButton);
   }
 
   async expectEditModalHidden(): Promise<void> {
@@ -131,22 +130,18 @@ export class KpiSettingsActionRowComponent {
 
   async openDeleteModal(): Promise<void> {
     await expect(this.deleteButton).toBeEnabled();
-    await loggedClick(
-      this.page,
-      `KPI settings: open delete ${this.actionType}/${this.value}`,
-      this.deleteButton,
-    );
+    await this.actions.click(`KPI settings: open delete ${this.actionType}/${this.value}`, this.deleteButton);
     await expect(this.deleteModal).toBeVisible();
   }
 
   async confirmDelete(): Promise<void> {
-    const confirmButton = this.page.locator('[data-testid="delete-item__del-btn"]');
-    await loggedClick(this.page, 'KPI settings: confirm delete', confirmButton);
+    const confirmButton = this.locate.testId(kpiTestIds.settings.deleteConfirm);
+    await this.actions.click('KPI settings: confirm delete', confirmButton);
   }
 
   async cancelDelete(): Promise<void> {
-    const cancelButton = this.page.locator('[data-testid="delete-item__cancel-btn"]');
-    await loggedClick(this.page, 'KPI settings: cancel delete', cancelButton);
+    const cancelButton = this.locate.testId(kpiTestIds.settings.deleteCancel);
+    await this.actions.click('KPI settings: cancel delete', cancelButton);
     await expect(this.deleteModal).toBeHidden();
   }
 

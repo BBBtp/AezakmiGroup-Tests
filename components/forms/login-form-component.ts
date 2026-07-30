@@ -1,6 +1,7 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { authTestIds } from '@locators/auth';
 import TestData from '../../fixtures/test-data';
-import { loggedAction, loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент формы логина.
@@ -13,10 +14,7 @@ import { loggedAction, loggedClick } from '../../utils/playwright-logger';
  * - кнопки отправки и восстановления пароля;
  * - проверку ошибок валидации.
  */
-export class LoginFormComponent {
-  /** Экземпляр страницы Playwright */
-  page: Page;
-
+export class LoginFormComponent extends UiObject {
   /** Корневой элемент формы */
   form: Locator;
 
@@ -45,15 +43,15 @@ export class LoginFormComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.page = page;
-    this.form = page.locator('[data-testid="login__form"]');
-    this.emailInput = page.locator('[data-testid="login__email-input"]');
-    this.passwordInput = page.locator('[data-testid="login__password-input"]');
-    this.toggleButtonPasswordVisibility = page.locator('[data-testid="login__password-input__eye-btn"]');
-    this.rememberMeCheckbox = page.locator('[data-testid="login__remember-me-checkbox-checkbox"]');
-    this.submitButton = page.locator('[data-testid="login__submit-button"]');
-    this.forgotPasswordButton = page.locator('[data-testid="login__forgot-password-button"]');
-    this.passwordVisibilityToggle = page.locator('[data-testid="login__password-input__eye-btn"]');
+    super(page);
+    this.form = this.locate.testId(authTestIds.form);
+    this.emailInput = this.locate.testId(authTestIds.emailInput);
+    this.passwordInput = this.locate.testId(authTestIds.passwordInput);
+    this.toggleButtonPasswordVisibility = this.locate.testId(authTestIds.passwordVisibilityButton);
+    this.rememberMeCheckbox = this.locate.testId(authTestIds.rememberMeCheckbox);
+    this.submitButton = this.locate.testId(authTestIds.submitButton);
+    this.forgotPasswordButton = this.locate.testId(authTestIds.forgotPasswordButton);
+    this.passwordVisibilityToggle = this.toggleButtonPasswordVisibility;
   }
 
   /**
@@ -63,10 +61,8 @@ export class LoginFormComponent {
    * @param password пароль пользователя
    */
   async fillCredentials(email: string, password: string): Promise<void> {
-    await loggedAction(this.page, 'fill', 'login email', this.emailInput, () => this.emailInput.fill(email));
-    await loggedAction(this.page, 'fill', 'login password', this.passwordInput, () =>
-      this.passwordInput.fill(password),
-    );
+    await this.actions.fill('login email', this.emailInput, email);
+    await this.actions.fill('login password', this.passwordInput, password);
   }
 
   /**
@@ -74,7 +70,7 @@ export class LoginFormComponent {
    * @param text текст ошибки
    */
   async assertErrorVisible(text: string): Promise<void> {
-    const error = this.page.locator(`p:has-text("${text}")`);
+    const error = this.locate.text(text, { exact: true });
     await expect(error).toBeVisible({ timeout: TestData.timeouts.action });
   }
 
@@ -83,7 +79,7 @@ export class LoginFormComponent {
    * @param text текст ошибки
    */
   async assertErrorHidden(text: string): Promise<void> {
-    const error = this.page.locator(`p:has-text("${text}")`);
+    const error = this.locate.text(text, { exact: true });
     await expect(error).not.toBeVisible();
   }
 
@@ -114,17 +110,21 @@ export class LoginFormComponent {
    */
   async login(email: string, password: string): Promise<void> {
     await this.fillCredentials(email, password);
-    await loggedClick(this.page, 'login: submit credentials', this.submitButton);
+    await this.submit();
+  }
+
+  async submit(): Promise<void> {
+    await this.actions.click('login: submit credentials', this.submitButton);
   }
 
   /** Переключает видимость пароля */
   async togglePasswordVisibility(): Promise<void> {
-    await loggedClick(this.page, 'login: toggle password visibility', this.passwordVisibilityToggle);
+    await this.actions.click('login: toggle password visibility', this.passwordVisibilityToggle);
   }
 
   /** Переключает чекбокс «Запомнить меня» */
   async toggleRememberMe(): Promise<void> {
-    await loggedClick(this.page, 'login: toggle remember me', this.rememberMeCheckbox);
+    await this.actions.click('login: toggle remember me', this.rememberMeCheckbox);
   }
 
   /** Проверяет, отмечен ли чекбокс «Запомнить меня» */

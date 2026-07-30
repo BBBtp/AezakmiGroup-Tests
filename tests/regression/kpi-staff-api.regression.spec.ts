@@ -11,7 +11,6 @@ import {
   managerKpiPath,
   openKpiAndGetStatistics,
 } from '@support/kpi';
-import { loggedAction, loggedClick } from '@utils/playwright-logger';
 
 test.describe('KPI staff service', () => {
   test('Основная статистика KPI возвращает стартовые баллы', async ({ kpiPage }) => {
@@ -40,19 +39,14 @@ test.describe('KPI staff service', () => {
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
     const employeeId = manager!.employee_id;
+    const managerPage = kpiPage.manager(employeeId);
 
     const expectedEndpoints = managerKpiEndpoints(employeeId);
     const responses = expectedEndpoints.map(([, path]) =>
       kpiPage.page.waitForResponse((response) => response.url().includes(path)),
     );
 
-    await loggedAction(
-      kpiPage.page,
-      'navigate',
-      `KPI manager ${employeeId}`,
-      kpiPage.page.locator('body'),
-      () => kpiPage.page.goto(`/kpi/${employeeId}`, { waitUntil: 'domcontentloaded' }),
-    );
+    await managerPage.navigate();
     const endpointResponses = await Promise.all(responses);
     await Promise.all(
       endpointResponses.map((response, index) => expectSuccessfulJson(response, expectedEndpoints[index][0])),
@@ -61,21 +55,9 @@ test.describe('KPI staff service', () => {
     const vacationsResponse = kpiPage.page.waitForResponse((response) =>
       response.url().includes(managerKpiPath(employeeId, 'vacations/history')),
     );
-    const settingsLink = kpiPage.page.getByRole('link', { name: 'Settings', exact: true });
-    await loggedClick(kpiPage.page, 'KPI manager: open settings', settingsLink);
+    await managerPage.openSettings();
     await expectSuccessfulJson(await vacationsResponse, 'vacations history');
-    await expect(kpiPage.page.getByText('Starting score', { exact: true }).first()).toBeVisible();
-    await expect(kpiPage.page.getByText('Vacation and KPI score', { exact: true })).toBeVisible();
-    await expect(
-      kpiPage.page.getByText('Impact of employee vacation on minimum rating.', { exact: true }),
-    ).toBeVisible();
-
-    for (const header of ['Month', 'Starting score', 'Minimal score', 'Sufficient score', 'Vacation']) {
-      await expect(kpiPage.page.getByText(header, { exact: true })).toBeVisible();
-    }
-
-    const settingsRows = kpiPage.page.getByRole('row');
-    expect(await settingsRows.count()).toBeGreaterThan(1);
+    await managerPage.expectSettingsContent();
   });
 
   test('Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage }) => {
@@ -92,26 +74,12 @@ test.describe('KPI staff service', () => {
       const vacationsResponse = kpiPage.page.waitForResponse((response) =>
         response.url().includes(managerKpiPath(candidate.employee_id, 'vacations/history')),
       );
-      await loggedAction(
-        kpiPage.page,
-        'navigate',
-        `KPI settings for ${candidate.employee_id}`,
-        kpiPage.page.locator('body'),
-        () => kpiPage.page.goto(`/kpi/${candidate.employee_id}/settings`, { waitUntil: 'domcontentloaded' }),
-      );
+      const managerPage = kpiPage.manager(candidate.employee_id);
+      await managerPage.navigateSettings();
       await expectSuccessfulJson(await vacationsResponse, 'vacations history');
 
-      const rows = kpiPage.page.getByRole('row');
-      const hasDataRows = await expect
-        .poll(() => rows.count(), { timeout: 5000, intervals: [250, 500, 1000] })
-        .toBeGreaterThan(1)
-        .then(() => true)
-        .catch(() => false);
-      if (!hasDataRows) continue;
-
-      await expect(kpiPage.page.getByText('Starting score', { exact: true }).first()).toBeVisible();
-      const row = rows.nth(1);
-      const displayedScore = Number((await row.getByRole('cell').nth(1).innerText()).replace(',', '.'));
+      const displayedScore = await managerPage.readStartingScore();
+      if (displayedScore === null) continue;
       expect(displayedScore).toBe(candidate.start_score);
       verified = true;
       break;
@@ -144,9 +112,10 @@ test.describe('KPI staff service', () => {
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 
-    await kpiPage.page.goto(`/kpi/${manager!.employee_id}`, { waitUntil: 'domcontentloaded' });
-    await kpiPage.page.goto(`/kpi/${manager!.employee_id}/settings`, { waitUntil: 'domcontentloaded' });
-    await kpiPage.page.goto('/kpi/settings', { waitUntil: 'domcontentloaded' });
+    const managerPage = kpiPage.manager(manager!.employee_id);
+    await managerPage.navigate();
+    await managerPage.navigateSettings();
+    await kpiPage.navigateSettings();
 
     expect(apiRequests.length, 'The KPI flow must make API requests').toBeGreaterThan(0);
     const legacyKpiRequests = apiRequests.filter((url) => !url.includes('/staff/api/'));
@@ -173,10 +142,10 @@ test.describe('KPI staff service', () => {
       });
     });
 
-    await kpiPage.page.goto(`/kpi/${manager!.employee_id}/settings`, { waitUntil: 'domcontentloaded' });
+    const managerPage = kpiPage.manager(manager!.employee_id);
+    await managerPage.navigateSettings();
 
     await expect.poll(() => vacationRequestHandled, { timeout: 10000 }).toBe(true);
-    await expect(kpiPage.page.getByTestId('error-content')).toBeVisible();
-    await expect(kpiPage.page.getByText('Vacation and KPI score', { exact: true })).toBeHidden();
+    await managerPage.expectVacationError();
   });
 });

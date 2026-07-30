@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
 
 /**
@@ -14,7 +15,7 @@ import { requireTestId } from '../../utils/test-id';
  * - `${testId}__alert-title` — заголовок
  * - `${testId}__alert-subtitle` — подзаголовок
  */
-export class ToastComponent {
+export class ToastComponent extends UiObject {
   /**
    * Корневой элемент уведомления
    */
@@ -35,9 +36,11 @@ export class ToastComponent {
    * @param testId Базовый data-testid уведомления
    */
   constructor(page: Page, testId: string) {
+    super(page);
     const normalizedTestId = requireTestId(testId, 'ToastComponent');
-    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-    this.title = this.root.locator(`[data-testid$="__alert-title"]`);
-    this.subtitle = this.root.locator(`[data-testid$="__alert-subtitle"]`);
+    this.root = this.locate.testId(normalizedTestId);
+    const toast = this.locate.within(this.root);
+    this.title = toast.css('[data-testid$="__alert-title"]');
+    this.subtitle = toast.css('[data-testid$="__alert-subtitle"]');
   }
 }

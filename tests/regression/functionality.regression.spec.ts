@@ -7,7 +7,6 @@ import path from 'path';
 import { LoginPage } from '@modules/auth';
 import { testSettings } from '@config/test-settings';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 test.describe('Функциональность авторизации', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.navigate();
@@ -79,17 +78,9 @@ test.describe('Функциональность авторизации', () => {
   test('Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {
     await allure.allureId('799');
     await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'password');
-    await loggedClick(
-      loginPage.page,
-      'login: show password',
-      loginPage.loginForm.toggleButtonPasswordVisibility,
-    );
+    await loginPage.loginForm.togglePasswordVisibility();
     await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'text');
-    await loggedClick(
-      loginPage.page,
-      'login: hide password',
-      loginPage.loginForm.toggleButtonPasswordVisibility,
-    );
+    await loginPage.loginForm.togglePasswordVisibility();
     await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'password');
   });
 

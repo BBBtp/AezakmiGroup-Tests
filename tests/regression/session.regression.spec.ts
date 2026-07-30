@@ -4,63 +4,43 @@ import { allure } from 'allure-playwright';
 import { expect } from '@playwright/test';
 
 import { test } from '@fixtures';
-import { loggedClick } from '@utils/playwright-logger';
 
 const AUTH_FILE = path.resolve('.auth/admin.json');
 
 test.describe('Сессия', () => {
-  test('Logout полностью закрывает сессию', async ({ kpiPage, browser }) => {
+  test('Logout полностью закрывает сессию', async ({ dashboardPage, applicationShell, sessions }) => {
     await allure.allureId('569');
 
-    await kpiPage.page.goto('/dashboard');
-    const logoutButton = kpiPage.page.locator('button[class*="logout"]');
-    await loggedClick(kpiPage.page, 'profile: logout', logoutButton);
-    await expect(kpiPage.page).toHaveURL(/\/login/);
+    await dashboardPage.navigate();
+    await applicationShell.logout();
 
-    await kpiPage.page.goBack();
-    await expect(kpiPage.page).toHaveURL(/\/login/);
+    await dashboardPage.page.goBack();
+    await expect(dashboardPage.page).toHaveURL(/\/login/);
 
-    const context = await browser.newContext({ storageState: AUTH_FILE });
-    const page = await context.newPage();
-    try {
-      for (const protectedPath of ['/dashboard', '/kpi']) {
-        await page.goto(protectedPath);
-        await expect(page).toHaveURL(/\/dashboard|\/kpi/);
-      }
-    } finally {
-      await context.close();
+    const page = await sessions.newPage({ storageState: AUTH_FILE });
+    for (const protectedPath of ['/dashboard', '/kpi']) {
+      await page.goto(protectedPath);
+      await expect(page).toHaveURL(/\/dashboard|\/kpi/);
     }
   });
 
-  test('Истекшая сессия блокирует чтение разделов CRM', async ({ browser }) => {
+  test('Истекшая сессия блокирует чтение разделов CRM', async ({ sessions }) => {
     await allure.allureId('570');
 
-    const context = await browser.newContext({ storageState: AUTH_FILE });
-    const page = await context.newPage();
-    try {
-      await page.goto('/dashboard');
-      await page.evaluate(() => {
-        localStorage.setItem('token', 'expired-invalid-token');
-        localStorage.setItem('tokenExpiry', '0');
-      });
-      await page.reload();
-      await expect(page).toHaveURL(/\/login/);
-    } finally {
-      await context.close();
-    }
+    const page = await sessions.newPage({ storageState: AUTH_FILE });
+    await expireSession(page, '/dashboard');
 
-    const settingsContext = await browser.newContext({ storageState: AUTH_FILE });
-    const settingsPage = await settingsContext.newPage();
-    try {
-      await settingsPage.goto('/kpi/settings');
-      await settingsPage.evaluate(() => {
-        localStorage.setItem('token', 'expired-invalid-token');
-        localStorage.setItem('tokenExpiry', '0');
-      });
-      await settingsPage.reload();
-      await expect(settingsPage).toHaveURL(/\/login/);
-    } finally {
-      await settingsContext.close();
-    }
+    const settingsPage = await sessions.newPage({ storageState: AUTH_FILE });
+    await expireSession(settingsPage, '/kpi/settings');
   });
 });
+
+async function expireSession(page: import('@playwright/test').Page, targetPath: string): Promise<void> {
+  await page.goto(targetPath);
+  await page.evaluate(() => {
+    localStorage.setItem('token', 'expired-invalid-token');
+    localStorage.setItem('tokenExpiry', '0');
+  });
+  await page.reload();
+  await expect(page).toHaveURL(/\/login/);
+}

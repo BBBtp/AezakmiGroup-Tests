@@ -6,8 +6,8 @@ export class KpiSettingsScoreComponent extends KpiSettingsTableComponent {
   readonly minimalScoreEditButton: Locator;
   constructor(page: Page) {
     super(page, 'score', { hasValueColumn: false, hasFooterBar: false });
-    this.sufficientScoreEditButton = page.locator('[data-testid="score__Sufficient score__edit"]');
-    this.minimalScoreEditButton = page.locator('[data-testid="score__Minimal score__edit"]');
+    this.sufficientScoreEditButton = this.locate.testId('score__Sufficient score__edit');
+    this.minimalScoreEditButton = this.locate.testId('score__Minimal score__edit');
   }
 
   async expectReadOnlyShellVisible(): Promise<void> {

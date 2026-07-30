@@ -1,4 +1,5 @@
 import { Locator, expect } from '@playwright/test';
+import { LocatorFactory } from '@framework/ui';
 
 /**
  * Компонент элемента подиума (Podium Item) в блоке Top Employees.
@@ -24,9 +25,11 @@ export class PodiumItemComponent {
    * @param index Индекс элемента подиума (0, 1 или 2)
    */
   constructor(root: Locator, index: number) {
-    this.root = root.locator(`[data-testid="podium-${index}"]`);
-    this.name = this.root.locator(`[data-testid="podium-${index}__name"]`);
-    this.currency = this.root.locator(`[data-testid="podium-${index}__currency"] p`);
+    const podium = new LocatorFactory(root);
+    this.root = podium.testId(`podium-${index}`);
+    const item = podium.within(this.root);
+    this.name = item.testId(`podium-${index}__name`);
+    this.currency = item.css(`[data-testid="podium-${index}__currency"] p`);
   }
 
   /**

@@ -1,6 +1,6 @@
 import { expect, type Page, type Response } from '@playwright/test';
 
-import { loggedAction } from '@utils/playwright-logger';
+import { UiActions } from '@framework/ui';
 
 export const STAFF_KPI_API_PREFIX = '/staff/api/v1/kpi';
 
@@ -38,9 +38,7 @@ export function isKpiStatisticsResponse(response: Response): boolean {
 
 export async function openKpiAndGetStatistics(page: Page): Promise<KpiStatistics> {
   const responsePromise = page.waitForResponse(isKpiStatisticsResponse);
-  await loggedAction(page, 'navigate', 'KPI page', page.locator('body'), () =>
-    page.goto('/kpi', { waitUntil: 'domcontentloaded' }),
-  );
+  await new UiActions(page).navigate('KPI page', '/kpi', { waitUntil: 'domcontentloaded' });
   const response = await responsePromise;
   await expectSuccessfulJson(response, 'KPI statistics');
   return response.json() as Promise<KpiStatistics>;

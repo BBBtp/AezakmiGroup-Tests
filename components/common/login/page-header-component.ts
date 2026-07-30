@@ -1,4 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../../utils/test-id';
 
 /**
@@ -13,12 +14,7 @@ import { requireTestId } from '../../../utils/test-id';
  * - восстановления пароля;
  * и других страницах с единым layout-заголовком.
  */
-export class PageHeaderComponent {
-  /**
-   * Экземпляр страницы Playwright
-   */
-  page: Page;
-
+export class PageHeaderComponent extends UiObject {
   /**
    * Заголовок страницы
    */
@@ -35,15 +31,16 @@ export class PageHeaderComponent {
    * внутри которого расположен заголовок страницы
    */
   constructor(page: Page, containerTestId: string) {
-    this.page = page;
+    super(page);
     const normalizedContainerTestId = requireTestId(containerTestId, 'PageHeaderComponent');
 
     // Корневой контейнер заголовка
-    const container = page.locator(`[data-testid="${normalizedContainerTestId}"]`);
+    const container = this.locate.testId(normalizedContainerTestId);
+    const header = this.locate.within(container);
 
     // Локаторы элементов заголовка
-    this.title = container.locator('[data-testid="login__title"]');
-    this.subtitle = container.locator('[data-testid="login__subtitle"]');
+    this.title = header.testId('login__title');
+    this.subtitle = header.testId('login__subtitle');
   }
 
   /**

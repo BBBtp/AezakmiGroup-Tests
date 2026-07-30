@@ -1,4 +1,5 @@
 import { Locator, expect } from '@playwright/test';
+import { LocatorFactory } from '@framework/ui';
 
 /**
  * Компонент элемента участника (Contender Item) в списке.
@@ -28,10 +29,12 @@ export class ContenderItemComponent {
    * @param index Индекс участника в списке (для формирования data-testid)
    */
   constructor(root: Locator, index: number) {
-    this.root = root.locator(`[data-testid="contender-${index}"]`);
-    this.name = this.root.locator(`[data-testid="contender-${index}__name"]`);
-    this.currency = this.root.locator(`[data-testid="contender-${index}__currency"] p`);
-    this.avatarLetter = this.root.locator(`[data-testid="contender-${index}-avatar"] p`).first();
+    const list = new LocatorFactory(root);
+    this.root = list.testId(`contender-${index}`);
+    const contender = list.within(this.root);
+    this.name = contender.testId(`contender-${index}__name`);
+    this.currency = contender.css(`[data-testid="contender-${index}__currency"] p`);
+    this.avatarLetter = contender.css(`[data-testid="contender-${index}-avatar"] p`).first();
   }
 
   /**

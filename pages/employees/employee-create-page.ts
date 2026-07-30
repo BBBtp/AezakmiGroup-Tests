@@ -1,6 +1,5 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '../base-page';
-import { loggedAction, loggedClick, loggedFill } from '../../utils/playwright-logger';
 
 export class EmployeeCreatePage extends BasePage {
   readonly personalInfoHeading: Locator;
@@ -18,18 +17,27 @@ export class EmployeeCreatePage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.personalInfoHeading = page.getByRole('heading', { name: 'Personal info', exact: true });
-    this.workingInfoHeading = page.getByRole('heading', { name: 'Working info', exact: true });
-    this.secondNameInput = page.getByRole('textbox', { name: 'Second name', exact: true });
-    this.firstNameInput = page.getByRole('textbox', { name: 'First name', exact: true });
-    this.birthDateInput = page.getByRole('textbox', { name: 'Date of birth', exact: true });
-    this.countrySelect = page.getByRole('combobox').filter({ hasText: 'Select a country' });
-    this.citySelect = page.getByRole('combobox').filter({ hasText: 'Select a city' });
-    this.nextButton = page.locator('[data-testid$="__button-next"]');
-    this.moduleSelect = page.getByRole('button', { name: 'Select a module', exact: true });
-    this.departmentSelect = page.getByRole('button', { name: 'Select a department', exact: true });
-    this.directionSelect = page.getByRole('combobox').filter({ hasText: 'Select a direction' });
-    this.positionSelect = page.getByRole('combobox').filter({ hasText: 'Select a position' });
+    this.personalInfoHeading = this.locate.role('heading', {
+      name: 'Personal info',
+      exact: true,
+    });
+    this.workingInfoHeading = this.locate.role('heading', {
+      name: 'Working info',
+      exact: true,
+    });
+    this.secondNameInput = this.locate.role('textbox', { name: 'Second name', exact: true });
+    this.firstNameInput = this.locate.role('textbox', { name: 'First name', exact: true });
+    this.birthDateInput = this.locate.role('textbox', { name: 'Date of birth', exact: true });
+    this.countrySelect = this.locate.role('combobox').filter({ hasText: 'Select a country' });
+    this.citySelect = this.locate.role('combobox').filter({ hasText: 'Select a city' });
+    this.nextButton = this.locate.css('[data-testid$="__button-next"]');
+    this.moduleSelect = this.locate.role('button', { name: 'Select a module', exact: true });
+    this.departmentSelect = this.locate.role('button', {
+      name: 'Select a department',
+      exact: true,
+    });
+    this.directionSelect = this.locate.role('combobox').filter({ hasText: 'Select a direction' });
+    this.positionSelect = this.locate.role('combobox').filter({ hasText: 'Select a position' });
   }
 
   async navigate(): Promise<void> {
@@ -38,56 +46,49 @@ export class EmployeeCreatePage extends BasePage {
   }
 
   async openWorkingInfo(): Promise<void> {
-    await loggedFill(this.page, 'employee personal info: second name', this.secondNameInput, 'Autotest');
-    await loggedFill(this.page, 'employee personal info: first name', this.firstNameInput, 'Kpi');
-    await loggedFill(this.page, 'employee personal info: date of birth', this.birthDateInput, '01.01.1990');
-    await loggedAction(
-      this.page,
-      'press',
-      'employee personal info: close date picker',
-      this.birthDateInput,
-      () => this.birthDateInput.press('Escape'),
+    await this.actions.fill('employee personal info: second name', this.secondNameInput, 'Autotest');
+    await this.actions.fill('employee personal info: first name', this.firstNameInput, 'Kpi');
+    await this.actions.fill('employee personal info: date of birth', this.birthDateInput, '01.01.1990');
+    await this.actions.run('press', 'employee personal info: close date picker', this.birthDateInput, () =>
+      this.birthDateInput.press('Escape'),
     );
 
-    await loggedClick(this.page, 'employee personal info: country selector', this.countrySelect);
-    const country = this.page.getByRole('option', { name: 'Andorra', exact: true });
-    await loggedClick(this.page, 'employee personal info: country Andorra', country);
+    await this.actions.click('employee personal info: country selector', this.countrySelect);
+    const country = this.locate.role('option', { name: 'Andorra', exact: true });
+    await this.actions.click('employee personal info: country Andorra', country);
 
-    await loggedClick(this.page, 'employee personal info: city selector', this.citySelect);
-    const city = this.page.getByRole('option', { name: /Andorra la Vella/ });
-    await loggedClick(this.page, 'employee personal info: city Andorra la Vella', city);
+    await this.actions.click('employee personal info: city selector', this.citySelect);
+    const city = this.locate.role('option', { name: /Andorra la Vella/ });
+    await this.actions.click('employee personal info: city Andorra la Vella', city);
 
-    await loggedClick(this.page, 'employee personal info: next', this.nextButton);
+    await this.actions.click('employee personal info: next', this.nextButton);
     await expect(this.workingInfoHeading).toBeVisible();
   }
 
   async selectAsoManagerPosition(): Promise<void> {
-    await loggedClick(this.page, 'employee working info: module selector', this.moduleSelect);
-    await loggedClick(
-      this.page,
+    await this.actions.click('employee working info: module selector', this.moduleSelect);
+    await this.actions.click(
       'employee working info: module ASO',
-      this.page.getByRole('option', { name: 'ASO', exact: true }),
+      this.locate.role('option', { name: 'ASO', exact: true }),
     );
 
-    await loggedClick(this.page, 'employee working info: department selector', this.departmentSelect);
-    await loggedClick(
-      this.page,
+    await this.actions.click('employee working info: department selector', this.departmentSelect);
+    await this.actions.click(
       'employee working info: department ASA',
-      this.page.getByRole('option', { name: 'ASA', exact: true }),
+      this.locate.role('option', { name: 'ASA', exact: true }),
     );
 
-    await loggedClick(this.page, 'employee working info: direction selector', this.directionSelect);
-    await loggedClick(
-      this.page,
+    await this.actions.click('employee working info: direction selector', this.directionSelect);
+    await this.actions.click(
       'employee working info: direction Product',
-      this.page.getByRole('option', { name: 'Product', exact: true }),
+      this.locate.role('option', { name: 'Product', exact: true }),
     );
 
     await expect(this.positionSelect).toBeEnabled();
-    await loggedClick(this.page, 'employee working info: position selector', this.positionSelect);
+    await this.actions.click('employee working info: position selector', this.positionSelect);
   }
 
   get asoManagerOption(): Locator {
-    return this.page.getByRole('option', { name: 'ASO manager', exact: true });
+    return this.locate.role('option', { name: 'ASO manager', exact: true });
   }
 }

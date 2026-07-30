@@ -1,4 +1,5 @@
 import type { Route } from '@playwright/test';
+import type { CleanupHandle, CleanupRegistry } from '@framework/lifecycle';
 
 import { KpiSettingsActionRowComponent, KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
 import { STAFF_KPI_API_PREFIX } from './staff-service';
@@ -11,6 +12,7 @@ type CreateKpiSettingsActionOptions = {
   openModal: () => Promise<KpiSettingsAddValueModal>;
   fillModal: (modal: KpiSettingsAddValueModal) => Promise<void>;
   createPoints: string;
+  cleanup?: CleanupRegistry;
 };
 
 type CreateEditDeleteKpiSettingsActionOptions = CreateKpiSettingsActionOptions & {
@@ -23,9 +25,9 @@ export async function pickAvailableAbTestPercent(
   settingsPage: KpiSettingsPage,
   actionType = 'Internal test',
 ): Promise<string> {
-  const existingIds = await settingsPage.page
-    .locator(`[data-testid^="ab-tests__${actionType}__Completed with "][data-testid$="__edit"]`)
-    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-testid') ?? ''));
+  const existingIds = await settingsPage.abTestsTable.listEditButtonTestIds(
+    `ab-tests__${actionType}__Completed with `,
+  );
 
   for (let value = 31; value < 100; value++) {
     const expectedId = `ab-tests__${actionType}__Completed with ${value}% +__edit`;
@@ -36,9 +38,9 @@ export async function pickAvailableAbTestPercent(
 }
 
 export async function pickAvailableTotalMrrReachedValue(settingsPage: KpiSettingsPage): Promise<string> {
-  const existingIds = await settingsPage.page
-    .locator('[data-testid^="total-mrr__MRR milestones__Reached $"][data-testid$="__edit"]')
-    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-testid') ?? ''));
+  const existingIds = await settingsPage.totalMrrTable.listEditButtonTestIds(
+    'total-mrr__MRR milestones__Reached $',
+  );
   const existingValues = new Set(
     existingIds
       .map((id) => id.match(/total-mrr__MRR milestones__Reached \$\s?(\d+)__edit$/)?.[1])
@@ -106,7 +108,9 @@ export async function createEditDeleteKpiSettingsAction({
   fillModal,
   createPoints,
   editPoints,
+  cleanup,
 }: CreateEditDeleteKpiSettingsActionOptions): Promise<void> {
+  const cleanupHandle = cleanup ? registerKpiSettingsCleanup(cleanup, settingsPage, row) : undefined;
   try {
     await createKpiSettingsAction({ settingsPage, row, openModal, fillModal, createPoints });
 
@@ -117,9 +121,20 @@ export async function createEditDeleteKpiSettingsAction({
     await row.expectEditModalHidden();
   } finally {
     await deleteKpiSettingsActionIfPresent(settingsPage, row);
+    cleanupHandle?.dismiss();
   }
 
   await row.expectDeleted();
+}
+
+export function registerKpiSettingsCleanup(
+  cleanup: CleanupRegistry,
+  settingsPage: KpiSettingsPage,
+  row: KpiSettingsActionRowComponent,
+): CleanupHandle {
+  return cleanup.register(`KPI settings row ${row.tableName}/${row.actionType}/${row.value}`, () =>
+    deleteKpiSettingsActionIfPresent(settingsPage, row),
+  );
 }
 
 export async function createKpiSettingsAction({

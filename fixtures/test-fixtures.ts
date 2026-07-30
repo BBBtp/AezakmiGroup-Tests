@@ -1,6 +1,9 @@
 import { test as baseTest } from '@playwright/test';
 import { LoginPage } from '@modules/auth';
 import { KpiPage, KpiSettingsPage } from '@modules/kpi';
+import { CleanupRegistry } from '@framework/lifecycle';
+import { TestSessionFactory } from '@framework/playwright';
+import { ApplicationShellComponent, DashboardPage } from '@modules/navigation';
 import { testUsers } from './users';
 
 /**
@@ -21,6 +24,15 @@ export type TestFixtures = {
 
   /** KPI Settings страница */
   kpiSettingsPage: KpiSettingsPage;
+
+  /** LIFO-реестр гарантированной очистки созданных тестовых данных. */
+  cleanup: CleanupRegistry;
+
+  applicationShell: ApplicationShellComponent;
+
+  dashboardPage: DashboardPage;
+
+  sessions: TestSessionFactory;
 };
 
 /**
@@ -62,5 +74,31 @@ export const test = baseTest.extend<TestFixtures>({
   /** KPI Settings page использует page и storageState текущего Playwright project. */
   kpiSettingsPage: async ({ page }, use) => {
     await use(new KpiSettingsPage(page));
+  },
+
+  cleanup: async ({ page: _page }, use, testInfo) => {
+    const registry = new CleanupRegistry();
+    await use(registry);
+    try {
+      await registry.runAll();
+    } catch (error) {
+      await testInfo.attach('cleanup-errors', {
+        body: Buffer.from(error instanceof Error ? error.stack || error.message : String(error)),
+        contentType: 'text/plain',
+      });
+      throw error;
+    }
+  },
+
+  applicationShell: async ({ page }, use) => {
+    await use(new ApplicationShellComponent(page));
+  },
+
+  dashboardPage: async ({ page }, use) => {
+    await use(new DashboardPage(page));
+  },
+
+  sessions: async ({ browser, cleanup }, use) => {
+    await use(new TestSessionFactory(browser, cleanup));
   },
 });
