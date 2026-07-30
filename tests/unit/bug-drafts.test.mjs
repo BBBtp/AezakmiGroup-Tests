@@ -117,6 +117,62 @@ test('generateBugDrafts writes an empty index when there are no failures', async
   assert.match(await readFile(path.join(outputDir, 'README.md'), 'utf8'), /результатов.*нет/i);
 });
 
+test('generateBugDrafts keeps only the latest failed retry for an Allure ID', async (t) => {
+  const root = await temporaryDirectory(t);
+  const allureDir = path.join(root, 'allure-results');
+  const outputDir = path.join(root, 'bug-drafts');
+  await mkdir(allureDir);
+  await writeAllureResult(allureDir, 'first-result.json', {
+    status: 'failed',
+    stop: 100,
+    message: 'First attempt',
+  });
+  await writeAllureResult(allureDir, 'retry-result.json', {
+    status: 'broken',
+    stop: 200,
+    message: 'Latest retry',
+  });
+
+  const result = await generateBugDrafts({
+    allureDir,
+    outputDir,
+    client: bugDraftClient(),
+  });
+  const json = JSON.parse(await readFile(path.join(outputDir, 'TC-571', 'draft.json'), 'utf8'));
+  const index = await readFile(path.join(outputDir, 'README.md'), 'utf8');
+
+  assert.equal(result.failures, 1);
+  assert.equal(result.drafts.length, 1);
+  assert.equal(json.status, 'broken');
+  assert.equal(json.actualResult, 'Latest retry');
+  assert.equal(index.match(/\| 571 \|/g)?.length, 1);
+});
+
+test('generateBugDrafts ignores an earlier failure when the final retry passed', async (t) => {
+  const root = await temporaryDirectory(t);
+  const allureDir = path.join(root, 'allure-results');
+  const outputDir = path.join(root, 'bug-drafts');
+  await mkdir(allureDir);
+  await writeAllureResult(allureDir, 'failed-result.json', {
+    status: 'failed',
+    stop: 100,
+    message: 'Transient failure',
+  });
+  await writeAllureResult(allureDir, 'passed-retry-result.json', {
+    status: 'passed',
+    stop: 200,
+  });
+
+  const result = await generateBugDrafts({
+    allureDir,
+    outputDir,
+    client: {},
+  });
+
+  assert.equal(result.failures, 0);
+  assert.equal(result.drafts.length, 0);
+});
+
 test('resetBugDraftOutput refuses to delete its trusted root', async (t) => {
   const root = await temporaryDirectory(t);
   await assert.rejects(resetBugDraftOutput(root, root), /must be a child/);
@@ -125,6 +181,40 @@ test('resetBugDraftOutput refuses to delete its trusted root', async (t) => {
     'token=[REDACTED] password: [REDACTED] authorization: Bearer [REDACTED]',
   );
 });
+
+async function writeAllureResult(allureDir, file, { status, stop, message }) {
+  await writeFile(
+    path.join(allureDir, file),
+    JSON.stringify({
+      name: 'Navigation',
+      fullName: 'regression/navigation-dashboard.regression.spec.ts:26:7',
+      status,
+      stop,
+      statusDetails: message ? { message } : undefined,
+      labels: [
+        { name: 'ALLURE_ID', value: '571' },
+        { name: 'parentSuite', value: 'regression' },
+      ],
+    }),
+  );
+}
+
+function bugDraftClient() {
+  return {
+    async getCase() {
+      return {
+        case: {
+          id: 571,
+          title: 'Navigation',
+          expectedResult: 'Dashboard доступен.',
+        },
+      };
+    },
+    async listRunBugs() {
+      return { bugs: [], meta: null };
+    },
+  };
+}
 
 async function temporaryDirectory(t) {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'crm-bug-draft-test-'));

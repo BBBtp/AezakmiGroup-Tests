@@ -60,6 +60,8 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - Все диагностические результаты сохраняются при любом исходе.
 - После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,
   screenshot/video и очищенным error-context для каждого failed/broken результата.
+- При наличии retry в черновик попадает только последняя попытка каждого Allure ID; успешная
+  финальная попытка не создаёт bug draft и отдельно учитывается flaky-проверкой.
 - Для этого job нужны repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, `DOQA_TOKEN` и
   опциональный `DOQA_PROJECT_ID`; токен используется только для чтения кейсов и активных багов.
 - Retry остаётся диагностическим механизмом: тест, прошедший со второй попытки, считается flaky и

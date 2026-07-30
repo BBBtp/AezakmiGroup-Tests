@@ -29,12 +29,16 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.navigate();
     for (const [label, href] of sections) {
       await applicationShell.expectSidebarDestination(label, href);
+    }
+
+    for (const [, href] of sections) {
       // Some sidebar groups overlap their child links in the collapsed layout.
       // Verify the same destination directly after checking the rendered link.
       await dashboardPage.navigateTo(href);
       await dashboardPage.waitForUrl(new RegExp(`${href.replace('/', '\\/')}$`));
-      await dashboardPage.navigate();
     }
+
+    await dashboardPage.navigate();
   });
 
   test('Dashboard открывается из меню и содержит основные элементы', async ({ kpiPage, dashboardPage }) => {
