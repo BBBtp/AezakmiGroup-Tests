@@ -51,9 +51,10 @@ Run each changed Playwright scenario directly. Run smoke or regression in propor
 - Preserve ETag/versionUuid optimistic locking.
 - Never publish an empty report.
 - Completed reports may contain failed, broken or skipped mapped tests.
-- Triage every failed/broken run element after upload. Create a defect only for an explicitly
-  confirmed product failure, after a dry-run duplicate check.
-- Verify the created DoQA defect and its external tracker link.
+- Triage every failed/broken run element after upload. Prepare a bug draft only for an explicitly
+  confirmed product failure, after a read-only duplicate check.
+- Do not create DoQA or tracker defects automatically; return copy-ready text and reviewed
+  screenshot/video plus sanitized error context.
 - After upload, verify run test count, progress and run elements.
 - Do not pass or print tokens, passwords, `.env` contents or storage state.
 

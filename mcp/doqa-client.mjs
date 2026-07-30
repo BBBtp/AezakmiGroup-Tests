@@ -276,76 +276,6 @@ export class DoqaClient {
     return unwrapArray(body);
   }
 
-  async getRunBug(bugId) {
-    const { body, headers } = await this.request(`/api/run-bugs/${encodeURIComponent(bugId)}`);
-    return {
-      bug: body?.data ?? body,
-      etag: headers.get('etag') ?? null,
-    };
-  }
-
-  async getRunElementBugInfo(runElementId) {
-    const { body } = await this.request(`/api/run-elements/${encodeURIComponent(runElementId)}/bugs-info`);
-    return body?.data ?? body;
-  }
-
-  async createRunBug(
-    {
-      runElementId,
-      title,
-      priority = 'medium',
-      status = 'open',
-      actualResult,
-      expectedResult,
-      content = '',
-      useRelationTracker = true,
-    },
-    { idempotencyKey } = {},
-  ) {
-    if (!Number.isInteger(Number(runElementId)) || Number(runElementId) <= 0) {
-      throw new DoqaApiError('A positive runElementId is required to create a defect', 400, null);
-    }
-    if (!title?.trim()) throw new DoqaApiError('A defect title is required', 400, null);
-    if (!actualResult?.trim()) {
-      throw new DoqaApiError('A defect actualResult is required', 400, null);
-    }
-    if (!expectedResult?.trim()) {
-      throw new DoqaApiError('A defect expectedResult is required', 400, null);
-    }
-
-    const payload = {
-      title: title.trim(),
-      priority,
-      status,
-      actualResult: actualResult.trim(),
-      expectedResult: expectedResult.trim(),
-      content,
-      useRelationTracker: String(useRelationTracker),
-      type: 'autotest',
-      itemId: String(runElementId),
-    };
-    const form = new FormData();
-    for (const [key, value] of Object.entries(payload)) form.append(key, value);
-
-    const { body, headers } = await this.request('/api/run-bugs', {
-      method: 'POST',
-      headers: {
-        'Idempotency-Key':
-          idempotencyKey ??
-          stableKey('create-run-defect', {
-            spaceId: this.config.spaceId,
-            runElementId: Number(runElementId),
-            title: payload.title,
-          }),
-      },
-      body: form,
-    });
-    return {
-      bug: body?.data ?? body,
-      etag: headers.get('etag') ?? null,
-    };
-  }
-
   async analyzeRunFailures(runId) {
     const [run, elements, runBugs] = await Promise.all([
       this.getRun(runId),
@@ -367,29 +297,17 @@ export class DoqaClient {
     };
   }
 
-  async prepareRunDefect({
+  async prepareProductBugDraft({
     runId,
     caseId,
-    classification,
     evidence,
     title,
     actualResult,
     expectedResult,
     priority = 'high',
-    apply = false,
   }) {
-    if (classification !== 'product') {
-      return {
-        runId,
-        caseId,
-        applied: false,
-        blocked: true,
-        reason: 'only_confirmed_product_failures_can_create_defects',
-        classification,
-      };
-    }
     if (!evidence?.trim()) {
-      throw new DoqaApiError('Evidence is required for a confirmed product defect', 400, null);
+      throw new DoqaApiError('Evidence is required for a confirmed product bug draft', 400, null);
     }
 
     const [run, elements, caseSnapshot] = await Promise.all([
@@ -408,7 +326,7 @@ export class DoqaClient {
     }
     if (!['failed', 'broken', 'blocked'].includes(element.status)) {
       throw new DoqaApiError(
-        `Run element for case ${caseId} is ${element.status}; refusing to create a defect`,
+        `Run element for case ${caseId} is ${element.status}; refusing to prepare a bug draft`,
         409,
         null,
       );
@@ -422,26 +340,13 @@ export class DoqaClient {
     const duplicate = matchingBugs.find(
       (bug) => bug.title?.includes(marker) && ['open', 'work', 'testing'].includes(bug.status),
     );
-    if (duplicate) {
-      return {
-        runId,
-        caseId,
-        runElementId: element.id,
-        applied: false,
-        duplicate: true,
-        marker,
-        existingBug: safeBugSummary(duplicate),
-      };
-    }
-
     const sourceCase = caseSnapshot.case?.data ?? caseSnapshot.case;
-    const bugInfo = await this.getRunElementBugInfo(element.id);
     const resolvedTitle = truncate(title?.trim() || `${marker} ${sourceCase.title}`, 255);
     const resolvedActual =
       actualResult?.trim() || failureText(element) || `Autotest finished with status ${element.status}`;
     const resolvedExpected =
       expectedResult?.trim() || htmlToText(sourceCase.expectedResult) || 'The scenario passes';
-    const content = buildDefectContent({
+    const content = buildBugDraftContent({
       marker,
       run,
       caseId,
@@ -450,88 +355,27 @@ export class DoqaClient {
       actualResult: resolvedActual,
       expectedResult: resolvedExpected,
     });
-    const preview = {
+    return {
       runId,
       caseId,
       runElementId: element.id,
       status: element.status,
-      classification,
+      classification: 'product',
+      confirmedProduct: true,
       marker,
       title: resolvedTitle,
       priority,
-      actualResult: resolvedActual,
-      expectedResult: resolvedExpected,
-      relationTracker: Boolean(bugInfo?.relationTracker),
-      relationType: bugInfo?.relationType ?? null,
-    };
-    if (!apply) return { ...preview, applied: false, dryRun: true };
-    if (!bugInfo?.relationTracker) {
-      throw new DoqaApiError(
-        `DoQA has no tracker relation for run element ${element.id}; refusing an untracked defect`,
-        409,
-        { relationType: bugInfo?.relationType ?? null, exception: bugInfo?.exception ?? null },
-      );
-    }
-    if (bugInfo?.exception) {
-      throw new DoqaApiError('DoQA tracker integration is unavailable', 409, bugInfo.exception);
-    }
-
-    const created = await this.createRunBug({
-      runElementId: element.id,
-      title: resolvedTitle,
-      priority,
-      status: 'open',
       actualResult: resolvedActual,
       expectedResult: resolvedExpected,
       content,
-      useRelationTracker: true,
-    });
-    const bugId = Number(created.bug?.id);
-    if (!Number.isInteger(bugId) || bugId <= 0) {
-      throw new DoqaApiError('DoQA did not return a valid created defect ID', 502, created.bug);
-    }
-    const verification = await this.waitForRunBugVerification({
-      bugId,
-      runId,
-      runElementId: element.id,
-      marker,
-      requireTracker: true,
-    });
-    return {
-      ...preview,
-      applied: true,
-      bug: verification,
+      duplicate: duplicate
+        ? {
+            found: true,
+            existingBug: safeBugSummary(duplicate),
+          }
+        : { found: false },
+      readOnly: true,
     };
-  }
-
-  async waitForRunBugVerification({ bugId, runId, runElementId, marker, requireTracker = true }) {
-    const timeoutMs = Number(process.env.DOQA_DEFECT_VERIFY_TIMEOUT_MS || 30_000);
-    const deadline = Date.now() + timeoutMs;
-    let latest;
-    do {
-      const [{ bug }, runBugs] = await Promise.all([this.getRunBug(bugId), this.getRunBugs(runId)]);
-      latest = bug;
-      const linked = runBugs.some(
-        (candidate) =>
-          Number(candidate.id) === Number(bugId) &&
-          (!candidate.runElementId || Number(candidate.runElementId) === Number(runElementId)),
-      );
-      const trackerLinked = Boolean(bug?.integration?.link || bug?.integration?.title);
-      if (linked && bug?.title?.includes(marker) && (!requireTracker || trackerLinked)) {
-        return {
-          ...safeBugSummary(bug),
-          runId,
-          runElementId,
-          trackerLinked,
-        };
-      }
-      if (Date.now() < deadline) await delay(1_000);
-    } while (Date.now() < deadline);
-    throw new DoqaApiError(
-      `DoQA defect ${bugId} was created but failed link verification`,
-      502,
-      safeBugSummary(latest),
-    );
   }
 
   async discoverFolders(tree) {
@@ -707,16 +551,19 @@ function failureText(element = {}) {
   return '';
 }
 
-function buildDefectContent({ marker, run, caseId, element, evidence, actualResult, expectedResult }) {
+function buildBugDraftContent({ marker, run, caseId, element, evidence, actualResult, expectedResult }) {
   return [
-    `<p><strong>${escapeHtml(marker)} Подтверждённый дефект продукта</strong></p>`,
-    `<p>DoQA run: ${escapeHtml(run.id)} — ${escapeHtml(run.title ?? '')}</p>`,
-    `<p>Test case: #${escapeHtml(caseId)} — ${escapeHtml(element.title ?? '')}</p>`,
-    `<p>Классификация: product</p>`,
-    `<p>Основание: ${escapeHtml(evidence)}</p>`,
-    `<p>Ожидаемый результат: ${escapeHtml(expectedResult)}</p>`,
-    `<p>Фактический результат: ${escapeHtml(actualResult)}</p>`,
-  ].join('');
+    `${marker} Подтверждённый дефект продукта`,
+    '',
+    `DoQA run: ${run.id} — ${run.title ?? ''}`,
+    `Test case: #${caseId} — ${element.title ?? ''}`,
+    'Классификация: product',
+    `Основание: ${evidence}`,
+    '',
+    `Ожидаемый результат: ${expectedResult}`,
+    '',
+    `Фактический результат: ${actualResult}`,
+  ].join('\n');
 }
 
 function safeBugSummary(bug) {
@@ -748,21 +595,6 @@ function unwrapArray(value) {
 
 function truncate(value, maxLength) {
   return value.length <= maxLength ? value : `${value.slice(0, maxLength - 1)}…`;
-}
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-function delay(milliseconds) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-  });
 }
 
 export async function validateReportPath(

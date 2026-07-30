@@ -25,7 +25,13 @@ const baseReporters: any[] = [
 const reporters = [
   ['./utils/diagnostic-reporter.ts'],
   ...baseReporters.slice(0, -1),
-  ['allure-playwright', { resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results' }],
+  [
+    'allure-playwright',
+    {
+      resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
+      detail: false,
+    },
+  ],
   baseReporters.at(-1)!,
 ];
 

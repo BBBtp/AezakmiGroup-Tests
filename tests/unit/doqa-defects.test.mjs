@@ -42,9 +42,6 @@ function clientWith(overrides = {}) {
     async listRunBugs() {
       return { bugs: [], meta: null };
     },
-    async getRunElementBugInfo() {
-      return { relationTracker: true, relationType: 'yandexTracker' };
-    },
     ...overrides,
   });
   return client;
@@ -71,78 +68,51 @@ test('classifyRunFailure separates infrastructure signals from review candidates
   assert.equal(defectMarker(568), '[AUTO][TC-568]');
 });
 
-test('prepareRunDefect is a read-only preview by default', async () => {
+test('prepareProductBugDraft returns copy-ready fields without writing', async () => {
   const client = clientWith();
-  const result = await client.prepareRunDefect({
+  const result = await client.prepareProductBugDraft({
     runId: 321,
     caseId: 568,
-    classification: 'product',
     evidence: 'Admin route logs out a valid regular-user session.',
   });
 
-  assert.equal(result.dryRun, true);
-  assert.equal(result.applied, false);
-  assert.equal(result.relationType, 'yandexTracker');
+  assert.equal(result.readOnly, true);
+  assert.equal(result.confirmedProduct, true);
+  assert.equal(result.duplicate.found, false);
   assert.match(result.title, /^\[AUTO\]\[TC-568\]/);
+  assert.match(result.content, /Подтверждённый дефект продукта/);
 });
 
-test('prepareRunDefect blocks non-product classifications and active duplicates', async () => {
-  const blocked = await clientWith().prepareRunDefect({
-    runId: 321,
-    caseId: 568,
-    classification: 'test',
-    evidence: 'The locator changed.',
-    apply: true,
-  });
-  assert.equal(blocked.blocked, true);
-
-  const duplicate = await clientWith({
+test('prepareProductBugDraft reports an active duplicate without creating anything', async () => {
+  const result = await clientWith({
     async listRunBugs() {
       return {
         bugs: [{ id: 77, title: '[AUTO][TC-568] Existing defect', status: 'open', priority: 'high' }],
         meta: null,
       };
     },
-  }).prepareRunDefect({
+  }).prepareProductBugDraft({
     runId: 321,
     caseId: 568,
-    classification: 'product',
     evidence: 'Confirmed product behavior.',
-    apply: true,
   });
 
-  assert.equal(duplicate.duplicate, true);
-  assert.equal(duplicate.existingBug.id, 77);
+  assert.equal(result.readOnly, true);
+  assert.equal(result.duplicate.found, true);
+  assert.equal(result.duplicate.existingBug.id, 77);
 });
 
-test('prepareRunDefect creates and verifies a tracker-linked product defect', async () => {
-  let createdInput;
-  const client = clientWith({
-    async createRunBug(input) {
-      createdInput = input;
-      return { bug: { id: 88 }, etag: 'bug-version' };
-    },
-    async waitForRunBugVerification(input) {
-      return {
-        id: input.bugId,
-        title: '[AUTO][TC-568] Regular user access',
-        status: 'open',
-        trackerLinked: true,
-      };
-    },
-  });
-
-  const result = await client.prepareRunDefect({
-    runId: 321,
-    caseId: 568,
-    classification: 'product',
-    evidence: 'Admin route logs out a valid regular-user session.',
-    apply: true,
-  });
-
-  assert.equal(result.applied, true);
-  assert.equal(result.bug.id, 88);
-  assert.equal(result.bug.trackerLinked, true);
-  assert.equal(createdInput.useRelationTracker, true);
-  assert.match(createdInput.content, /Подтверждённый дефект продукта/);
+test('prepareProductBugDraft refuses a passing run element', async () => {
+  await assert.rejects(
+    clientWith({
+      async listRunElements() {
+        return [{ id: 9001, viewId: 568, title: 'Regular user access', status: 'passed' }];
+      },
+    }).prepareProductBugDraft({
+      runId: 321,
+      caseId: 568,
+      evidence: 'No product failure exists.',
+    }),
+    /refusing to prepare a bug draft/,
+  );
 });

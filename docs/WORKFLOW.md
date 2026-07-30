@@ -26,8 +26,8 @@
 12. Команда завершается успешно только после проверки `counts.tests`, `progress`, элементов
     прогона и соответствия Allure ID кейсам DoQA.
 13. Для failed/broken элементов выполняется `doqa_analyze_run_failures`.
-14. Только подтверждённые продуктовые ошибки проходят dry-run дедупликации и создаются через
-    `doqa_create_product_defect`; DoQA передаёт их в настроенный Yandex Tracker.
+14. Только подтверждённые продуктовые ошибки проходят read-only дедупликацию и оформляются через
+    `doqa_prepare_product_bug_draft`; пользователь вручную создаёт баг в DoQA.
 15. Утром формируется сводка: passed/failed/broken/skipped, новые ошибки, повторяющиеся ошибки и требуемые баги.
 
 ## Команды
@@ -38,6 +38,7 @@ npm run quality
 npx playwright test <file> --project=regression --workers=1
 npm run doqa:run -- --project=regression --workers=1
 npm run doqa:publish
+npm run bug:drafts
 ```
 
 Для адресной публикации нескольких тестов:
@@ -57,6 +58,10 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - Параллельные группы: auth, KPI read-only, navigation/session.
 - KPI Settings запускается после них, потому что сценарии меняют общие настройки CRM.
 - Все диагностические результаты сохраняются при любом исходе.
+- После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,
+  screenshot/video и очищенным error-context для каждого failed/broken результата.
+- Для этого job нужны repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, `DOQA_TOKEN` и
+  опциональный `DOQA_PROJECT_ID`; токен используется только для чтения кейсов и активных багов.
 - Retry остаётся диагностическим механизмом: тест, прошедший со второй попытки, считается flaky и
   проваливает job.
 - Публикация в DoQA доступна только при ручном запуске с `publish_to_doqa=true` и approval в
@@ -74,9 +79,12 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - Не публиковать незавершённый или некорректный отчёт; продуктовые failed/broken результаты
   являются допустимым preflight.
 - После загрузки обязательно проверять `counts.tests`, `progress`, элементы и ID через API.
-- Не заводить дефект автоматически по timeout/locator/network сообщению.
-- Создавать дефект только после подтверждения `product`, dry-run и проверки дублей.
-- После создания проверять DoQA bug ID и tracker link.
+- Не готовить продуктовый баг автоматически по timeout/locator/network сообщению.
+- Формировать финальный черновик только после подтверждения `product` и проверки дублей.
+- Не создавать DoQA/Tracker дефекты автоматически; передавать пользователю текст и вложения.
+- Не включать stdout/stderr/trace, пароли, токены и значения чувствительных `fill()` в bug draft.
+- Визуально проверить screenshot/video перед ручной загрузкой: изображение может содержать данные
+  интерфейса, которые нельзя надёжно отредактировать текстовыми правилами.
 
 ## Критерий готовности кейса
 
@@ -87,4 +95,4 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - лог объясняет ключевые действия и локаторы;
 - отчёт загружен в DoQA;
 - в DoQA появился элемент прогона и статус кейса обновился.
-- для подтверждённого продуктового падения создан один недублирующийся дефект с tracker link.
+- для подтверждённого продуктового падения подготовлен один недублирующийся черновик с вложениями.

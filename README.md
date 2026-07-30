@@ -31,6 +31,7 @@ npm run test:regression  # подробный regression-набор
 npm run test:auth        # тесты авторизации и сессии
 npm run doqa:run -- --project=regression --workers=1
 npm run doqa:publish     # публикация уже собранного Allure-каталога
+npm run bug:drafts      # read-only черновики по failed/broken Allure-результатам
 ```
 
 `doqa:run` запускает тесты и публикует свежие Allure results в DoQA. Passed, failed, broken и
@@ -43,9 +44,11 @@ MCP не принимает токены в аргументах инструм�
 `DOQA_AUTOTEST_TOKEN` из окружения и разрешает выбирать только имя файла внутри
 `DOQA_REPORT_DIR`. `doqa_improve_case` работает как dry-run, пока явно не передан `apply: true`.
 После failed/broken run инструмент `doqa_analyze_run_failures` выполняет read-only triage.
-`doqa_create_product_defect` также работает как dry-run по умолчанию, проверяет активные дубли
-`[AUTO][TC-<id>]` и создаёт баг только для подтверждённой классификации `product`. После записи
-проверяются DoQA bug ID и ссылка настроенного трекера.
+`doqa_prepare_product_bug_draft` формирует готовые поля бага только после подтверждения
+классификации `product` и проверяет активные дубли `[AUTO][TC-<id>]`. Он ничего не записывает.
+Команда `bug:drafts` создаёт каталог `bug-drafts/TC-<id>` с `bug.md`, `draft.json`, screenshot,
+video и очищенным error-context. stdout/stderr и trace в пакет не попадают; screenshot/video
+отмечаются для визуальной проверки перед ручной загрузкой.
 
 ## Архитектура
 
@@ -93,13 +96,16 @@ GitHub Actions выполняет статический quality gate для pul
 параллельно, затем отдельно выполняет сценарии с общими KPI Settings. Каждый job сохраняет
 Allure, blob, HTML, JSON, JUnit, traces, screenshots и videos на 14 дней. Тест, прошедший только
 после retry, отмечается как flaky и делает соответствующую CI job красной.
+После завершения regression отдельный read-only job сохраняет artifact `bug-drafts-<run-id>`:
+для каждого failed/broken теста в нём находятся готовые поля формы и диагностические вложения.
 
 Nightly-прогон сам по себе ничего не публикует в DoQA. Для публикации запустите workflow вручную
 с параметром `publish_to_doqa=true`. Job публикации использует GitHub Environment
-`doqa-production`; настройте для него required reviewers и environment secrets:
+`doqa-production`; настройте для него required reviewers. Read-only job черновиков использует
+repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, опционально `DOQA_PROJECT_ID` и
+`DOQA_TOKEN`. Для environment `doqa-production` дополнительно нужен:
 
-- `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, опционально `DOQA_PROJECT_ID`;
-- `DOQA_TOKEN`, `DOQA_AUTOTEST_TOKEN`.
+- `DOQA_AUTOTEST_TOKEN`.
 
 Публикация начинается после завершения всех regression-групп, включая завершённые failed jobs,
 объединяет их Allure results и повторно выполняет preflight и post-upload verification.

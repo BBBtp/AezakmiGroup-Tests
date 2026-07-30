@@ -120,36 +120,6 @@ test('createCase uses a stable idempotency key for an identical payload', async 
   assert.equal(keys[0], keys[1]);
 });
 
-test('createRunBug posts a multipart autotest defect without exposing tracker credentials', async () => {
-  let request;
-  const fetchImpl = async (url, options = {}) => {
-    request = { url, options };
-    return json(201, { data: { id: 88, title: '[AUTO][TC-568] Access control' } }, { ETag: 'bug-1' });
-  };
-  const client = new DoqaClient(
-    { endpoint: 'http://doqa.test', spaceId: 7, token: 'not-a-real-token' },
-    { fetchImpl },
-  );
-
-  const result = await client.createRunBug({
-    runElementId: 9001,
-    title: '[AUTO][TC-568] Access control',
-    actualResult: 'The session is cleared',
-    expectedResult: 'The session remains active',
-    content: '<p>Evidence</p>',
-  });
-
-  assert.equal(request.url, 'http://doqa.test/api/run-bugs');
-  assert.equal(request.options.method, 'POST');
-  assert.ok(request.options.body instanceof FormData);
-  assert.equal(request.options.body.get('type'), 'autotest');
-  assert.equal(request.options.body.get('itemId'), '9001');
-  assert.equal(request.options.body.get('useRelationTracker'), 'true');
-  assert.equal(request.options.headers['Content-Type'], undefined);
-  assert.equal(result.bug.id, 88);
-  assert.equal(result.etag, 'bug-1');
-});
-
 function json(status, body, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,

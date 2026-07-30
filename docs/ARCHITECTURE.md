@@ -27,7 +27,11 @@ flowchart TD
   Allure --> Upload[POST /api/autotests/report]
   Upload --> DoQA
   DoQA --> Triage[Failed run triage]
-  Triage -->|confirmed product| Defect[DoQA defect]
+  Triage -->|confirmed product| Draft[Read-only bug draft]
+  Allure --> Evidence[Reviewed screenshot/video and sanitized context]
+  Evidence --> Draft
+  Draft --> Manual[Manual review and create]
+  Manual --> Defect[DoQA defect]
   Defect --> Tracker[Yandex Tracker]
 ```
 
@@ -120,11 +124,10 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 ### `mcp/`
 
 `doqa-client.mjs` работает с API DoQA: ищет кандидатов, читает кейсы, переводит кейс в работу,
-загружает отчёты и безопасно управляет дефектами элементов прогона. PATCH использует ETag той же версии, которая была прочитана и
+загружает отчёты и формирует read-only черновики дефектов элементов прогона. PATCH использует ETag той же версии, которая была прочитана и
 проанализирована; при `412 Precondition Failed` клиент повторно читает кейс и не перезаписывает
-чужое изменение. Defect flow читает run element и tracker relation, выполняет dry-run,
-дедупликацию активных багов по маркеру `[AUTO][TC-<id>]`, а после записи проверяет DoQA bug и
-внешнюю tracker-ссылку. `server.mjs` предоставляет операции как MCP-инструменты с read/write
+чужое изменение. Bug-draft flow читает run element, выполняет дедупликацию активных багов по
+маркеру `[AUTO][TC-<id>]` и возвращает готовые поля без внешней записи. `server.mjs` предоставляет операции как MCP-инструменты с read/write
 аннотациями и структурированным результатом. Секрет отчёта берётся только из окружения, а путь
 ограничен доверенным каталогом.
 
@@ -136,7 +139,10 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 блокируют публикацию.
 После загрузки проверяются `counts.tests`, `progress`, элементы run и соответствие Allure ID
 кейсам DoQA. Ненулевой exit code Playwright остаётся ненулевым для CI, но больше не скрывает
-результат от DoQA.
+результат от DoQA. `bug-drafts.mjs` читает failed/broken Allure results, получает ожидаемый
+бизнес-результат из DoQA, исключает stdout/stderr/trace, редактирует чувствительные строки в
+error-context и создаёт `bug.md`, `draft.json`, screenshot/video для ручного оформления.
+Визуальные вложения требуют просмотра перед загрузкой.
 
 ### `.agents/skills/`
 

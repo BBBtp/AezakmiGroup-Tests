@@ -17,6 +17,7 @@ dist/
 /.playwright-cli/
 /outputs/
 /reports/
+/bug-drafts/
 /tmp/
 *.inspect.ndjson
 .DS_Store

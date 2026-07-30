@@ -29,7 +29,8 @@
     "mcp:doqa": "node mcp/server.mjs",
     "doqa:run": "node scripts/doqa-run.mjs",
     "doqa:publish": "node scripts/doqa-publish.mjs",
-    "doqa:summary": "node scripts/doqa-summary.mjs"
+    "doqa:summary": "node scripts/doqa-summary.mjs",
+    "bug:drafts": "node scripts/bug-draft-cli.mjs"
   },
   "files": [
     "components/**/*",
