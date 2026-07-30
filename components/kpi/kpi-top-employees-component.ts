@@ -1,5 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { PodiumItemComponent } from './podium-item-component';
 import { ContenderItemComponent } from './contender-item-component';
 
@@ -34,10 +35,10 @@ export class KpiTopEmployeesComponent extends UiObject {
    */
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.testId('top-employees');
+    this.root = this.locate.testId(kpiTestIds.topEmployees.root);
     const topEmployees = this.locate.within(this.root);
-    this.title = topEmployees.testId('top-employees__title');
-    this.podium = topEmployees.testId('top-employees__podium');
+    this.title = topEmployees.testId(kpiTestIds.topEmployees.title);
+    this.podium = topEmployees.testId(kpiTestIds.topEmployees.podium);
 
     this.podiumItems = [
       new PodiumItemComponent(this.podium, 0),
@@ -45,19 +46,14 @@ export class KpiTopEmployeesComponent extends UiObject {
       new PodiumItemComponent(this.podium, 2),
     ];
 
-    this.contendersRoot = topEmployees.testId('top-employees__contenders');
+    this.contendersRoot = topEmployees.testId(kpiTestIds.topEmployees.contenders);
   }
 
   /**
    * Возвращает количество претендентов
    */
   async getContendersCount(): Promise<number> {
-    return this.locate
-      .within(this.contendersRoot)
-      .css(
-        '[data-testid^="contender-"]:not([data-testid*="avatar"]):not([data-testid*="name"]):not([data-testid*="currency"])',
-      )
-      .count();
+    return this.locate.within(this.contendersRoot).css(kpiTestIds.topEmployees.contendersSelector).count();
   }
 
   /**
@@ -81,15 +77,15 @@ export class KpiTopEmployeesComponent extends UiObject {
    * @param expectedTitle ожидаемый текст заголовка
    */
   async verifyVisible(expectedTitle: string): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.title).toHaveText(expectedTitle);
+    await this.expectations.visible('KPI top employees', this.root);
+    await this.expectations.text('KPI top employees title', this.title, expectedTitle);
   }
 
   /**
    * Проверяет видимость подиума и всех элементов внутри
    */
   async verifyPodium(): Promise<void> {
-    await expect(this.podium).toBeVisible();
+    await this.expectations.visible('KPI top employees podium', this.podium);
     for (const item of this.podiumItems) {
       await item.verify();
     }
@@ -99,7 +95,9 @@ export class KpiTopEmployeesComponent extends UiObject {
    * Проверяет видимость претендентов и корректность каждого элемента
    */
   async verifyContenders(): Promise<void> {
-    await expect(this.contendersRoot).toBeVisible({ timeout: 10000 });
+    await this.expectations.visible('KPI top employees contenders', this.contendersRoot, {
+      timeout: 10000,
+    });
     const contendersCount = await this.getContendersCount();
     for (let i = 0; i < contendersCount; i++) {
       const contender = this.getContender(i);

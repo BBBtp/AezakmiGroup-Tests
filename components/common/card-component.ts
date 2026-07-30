@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
 import { requireTestId } from '../../utils/test-id';
 
@@ -90,14 +90,12 @@ export class CardComponent extends UiObject {
    * - отображение всех ключевых значений карточки.
    */
   async assertVisible(cardTitle: string): Promise<void> {
-    await expect(this.root).toBeVisible();
-
-    await expect(this.title).toBeVisible();
-    await expect(this.title).toContainText(cardTitle);
-
-    await expect(this.mainValue).toBeVisible();
-    await expect(this.absValue).toBeVisible();
-    await expect(this.percentValue).toBeVisible();
-    await expect(this.period).toBeVisible();
+    await this.expectations.visible(`${cardTitle} KPI card`, this.root);
+    await this.expectations.visible(`${cardTitle} KPI card title`, this.title);
+    await this.expectations.containsText(`${cardTitle} KPI card title`, this.title, cardTitle);
+    await this.expectations.visible(`${cardTitle} KPI card main value`, this.mainValue);
+    await this.expectations.visible(`${cardTitle} KPI card absolute value`, this.absValue);
+    await this.expectations.visible(`${cardTitle} KPI card percentage`, this.percentValue);
+    await this.expectations.visible(`${cardTitle} KPI card period`, this.period);
   }
 }

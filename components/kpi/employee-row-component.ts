@@ -1,5 +1,6 @@
-import { Locator, expect } from '@playwright/test';
+import { Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { EmployeeData } from './kpi-employees-table-component';
 import { parseCurrency } from '../../utils/parser';
 
@@ -48,34 +49,32 @@ export class EmployeeRowComponent extends UiObject {
    */
   constructor(root: Locator, index: number) {
     super(root.page());
+    const testIds = kpiTestIds.employeesTable.row(index);
     const table = this.locate.within(root);
-    this.row = table.css('tbody tr').nth(index);
-    this.rating = table.testId(`employees-table__rating-${index}`);
-    this.avatarLetter = table.css(`[data-testid="employees-table__avatar-${index}"] p`).first();
-    this.name = table.testId(`employees-table__avatar-${index}-title`);
-    this.sublink = table.testId(`employees-table__avatar-${index}-sublink`);
-    this.score = table.testId(`employees-table__score-${index}`);
-    this.mrr = table.testId(`employees-table__mrr-${index}`);
-    this.appsNumber = table.testId(`employees-table__apps-number-${index}`);
-    this.lastModified = table.testId(`employees-table__last-modified-${index}`);
-    this.openButton = this.locate
-      .within(this.row)
-      .css('button:has-text("Open"), a:has-text("Open"), [role="button"]:has-text("Open")')
-      .first();
+    this.row = table.css(kpiTestIds.employeesTable.rowsSelector).nth(index);
+    this.rating = table.testId(testIds.rating);
+    this.avatarLetter = table.css(testIds.avatarSelector).first();
+    this.name = table.testId(testIds.name);
+    this.sublink = table.testId(testIds.sublink);
+    this.score = table.testId(testIds.score);
+    this.mrr = table.testId(testIds.mrr);
+    this.appsNumber = table.testId(testIds.appsNumber);
+    this.lastModified = table.testId(testIds.lastModified);
+    this.openButton = this.locate.within(this.row).css(kpiTestIds.employeesTable.openActionSelector).first();
   }
 
   /**
    * Проверяет видимость всех ключевых элементов строки сотрудника
    */
   async verify(): Promise<void> {
-    await expect(this.rating).toBeVisible();
-    await expect(this.avatarLetter).toBeVisible();
-    await expect(this.name).toBeVisible();
-    await expect(this.score).toBeVisible();
-    await expect(this.mrr).toBeVisible();
-    await expect(this.appsNumber).toBeVisible();
-    await expect(this.lastModified).toBeVisible();
-    await expect(this.openButton).toBeVisible();
+    await this.expectations.visible('KPI employee rating', this.rating);
+    await this.expectations.visible('KPI employee avatar', this.avatarLetter);
+    await this.expectations.visible('KPI employee name', this.name);
+    await this.expectations.visible('KPI employee score', this.score);
+    await this.expectations.visible('KPI employee MRR', this.mrr);
+    await this.expectations.visible('KPI employee applications', this.appsNumber);
+    await this.expectations.visible('KPI employee last modified', this.lastModified);
+    await this.expectations.visible('KPI employee open action', this.openButton);
   }
 
   /**
@@ -101,7 +100,9 @@ export class EmployeeRowComponent extends UiObject {
   async verifyAvatarMatchesName(): Promise<void> {
     const letter = (await this.avatarLetter.textContent())?.trim() ?? '';
     const name = (await this.name.textContent())?.trim() ?? '';
-    await expect(letter).toBe(name.charAt(0));
+    if (letter !== name.charAt(0)) {
+      throw new Error(`Employee avatar "${letter}" does not match employee name "${name}"`);
+    }
   }
 
   async open(): Promise<void> {

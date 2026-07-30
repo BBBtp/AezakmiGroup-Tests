@@ -18,13 +18,11 @@ const directLocatorMethods = new Set([
 ]);
 const rawNetworkMethods = new Set(['goto', 'route', 'unroute', 'waitForRequest', 'waitForResponse']);
 const violations = [];
-const centralizedLocatorFiles = new Set([path.join('pages', 'kpi', 'kpi-settings-page.ts')]);
-
 function usesCentralizedLocatorContract(file) {
   const relative = path.relative(root, file);
   return (
-    centralizedLocatorFiles.has(relative) ||
-    relative.startsWith(`${path.join('components', 'kpi', 'settings')}${path.sep}`)
+    relative.startsWith(`${path.join('pages', 'kpi')}${path.sep}`) ||
+    relative.startsWith(`${path.join('components', 'kpi')}${path.sep}`)
   );
 }
 
@@ -91,20 +89,20 @@ for (const implementationRoot of implementationRoots) {
       ) {
         const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
         violations.push(
-          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI settings UI must use UiExpectations instead of raw expect()`,
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI UI must use UiExpectations instead of raw expect()`,
         );
       }
       if (
         usesCentralizedLocatorContract(file) &&
         ts.isCallExpression(node) &&
         ts.isPropertyAccessExpression(node.expression) &&
-        node.expression.name.text === 'testId' &&
+        (node.expression.name.text === 'testId' || node.expression.name.text === 'css') &&
         node.arguments[0] &&
         (ts.isStringLiteral(node.arguments[0]) || ts.isNoSubstitutionTemplateLiteral(node.arguments[0]))
       ) {
         const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
         violations.push(
-          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI settings data-testid must come from @locators/kpi-settings`,
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI selector must come from @locators/kpi or @locators/kpi-settings`,
         );
       }
       if (
@@ -162,6 +160,6 @@ if (violations.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    'Architecture validation passed: public modules, centralized KPI settings locators, managed UI actions/expectations and network access are enforced.',
+    'Architecture validation passed: public modules, centralized KPI locators, managed UI actions/expectations and network access are enforced.',
   );
 }

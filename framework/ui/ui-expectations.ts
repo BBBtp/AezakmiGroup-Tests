@@ -33,6 +33,35 @@ export class UiExpectations {
     );
   }
 
+  nonEmpty(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
+    return loggedExpectation(this.page, target, locator, 'count>0', () =>
+      expect.poll(() => locator.count(), options).toBeGreaterThan(0),
+    );
+  }
+
+  countAtLeast(
+    target: string,
+    locator: Locator,
+    minimum: number,
+    options?: { timeout?: number },
+  ): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `count>=${minimum}`, () =>
+      expect.poll(() => locator.count(), options).toBeGreaterThanOrEqual(minimum),
+    );
+  }
+
+  attribute(
+    target: string,
+    locator: Locator,
+    name: string,
+    value: string | RegExp,
+    options?: { timeout?: number },
+  ): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `${name}=${String(value)}`, () =>
+      expect(locator).toHaveAttribute(name, value, options),
+    );
+  }
+
   text(target: string, locator: Locator, value: string | RegExp): Promise<void> {
     return loggedExpectation(this.page, target, locator, `text=${String(value)}`, () =>
       expect(locator).toHaveText(value),
@@ -49,6 +78,29 @@ export class UiExpectations {
     const body = this.page.locator('body');
     return loggedExpectation(this.page, target, body, `url=${String(value)}`, () =>
       expect(this.page).toHaveURL(value, options),
+    );
+  }
+
+  textChanged(
+    target: string,
+    locator: Locator,
+    previousValue: string | null,
+    options?: { timeout?: number; intervals?: number[] },
+  ): Promise<void> {
+    return loggedExpectation(this.page, target, locator, 'text changed', () =>
+      expect.poll(() => locator.textContent(), options).not.toBe(previousValue),
+    );
+  }
+
+  pollNumberAtLeast(
+    target: string,
+    locator: Locator,
+    probe: () => Promise<number>,
+    minimum: number,
+    options?: { timeout?: number; intervals?: number[] },
+  ): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `poll>=${minimum}`, () =>
+      expect.poll(probe, options).toBeGreaterThanOrEqual(minimum),
     );
   }
 }

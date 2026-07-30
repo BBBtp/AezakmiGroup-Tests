@@ -1,5 +1,6 @@
-import { Locator, expect } from '@playwright/test';
-import { LocatorFactory } from '@framework/ui';
+import { Locator } from '@playwright/test';
+import { LocatorFactory, UiExpectations } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 
 /**
  * Компонент элемента подиума (Podium Item) в блоке Top Employees.
@@ -19,6 +20,7 @@ export class PodiumItemComponent {
 
   /** Валютное значение сотрудника на подиуме */
   readonly currency: Locator;
+  private readonly expectations: UiExpectations;
 
   /**
    * @param root Корневой локатор контейнера подиума
@@ -26,21 +28,25 @@ export class PodiumItemComponent {
    */
   constructor(root: Locator, index: number) {
     const podium = new LocatorFactory(root);
-    this.root = podium.testId(`podium-${index}`);
+    const testIds = kpiTestIds.topEmployees.podiumItem(index);
+    this.expectations = new UiExpectations(root.page());
+    this.root = podium.testId(testIds.root);
     const item = podium.within(this.root);
-    this.name = item.testId(`podium-${index}__name`);
-    this.currency = item.css(`[data-testid="podium-${index}__currency"] p`);
+    this.name = item.testId(testIds.name);
+    this.currency = item.css(testIds.currencySelector);
   }
 
   /**
    * Проверяет видимость всех ключевых элементов и что значение валюты не пустое
    */
   async verify(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.name).toBeVisible();
-    await expect(this.currency).toBeVisible();
+    await this.expectations.visible('KPI podium item', this.root);
+    await this.expectations.visible('KPI podium employee name', this.name);
+    await this.expectations.visible('KPI podium currency', this.currency);
 
     const text = await this.currency.textContent();
-    await expect(text?.trim().length).toBeGreaterThan(0);
+    if (!text?.trim()) {
+      throw new Error('KPI podium currency must not be empty');
+    }
   }
 }

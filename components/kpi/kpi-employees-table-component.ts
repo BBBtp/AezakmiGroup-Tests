@@ -1,5 +1,6 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 import { EmployeeRowComponent } from './employee-row-component';
 
 /**
@@ -41,10 +42,10 @@ export class KpiEmployeesTableComponent extends UiObject {
    */
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.testId('employees-table__main');
+    this.root = this.locate.testId(kpiTestIds.employeesTable.root);
     const table = this.locate.within(this.root);
-    this.rowsRoot = table.css('tbody tr');
-    this.header = table.css('thead tr');
+    this.rowsRoot = table.css(kpiTestIds.employeesTable.rowsSelector);
+    this.header = table.css(kpiTestIds.employeesTable.headerSelector);
   }
 
   /**
@@ -52,10 +53,9 @@ export class KpiEmployeesTableComponent extends UiObject {
    * каждая строка проходит проверку видимости через EmployeeRowComponent
    */
   async verifyVisible(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    const rowCount = await this.getRowCount();
+    await this.expectations.visible('KPI employees table', this.root);
+    await this.expectations.nonEmpty('KPI employee rows', this.rowsRoot);
     const rows = await this.getRows();
-    expect(rowCount).toBeGreaterThan(0);
     for (const row of rows) {
       await row.verify();
     }
@@ -87,15 +87,8 @@ export class KpiEmployeesTableComponent extends UiObject {
    * @param columnName название столбца
    */
   async getHeaderCell(columnName: string): Promise<Locator> {
-    const testIdMap: { [key: string]: string } = {
-      Score: 'employees-table__header-score',
-      MRR: 'employees-table__header-mrr',
-      Rating: 'employees-table__header-rating',
-      Name: 'employees-table__header-name',
-      'Number of apps': 'employees-table__header-numberOfApps',
-      'Last modified': 'employees-table__header-lastModified',
-    };
-    const testId = testIdMap[columnName];
+    const testId =
+      kpiTestIds.employeesTable.headers[columnName as keyof typeof kpiTestIds.employeesTable.headers];
     if (!testId) {
       throw new Error(`Unknown column: ${columnName}`);
     }
@@ -121,22 +114,22 @@ export class KpiEmployeesTableComponent extends UiObject {
     let previousSnapshot = '';
     let stableReads = 0;
 
-    await expect
-      .poll(
-        async () => {
-          const rows = await this.rowsRoot.allTextContents();
-          const snapshot = JSON.stringify(rows);
-          stableReads = snapshot === previousSnapshot && rows.length > 0 ? stableReads + 1 : 0;
-          previousSnapshot = snapshot;
-          return stableReads;
-        },
-        {
-          message: 'Employee table rows must stop changing',
-          timeout: 15000,
-          intervals: [100, 200, 400],
-        },
-      )
-      .toBeGreaterThanOrEqual(1);
+    await this.expectations.pollNumberAtLeast(
+      'KPI employee rows become stable',
+      this.rowsRoot,
+      async () => {
+        const rows = await this.rowsRoot.allTextContents();
+        const snapshot = JSON.stringify(rows);
+        stableReads = snapshot === previousSnapshot && rows.length > 0 ? stableReads + 1 : 0;
+        previousSnapshot = snapshot;
+        return stableReads;
+      },
+      1,
+      {
+        timeout: 15000,
+        intervals: [100, 200, 400],
+      },
+    );
   }
 
   /**
@@ -144,11 +137,13 @@ export class KpiEmployeesTableComponent extends UiObject {
    */
   async verifyTableDataValid(): Promise<void> {
     const data = await this.getData();
-    expect(data.length).toBeGreaterThan(0);
+    if (data.length === 0) {
+      throw new Error('KPI employees table must contain data');
+    }
     for (const row of data) {
-      expect(row.name).toBeTruthy();
-      expect(row.score).toBeDefined();
-      expect(row.mrr).toBeDefined();
+      if (!row.name || !Number.isFinite(row.score) || !Number.isFinite(row.mrr)) {
+        throw new Error(`Invalid KPI employee row: ${JSON.stringify(row)}`);
+      }
     }
   }
 
@@ -178,10 +173,12 @@ export class KpiEmployeesTableComponent extends UiObject {
       if (isNumericColumn) {
         const currentNumber = Number(current);
         const nextNumber = Number(next);
-        if (direction === 'asc') {
-          expect(currentNumber).toBeLessThanOrEqual(nextNumber);
-        } else {
-          expect(currentNumber).toBeGreaterThanOrEqual(nextNumber);
+        const correctlySorted =
+          direction === 'asc' ? currentNumber <= nextNumber : currentNumber >= nextNumber;
+        if (!correctlySorted) {
+          throw new Error(
+            `KPI employees ${String(column)} is not sorted ${direction}: ${currentNumber}, ${nextNumber}`,
+          );
         }
         continue;
       }
@@ -190,10 +187,11 @@ export class KpiEmployeesTableComponent extends UiObject {
       const nextString = String(next).toLowerCase();
       const comparison = currentString.localeCompare(nextString);
 
-      if (direction === 'asc') {
-        expect(comparison).toBeLessThanOrEqual(0);
-      } else {
-        expect(comparison).toBeGreaterThanOrEqual(0);
+      const correctlySorted = direction === 'asc' ? comparison <= 0 : comparison >= 0;
+      if (!correctlySorted) {
+        throw new Error(
+          `KPI employees ${String(column)} is not sorted ${direction}: "${currentString}", "${nextString}"`,
+        );
       }
     }
   }

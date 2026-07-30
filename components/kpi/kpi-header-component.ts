@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 
 /**
  * Компонент заголовка KPI блока.
@@ -28,10 +29,10 @@ export class KpiHeaderComponent extends UiObject {
    */
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.testId('kpi');
+    this.root = this.locate.testId(kpiTestIds.page);
     const header = this.locate.within(this.root);
-    this.settingsButton = header.testId('settings-button');
-    this.subtitle = header.testId('subtitle');
-    this.errorBlock = header.testId('error-content');
+    this.settingsButton = header.testId(kpiTestIds.settingsButton);
+    this.subtitle = header.testId(kpiTestIds.subtitle);
+    this.errorBlock = header.testId(kpiTestIds.errorContent);
   }
 }

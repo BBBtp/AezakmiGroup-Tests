@@ -18,9 +18,9 @@ Use the aliases in `tsconfig.json` for new code. Add a module export before expo
 
 KPI Settings scenarios mutate shared application configuration and therefore remain serial even if the rest of the suite becomes parallel. Use the `kpiSettingsLifecycle` fixture: it allocates data and registers cleanup before creation. `ManagedKpiSettingsAction.remove()` performs eager cleanup; a failed eager cleanup remains registered for fixture teardown retry.
 
-KPI Settings pages and components take every `data-testid` from `@locators/kpi-settings` and use
-`UiExpectations` for observable UI state. The architecture check rejects inline test IDs and raw
-Playwright `expect()` in this migrated slice.
+KPI pages and components take every selector from `@locators/kpi` or `@locators/kpi-settings` and
+use `UiExpectations` for observable UI state. The architecture check rejects inline test IDs/CSS
+and raw Playwright `expect()` throughout the migrated KPI UI.
 
 Business tests must not call `locator`, `getBy*`, raw `page.goto/route/waitFor*` or diagnostic
 action helpers directly. Add UI behavior to the domain module and network behavior to the

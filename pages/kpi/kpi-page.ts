@@ -11,7 +11,6 @@ import { KpiMonthFiltersComponent } from '../../components/kpi/kpi-month-filters
 import { KpiPerformanceChartComponent } from '../../components/kpi/kpi-performance-chart-component';
 import { KpiTopEmployeesComponent } from '../../components/kpi/kpi-top-employees-component';
 import { KpiEmployeesTableComponent } from '../../components/kpi/kpi-employees-table-component';
-import { FilterFormComponent } from '../../components/forms/filter-form-component';
 
 /**
  * Страница KPI
@@ -38,9 +37,6 @@ export class KpiPage extends BasePage {
   /** Таблица сотрудников KPI */
   readonly employeesTable: KpiEmployeesTableComponent;
 
-  /** Форма фильтров KPI */
-  readonly filterForm: FilterFormComponent;
-
   /** Кнопка настроек */
   readonly settingsButton: Locator;
 
@@ -62,11 +58,10 @@ export class KpiPage extends BasePage {
     this.root = this.locate.testId(kpiTestIds.page);
     this.header = new KpiHeaderComponent(page);
     this.cards = new KpiCardGroupComponent(page);
-    this.filters = new KpiMonthFiltersComponent(page, 'kpi-month-filters');
+    this.filters = new KpiMonthFiltersComponent(page, kpiTestIds.monthFilters.root);
     this.chart = new KpiPerformanceChartComponent(page);
     this.topEmployees = new KpiTopEmployeesComponent(page);
     this.employeesTable = new KpiEmployeesTableComponent(page);
-    this.filterForm = new FilterFormComponent(page, 'kpi-filter-form');
     this.settingsButton = this.locate.testId(kpiTestIds.settingsButton);
     this.subtitle = this.locate
       .testId(kpiTestIds.pageSubtitle)
