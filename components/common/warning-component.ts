@@ -13,16 +13,16 @@ import { Page, Locator } from '@playwright/test';
  * По умолчанию используется testId = "month-end-warning".
  */
 export class WarningComponent {
-    /**
-     * Корневой элемент предупреждения
-     */
-    readonly root: Locator;
+  /**
+   * Корневой элемент предупреждения
+   */
+  readonly root: Locator;
 
-    /**
-     * @param page Экземпляр страницы Playwright
-     * @param testId data-testid предупреждающего блока (по умолчанию "month-end-warning")
-     */
-    constructor(page: Page, testId = 'month-end-warning') {
-        this.root = page.locator(`[data-testid="${testId}"]`);
-    }
+  /**
+   * @param page Экземпляр страницы Playwright
+   * @param testId data-testid предупреждающего блока (по умолчанию "month-end-warning")
+   */
+  constructor(page: Page, testId = 'month-end-warning') {
+    this.root = page.locator(`[data-testid="${testId}"]`);
+  }
 }

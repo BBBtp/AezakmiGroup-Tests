@@ -14,34 +14,34 @@ import { requireTestId } from '../../utils/test-id';
  * - информационных карточек.
  */
 export class DescriptionComponent {
-    /**
-     * Корневой элемент компонента
-     */
-    readonly root: Locator;
+  /**
+   * Корневой элемент компонента
+   */
+  readonly root: Locator;
 
-    /**
-     * Заголовок блока
-     */
-    readonly title: Locator;
+  /**
+   * Заголовок блока
+   */
+  readonly title: Locator;
 
-    /**
-     * Сообщение / текст внутри блока
-     */
-    readonly message: Locator;
+  /**
+   * Сообщение / текст внутри блока
+   */
+  readonly message: Locator;
 
-    /**
-     * @param page Экземпляр страницы Playwright
-     * @param testId Базовый data-testid компонента
-     *
-     * Ожидаемая структура testId:
-     * - `${testId}`
-     * - `${testId}__title`
-     * - `${testId}__message`
-     */
-    constructor(page: Page, testId: string) {
-        const normalizedTestId = requireTestId(testId, 'DescriptionComponent');
-        this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-        this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
-        this.message = this.root.locator(`[data-testid="${normalizedTestId}__message"]`);
-    }
+  /**
+   * @param page Экземпляр страницы Playwright
+   * @param testId Базовый data-testid компонента
+   *
+   * Ожидаемая структура testId:
+   * - `${testId}`
+   * - `${testId}__title`
+   * - `${testId}__message`
+   */
+  constructor(page: Page, testId: string) {
+    const normalizedTestId = requireTestId(testId, 'DescriptionComponent');
+    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
+    this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
+    this.message = this.root.locator(`[data-testid="${normalizedTestId}__message"]`);
+  }
 }

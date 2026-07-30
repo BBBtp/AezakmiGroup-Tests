@@ -1,0 +1,210 @@
+name: Nightly regression
+
+on:
+  schedule:
+    # 01:00 Moscow time (UTC+3).
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      publish_to_doqa:
+        description: Publish verified Allure results to DoQA
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      E2E_BASE_URL: http://127.0.0.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality gate
+        run: npm run quality
+
+      - name: Verify Playwright discovery
+        run: npx playwright test --list
+
+  regression-core:
+    name: Regression · ${{ matrix.name }}
+    needs: static
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: auth
+            script: test:regression:auth
+          - name: kpi-read
+            script: test:regression:kpi-read
+          - name: navigation
+            script: test:regression:navigation
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+      E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_USER_USERNAME: ${{ secrets.E2E_USER_USERNAME }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run regression group
+        run: npm run "${{ matrix.script }}"
+
+      - name: Detect flaky retries and write summary
+        if: always()
+        run: npm run check:flaky -- --label="Regression · ${{ matrix.name }}"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: regression-results-${{ matrix.name }}-${{ github.run_id }}
+          path: |
+            allure-results
+            blob-report
+            playwright-report
+            test-results
+            results.xml
+            test-results.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  regression-settings:
+    name: Regression · kpi-settings
+    if: ${{ always() && needs.static.result == 'success' }}
+    needs:
+      - static
+      - regression-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+      E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_USER_USERNAME: ${{ secrets.E2E_USER_USERNAME }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run shared-settings regression
+        run: npm run test:regression:kpi-settings
+
+      - name: Detect flaky retries and write summary
+        if: always()
+        run: npm run check:flaky -- --label="Regression · kpi-settings"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: regression-results-kpi-settings-${{ github.run_id }}
+          path: |
+            allure-results
+            blob-report
+            playwright-report
+            test-results
+            results.xml
+            test-results.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  publish-doqa:
+    name: Publish verified run to DoQA
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' &&
+          inputs.publish_to_doqa &&
+          needs['regression-core'].result == 'success' &&
+          needs['regression-settings'].result == 'success' }}
+    needs:
+      - regression-core
+      - regression-settings
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: doqa-production
+    env:
+      ALLURE_RESULTS_DIR: collected-results/allure-results
+      DOQA_ENDPOINT: ${{ secrets.DOQA_ENDPOINT }}
+      DOQA_SPACE_ID: ${{ secrets.DOQA_SPACE_ID }}
+      DOQA_PROJECT_ID: ${{ secrets.DOQA_PROJECT_ID }}
+      DOQA_TOKEN: ${{ secrets.DOQA_TOKEN }}
+      DOQA_AUTOTEST_TOKEN: ${{ secrets.DOQA_AUTOTEST_TOKEN }}
+      DOQA_RUN_TITLE: 'Nightly regression #${{ github.run_number }} (${{ github.sha }})'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download regression artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: regression-results-*-${{ github.run_id }}
+          path: collected-results
+          merge-multiple: true
+
+      - name: Publish and verify DoQA run
+        run: npm run doqa:publish

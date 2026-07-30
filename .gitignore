@@ -4,10 +4,12 @@ node_modules/
 /playwright-report/
 /blob-report/
 /allure-results/
+/allure-report/
 /allure-results*.zip
 /results.xml
 /test-results.json
 /playwright/.cache/
+/screenshots/
 .auth/
 dist/
 

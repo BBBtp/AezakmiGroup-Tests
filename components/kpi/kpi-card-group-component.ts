@@ -14,21 +14,21 @@ import { CardComponent } from '../common/card-component';
  * и извлечения данных.
  */
 export class KpiCardGroupComponent {
-    /** Карточка MRR */
-    readonly mrrCard: CardComponent;
+  /** Карточка MRR */
+  readonly mrrCard: CardComponent;
 
-    /** Карточка Score */
-    readonly scoreCard: CardComponent;
+  /** Карточка Score */
+  readonly scoreCard: CardComponent;
 
-    /** Карточка Applications */
-    readonly appsCard: CardComponent;
+  /** Карточка Applications */
+  readonly appsCard: CardComponent;
 
-    /**
-     * @param page Экземпляр страницы Playwright
-     */
-    constructor(page: Page) {
-        this.mrrCard = new CardComponent(page, 'card-mrr');
-        this.scoreCard = new CardComponent(page, 'card-score');
-        this.appsCard = new CardComponent(page, 'card-applications');
-    }
+  /**
+   * @param page Экземпляр страницы Playwright
+   */
+  constructor(page: Page) {
+    this.mrrCard = new CardComponent(page, 'card-mrr');
+    this.scoreCard = new CardComponent(page, 'card-score');
+    this.appsCard = new CardComponent(page, 'card-applications');
+  }
 }

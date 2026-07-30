@@ -1,0 +1,53 @@
+# Project instructions
+
+## Scope
+
+These rules apply to the entire repository.
+
+## Required checks
+
+Before completing a code change, run:
+
+```bash
+npm run quality
+npm run test:unit
+npx playwright test --list
+```
+
+Run each changed Playwright scenario directly. Run smoke or regression in proportion to the change.
+
+## Test architecture
+
+- Tests and fixtures import domain UI objects only through `@modules/*`.
+- Do not import `pages/*` or `components/*` directly from tests or fixtures.
+- Keep business scenarios in `tests/smoke` and `tests/regression`.
+- Put shared API contracts, data lifecycle and domain helpers under `tests/support/<domain>`.
+- Pages compose flows; components own their locators and local actions.
+- Prefer aliases from `tsconfig.json` for cross-directory imports.
+
+## Playwright rules
+
+- Every test has exactly one unique numeric `allure.allureId`.
+- Prefer `data-testid`, then accessible role/label. Do not target generated CSS-module classes.
+- Do not add fixed sleeps, `networkidle`, `force: true` or positional locators unless the reason is documented.
+- Wait for observable state: response, URL, loader, visible business result or stable DOM state.
+- New page/component actions use the diagnostic helpers from `@utils/playwright-logger`.
+- Tests that create or mutate data must use unique data and guaranteed cleanup.
+- Keep login/access-control tests in projects without setup dependencies or storage state.
+- Tests that mutate shared KPI settings must remain serial until an isolated API data factory exists.
+- Do not hide instability with local retries.
+
+## DoQA and MCP
+
+- Read and analyze a case before changing its state.
+- Use dry-run before safe normalization.
+- Preserve ETag/versionUuid optimistic locking.
+- Never publish an empty report.
+- After upload, verify run test count, progress and run elements.
+- Do not pass or print tokens, passwords, `.env` contents or storage state.
+
+## Repository hygiene
+
+- Do not commit `.env`, `.auth`, reports, screenshots, videos or traces.
+- Update README and architecture documentation when commands or boundaries change.
+- Keep `npm run quality` green.
