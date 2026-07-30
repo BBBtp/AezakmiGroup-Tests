@@ -2,8 +2,11 @@ import { test as baseTest } from '@playwright/test';
 import { LoginPage } from '@modules/auth';
 import { KpiPage, KpiSettingsPage } from '@modules/kpi';
 import { CleanupRegistry } from '@framework/lifecycle';
+import { TestDataFactory } from '@framework/data';
+import { NetworkController } from '@framework/network';
 import { TestSessionFactory } from '@framework/playwright';
 import { ApplicationShellComponent, DashboardPage } from '@modules/navigation';
+import { KpiSettingsLifecycle } from '@support/kpi';
 import { testUsers } from './users';
 
 /**
@@ -33,6 +36,12 @@ export type TestFixtures = {
   dashboardPage: DashboardPage;
 
   sessions: TestSessionFactory;
+
+  dataFactory: TestDataFactory;
+
+  network: NetworkController;
+
+  kpiSettingsLifecycle: KpiSettingsLifecycle;
 };
 
 /**
@@ -100,5 +109,17 @@ export const test = baseTest.extend<TestFixtures>({
 
   sessions: async ({ browser, cleanup }, use) => {
     await use(new TestSessionFactory(browser, cleanup));
+  },
+
+  dataFactory: async ({ page: _page }, use) => {
+    await use(new TestDataFactory());
+  },
+
+  network: async ({ page }, use) => {
+    await use(new NetworkController(page));
+  },
+
+  kpiSettingsLifecycle: async ({ kpiSettingsPage, cleanup, dataFactory, network }, use) => {
+    await use(new KpiSettingsLifecycle(kpiSettingsPage, cleanup, dataFactory, network));
   },
 });

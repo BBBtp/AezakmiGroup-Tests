@@ -14,21 +14,13 @@ test.describe('KPI UI', () => {
     await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
   });
 
-  test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage }) => {
+  test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage, network }) => {
     await allure.allureId('805');
-    await kpiPage.page.route('**/staff/api/v1/kpi/managers/statistics*', async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'Mocked server error' }),
-      });
+    await network.failNext('**/staff/api/v1/kpi/managers/statistics*', 'GET', {
+      message: 'Mocked server error',
     });
-
-    const failedStatistics = kpiPage.page.waitForResponse(
-      (response) =>
-        response.url().includes('/staff/api/v1/kpi/managers/statistics') && response.status() === 500,
-    );
-    await kpiPage.page.goto('/kpi', { waitUntil: 'domcontentloaded' });
+    const failedStatistics = network.waitForFailedResponse('/staff/api/v1/kpi/managers/statistics', 'GET');
+    await network.navigate('/kpi', { waitUntil: 'domcontentloaded' });
     await failedStatistics;
     await expect(kpiPage.errorContent).toBeVisible();
     await expect(kpiPage.mainContent).toBeHidden();

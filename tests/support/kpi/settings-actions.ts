@@ -1,5 +1,7 @@
-import type { Route } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { TestDataFactory } from '@framework/data';
 import type { CleanupHandle, CleanupRegistry } from '@framework/lifecycle';
+import { NetworkController } from '@framework/network';
 
 import { KpiSettingsActionRowComponent, KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
 import { STAFF_KPI_API_PREFIX } from './staff-service';
@@ -7,37 +9,34 @@ import { STAFF_KPI_API_PREFIX } from './staff-service';
 export type KpiSettingsActionMethod = 'POST' | 'PATCH' | 'DELETE';
 
 type CreateKpiSettingsActionOptions = {
-  settingsPage: KpiSettingsPage;
   row: KpiSettingsActionRowComponent;
   openModal: () => Promise<KpiSettingsAddValueModal>;
   fillModal: (modal: KpiSettingsAddValueModal) => Promise<void>;
   createPoints: string;
-  cleanup?: CleanupRegistry;
-};
-
-type CreateEditDeleteKpiSettingsActionOptions = CreateKpiSettingsActionOptions & {
-  editPoints: string;
+  network: NetworkController;
 };
 
 const settingsActionsPath = `${STAFF_KPI_API_PREFIX}/managers/settings/actions`;
 
 export async function pickAvailableAbTestPercent(
   settingsPage: KpiSettingsPage,
+  dataFactory: TestDataFactory,
   actionType = 'Internal test',
 ): Promise<string> {
   const existingIds = await settingsPage.abTestsTable.listEditButtonTestIds(
     `ab-tests__${actionType}__Completed with `,
   );
 
-  for (let value = 31; value < 100; value++) {
-    const expectedId = `ab-tests__${actionType}__Completed with ${value}% +__edit`;
-    if (!existingIds.includes(expectedId)) return String(value);
-  }
-
-  throw new Error('No free A/B test percentage value found for KPI Settings regression');
+  const occupied = existingIds
+    .map((id) => id.match(/Completed with (\d+)% \+__edit$/)?.[1])
+    .filter((value): value is string => Boolean(value));
+  return String(dataFactory.firstAvailableNumber(occupied, { min: 31, max: 99 }));
 }
 
-export async function pickAvailableTotalMrrReachedValue(settingsPage: KpiSettingsPage): Promise<string> {
+export async function pickAvailableTotalMrrReachedValue(
+  settingsPage: KpiSettingsPage,
+  dataFactory: TestDataFactory,
+): Promise<string> {
   const existingIds = await settingsPage.totalMrrTable.listEditButtonTestIds(
     'total-mrr__MRR milestones__Reached $',
   );
@@ -47,84 +46,33 @@ export async function pickAvailableTotalMrrReachedValue(settingsPage: KpiSetting
       .filter((value): value is string => Boolean(value)),
   );
 
-  for (let value = 30001; value < 100000; value++) {
-    if (!existingValues.has(String(value))) return String(value);
-  }
-
-  throw new Error('No free Total MRR reached value found for KPI Settings regression');
+  return String(dataFactory.firstAvailableNumber(existingValues, { min: 30001, max: 99999 }));
 }
 
-export function waitForSettingsAction(settingsPage: KpiSettingsPage, method: KpiSettingsActionMethod) {
-  return settingsPage.page.waitForResponse(
-    (response) =>
-      response.request().method() === method &&
-      response.url().includes(settingsActionsPath) &&
-      response.status() >= 200 &&
-      response.status() < 300,
-  );
+export function waitForSettingsAction(network: NetworkController, method: KpiSettingsActionMethod) {
+  return network.waitForSuccessfulResponse(settingsActionsPath, method);
 }
 
-export function waitForFailedSettingsAction(settingsPage: KpiSettingsPage, method: KpiSettingsActionMethod) {
-  return settingsPage.page.waitForResponse(
-    (response) =>
-      response.request().method() === method &&
-      response.url().includes(settingsActionsPath) &&
-      response.status() >= 500,
-  );
+export function waitForFailedSettingsAction(network: NetworkController, method: KpiSettingsActionMethod) {
+  return network.waitForFailedResponse(settingsActionsPath, method);
 }
 
 export async function failNextSettingsAction(
-  settingsPage: KpiSettingsPage,
+  network: NetworkController,
   method: KpiSettingsActionMethod,
 ): Promise<void> {
   const urlPattern = method === 'POST' ? `**${settingsActionsPath}` : `**${settingsActionsPath}/**`;
-  const handler = async (route: Route) => {
-    if (route.request().method() !== method) return route.continue();
-
-    await route.fulfill({
-      status: 500,
-      contentType: 'application/json',
-      body: JSON.stringify({ message: 'Mocked KPI settings action error' }),
-    });
-  };
-
-  await settingsPage.page.route(urlPattern, handler, { times: 1 });
+  await network.failNext(urlPattern, method, { message: 'Mocked KPI settings action error' });
 }
 
 async function runAndWaitForSettingsAction(
-  settingsPage: KpiSettingsPage,
+  network: NetworkController,
   method: KpiSettingsActionMethod,
   action: () => Promise<void>,
 ): Promise<void> {
-  const responsePromise = waitForSettingsAction(settingsPage, method);
+  const responsePromise = waitForSettingsAction(network, method);
   await action();
   await responsePromise;
-}
-
-export async function createEditDeleteKpiSettingsAction({
-  settingsPage,
-  row,
-  openModal,
-  fillModal,
-  createPoints,
-  editPoints,
-  cleanup,
-}: CreateEditDeleteKpiSettingsActionOptions): Promise<void> {
-  const cleanupHandle = cleanup ? registerKpiSettingsCleanup(cleanup, settingsPage, row) : undefined;
-  try {
-    await createKpiSettingsAction({ settingsPage, row, openModal, fillModal, createPoints });
-
-    await row.openEditModal();
-    await row.selectEditPointsType('minus');
-    await row.fillEditPoints(editPoints);
-    await runAndWaitForSettingsAction(settingsPage, 'PATCH', () => row.saveEdit());
-    await row.expectEditModalHidden();
-  } finally {
-    await deleteKpiSettingsActionIfPresent(settingsPage, row);
-    cleanupHandle?.dismiss();
-  }
-
-  await row.expectDeleted();
 }
 
 export function registerKpiSettingsCleanup(
@@ -138,30 +86,43 @@ export function registerKpiSettingsCleanup(
 }
 
 export async function createKpiSettingsAction({
-  settingsPage,
   row,
   openModal,
   fillModal,
   createPoints,
+  network,
 }: CreateKpiSettingsActionOptions): Promise<void> {
   const modal = await openModal();
   await fillModal(modal);
   await modal.selectPointsType('plus');
   await modal.fillPoints(createPoints);
 
-  await runAndWaitForSettingsAction(settingsPage, 'POST', () => modal.submitCreate());
+  await runAndWaitForSettingsAction(network, 'POST', () => modal.submitCreate());
   await row.expectEditable();
+}
+
+export async function editKpiSettingsAction(
+  row: KpiSettingsActionRowComponent,
+  points: string,
+  network: NetworkController,
+): Promise<void> {
+  await row.openEditModal();
+  await row.selectEditPointsType('minus');
+  await row.fillEditPoints(points);
+  await runAndWaitForSettingsAction(network, 'PATCH', () => row.saveEdit());
+  await row.expectEditModalHidden();
 }
 
 export async function deleteKpiSettingsActionIfPresent(
   settingsPage: KpiSettingsPage,
   row: KpiSettingsActionRowComponent,
 ): Promise<void> {
-  await settingsPage.page.goto('/kpi/settings');
-  await settingsPage.waitForPageLoad();
+  await settingsPage.navigate();
 
   if ((await row.deleteButton.count()) === 0 || !(await row.deleteButton.isEnabled())) return;
 
   await row.openDeleteModal();
-  await runAndWaitForSettingsAction(settingsPage, 'DELETE', () => row.confirmDelete());
+  const network = new NetworkController(settingsPage.page);
+  await runAndWaitForSettingsAction(network, 'DELETE', () => row.confirmDelete());
+  await expect(row.deleteButton).toHaveCount(0);
 }

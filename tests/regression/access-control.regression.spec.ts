@@ -18,25 +18,21 @@ const protectedPaths = [
 ];
 
 test.describe('Контроль доступа', () => {
-  test('Неавторизованный доступ к основным разделам заблокирован', async ({ browser }) => {
+  test('Неавторизованный доступ к основным разделам заблокирован', async ({ sessions, network }) => {
     await allure.allureId('567');
 
-    const context = await browser.newContext({
+    const page = await sessions.newPage({
       storageState: { cookies: [], origins: [] },
     });
-    const page = await context.newPage();
+    const pageNetwork = network.forPage(page);
 
-    try {
-      await test.step('Проверить доступ к закрытым URL без сессии', async () => {
-        for (const path of protectedPaths) {
-          await page.goto(path, { waitUntil: 'commit' });
-          await expect(page).toHaveURL(/\/login(?:[/?]|$)/, {
-            timeout: 15000,
-          });
-        }
-      });
-    } finally {
-      await context.close();
-    }
+    await test.step('Проверить доступ к закрытым URL без сессии', async () => {
+      for (const path of protectedPaths) {
+        await pageNetwork.navigate(path, { waitUntil: 'commit' });
+        await expect(page).toHaveURL(/\/login(?:[/?]|$)/, {
+          timeout: 15000,
+        });
+      }
+    });
   });
 });

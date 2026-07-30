@@ -32,7 +32,7 @@ test.describe('KPI staff service', () => {
     });
   });
 
-  test('Карточка ASO manager загружает все KPI endpoint', async ({ kpiPage }) => {
+  test('Карточка ASO manager загружает все KPI endpoint', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.managerCard);
 
     const statistics = await openKpiAndGetStatistics(kpiPage.page);
@@ -42,9 +42,7 @@ test.describe('KPI staff service', () => {
     const managerPage = kpiPage.manager(employeeId);
 
     const expectedEndpoints = managerKpiEndpoints(employeeId);
-    const responses = expectedEndpoints.map(([, path]) =>
-      kpiPage.page.waitForResponse((response) => response.url().includes(path)),
-    );
+    const responses = expectedEndpoints.map(([, path]) => network.waitForResponse({ url: path }));
 
     await managerPage.navigate();
     const endpointResponses = await Promise.all(responses);
@@ -52,15 +50,15 @@ test.describe('KPI staff service', () => {
       endpointResponses.map((response, index) => expectSuccessfulJson(response, expectedEndpoints[index][0])),
     );
 
-    const vacationsResponse = kpiPage.page.waitForResponse((response) =>
-      response.url().includes(managerKpiPath(employeeId, 'vacations/history')),
-    );
+    const vacationsResponse = network.waitForResponse({
+      url: managerKpiPath(employeeId, 'vacations/history'),
+    });
     await managerPage.openSettings();
     await expectSuccessfulJson(await vacationsResponse, 'vacations history');
     await managerPage.expectSettingsContent();
   });
 
-  test('Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage }) => {
+  test('Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.startingScore);
 
     const statistics = await openKpiAndGetStatistics(kpiPage.page);
@@ -71,9 +69,9 @@ test.describe('KPI staff service', () => {
 
     let verified = false;
     for (const candidate of candidates) {
-      const vacationsResponse = kpiPage.page.waitForResponse((response) =>
-        response.url().includes(managerKpiPath(candidate.employee_id, 'vacations/history')),
-      );
+      const vacationsResponse = network.waitForResponse({
+        url: managerKpiPath(candidate.employee_id, 'vacations/history'),
+      });
       const managerPage = kpiPage.manager(candidate.employee_id);
       await managerPage.navigateSettings();
       await expectSuccessfulJson(await vacationsResponse, 'vacations history');
@@ -99,14 +97,10 @@ test.describe('KPI staff service', () => {
     await expect(employeeCreatePage.asoManagerOption).toBeVisible();
   });
 
-  test('Все KPI API-запросы UI идут через staff service', async ({ kpiPage }) => {
+  test('Все KPI API-запросы UI идут через staff service', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.staffServiceMigration);
 
-    const apiRequests: string[] = [];
-    kpiPage.page.on('request', (request) => {
-      const url = request.url();
-      if (isKpiApiRequest(url)) apiRequests.push(url);
-    });
+    const apiRequests = network.captureRequests((request) => isKpiApiRequest(request.url()));
 
     const statistics = await openKpiAndGetStatistics(kpiPage.page);
     const manager = statistics.full_stats.find((item) => item.employee_id);
@@ -117,13 +111,15 @@ test.describe('KPI staff service', () => {
     await managerPage.navigateSettings();
     await kpiPage.navigateSettings();
 
-    expect(apiRequests.length, 'The KPI flow must make API requests').toBeGreaterThan(0);
-    const legacyKpiRequests = apiRequests.filter((url) => !url.includes('/staff/api/'));
+    apiRequests.stop();
+    expect(apiRequests.urls.length, 'The KPI flow must make API requests').toBeGreaterThan(0);
+    const legacyKpiRequests = apiRequests.urls.filter((url) => !url.includes('/staff/api/'));
     expect(legacyKpiRequests, 'KPI API requests must not use the legacy service').toEqual([]);
   });
 
   test('Ошибка vacations history показывает error-state страницы Settings сотрудника', async ({
     kpiPage,
+    network,
   }) => {
     await allure.allureId(kpiAllureIds.vacationsHistoryError);
 
@@ -132,20 +128,13 @@ test.describe('KPI staff service', () => {
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 
     const vacationPath = '**/vacations/history**';
-    let vacationRequestHandled = false;
-    await kpiPage.page.route(vacationPath, async (route) => {
-      vacationRequestHandled = true;
-      await route.fulfill({
-        status: 500,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'Mocked vacations history error' }),
-      });
-    });
+    await network.failNext(vacationPath, 'GET', { message: 'Mocked vacations history error' }, 500);
+    const failedVacation = network.waitForFailedResponse('/vacations/history', 'GET');
 
     const managerPage = kpiPage.manager(manager!.employee_id);
     await managerPage.navigateSettings();
 
-    await expect.poll(() => vacationRequestHandled, { timeout: 10000 }).toBe(true);
+    await failedVacation;
     await managerPage.expectVacationError();
   });
 });

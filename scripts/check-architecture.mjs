@@ -16,6 +16,7 @@ const directLocatorMethods = new Set([
   'getByPlaceholder',
   'getByTitle',
 ]);
+const rawNetworkMethods = new Set(['goto', 'route', 'unroute', 'waitForRequest', 'waitForResponse']);
 const violations = [];
 
 async function collectTypeScriptFiles(directory) {
@@ -104,6 +105,19 @@ for (const testRoot of [path.join('tests', 'smoke'), path.join('tests', 'regress
           `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must use module methods instead of "${node.expression.name.text}()"`,
         );
       }
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        rawNetworkMethods.has(node.expression.name.text)
+      ) {
+        const receiver = node.expression.expression.getText(source);
+        if (receiver === 'page' || receiver.endsWith('.page')) {
+          const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
+          violations.push(
+            `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must use the network fixture instead of raw page.${node.expression.name.text}()`,
+          );
+        }
+      }
       ts.forEachChild(node, visit);
     };
     visit(source);
@@ -115,6 +129,6 @@ if (violations.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    'Architecture validation passed: public modules, LocatorFactory and framework UI actions are enforced.',
+    'Architecture validation passed: public modules, LocatorFactory, framework UI actions and managed network access are enforced.',
   );
 }

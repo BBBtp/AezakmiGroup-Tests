@@ -1,6 +1,7 @@
 import { expect, type Page, type Response } from '@playwright/test';
 
 import { UiActions } from '@framework/ui';
+import { NetworkController } from '@framework/network';
 
 export const STAFF_KPI_API_PREFIX = '/staff/api/v1/kpi';
 
@@ -29,15 +30,12 @@ export function managerKpiEndpoints(employeeId: string) {
   ] as const;
 }
 
-export function isKpiStatisticsResponse(response: Response): boolean {
-  return (
-    response.request().method() === 'GET' &&
-    response.url().includes(`${STAFF_KPI_API_PREFIX}/managers/statistics?`)
-  );
-}
-
 export async function openKpiAndGetStatistics(page: Page): Promise<KpiStatistics> {
-  const responsePromise = page.waitForResponse(isKpiStatisticsResponse);
+  const network = new NetworkController(page);
+  const responsePromise = network.waitForResponse({
+    url: (url) => url.includes(`${STAFF_KPI_API_PREFIX}/managers/statistics?`),
+    method: 'GET',
+  });
   await new UiActions(page).navigate('KPI page', '/kpi', { waitUntil: 'domcontentloaded' });
   const response = await responsePromise;
   await expectSuccessfulJson(response, 'KPI statistics');

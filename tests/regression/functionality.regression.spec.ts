@@ -43,6 +43,7 @@ test.describe('Функциональность авторизации', () => {
 
   test('Кнопка "Remember me" сохраняет сессию между перезапусками браузерного контекста', async ({
     adminUser,
+    network,
   }) => {
     await allure.allureId('798');
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-remember-me-'));
@@ -65,7 +66,7 @@ test.describe('Функциональность авторизации', () => {
 
       context = await chromium.launchPersistentContext(userDataDir, contextOptions);
       const pageAfterRestart = context.pages()[0] ?? (await context.newPage());
-      await pageAfterRestart.goto('/dashboard');
+      await network.forPage(pageAfterRestart).navigate('/dashboard');
       await expect(pageAfterRestart).toHaveURL(/dashboard/);
     } finally {
       if (context) {
