@@ -1,0 +1,18 @@
+export const checksTestIds = {
+  page: 'checks-page',
+  editKeywordsButton: 'edit-keywords-button',
+  editKeywordsModal: 'edit-keys-modal',
+  editKeywordsModalTitle: 'edit-keys-modal__title',
+  editKeywordsModalClose: 'edit-keys-modal__close',
+  addKeywordButton: 'add-new-keyword-button',
+  keywordList: 'checks-list',
+  keywordItem: /^check-item-\d+$/,
+  keywordText: 'keyword-text',
+  stopTrackingButton: 'stop-tracking-button',
+  stopTrackingModal: 'stop-tracking-modal',
+  stopTrackingConfirmButton: 'delete-item__del-btn',
+  keywordInput: 'keyword-input',
+  countrySelectTrigger: 'country-select-trigger',
+  countryOption: (country: string) => `country-select_option-${country}`,
+  submitButton: 'submit-button',
+} as const;

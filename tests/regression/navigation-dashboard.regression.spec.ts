@@ -44,4 +44,18 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.openFromSidebar();
     await dashboardPage.expectBusinessControls();
   });
+
+  test('Dashboard отображает метрики без технических значений после перезагрузки', async ({
+    dashboardPage,
+    network,
+  }) => {
+    await allure.allureId('574');
+
+    await dashboardPage.navigate();
+    await dashboardPage.expectMetricsHealthy();
+
+    await network.reload({ waitUntil: 'commit' });
+    await dashboardPage.expectLoaded();
+    await dashboardPage.expectMetricsHealthy();
+  });
 });

@@ -17,6 +17,19 @@ export class ApplicationShellComponent extends UiObject {
     await this.expectations.attribute(`sidebar destination ${label}`, link, 'href', href);
   }
 
+  async expectSidebarDestinationHidden(label: string): Promise<void> {
+    await this.expectations.hidden(`restricted sidebar destination ${label}`, this.sidebarLink(label));
+  }
+
+  async expectDangerousActionsHidden(): Promise<void> {
+    for (const action of ['Create', 'Edit', 'Delete']) {
+      await this.expectations.hidden(
+        `restricted ${action} action`,
+        this.locate.role('button', { name: new RegExp(`^${action}\\b`, 'i') }),
+      );
+    }
+  }
+
   async openSidebarDestination(label: string, href: string): Promise<void> {
     await this.actions.click(`sidebar: open ${label}`, this.sidebarLink(label));
     await this.expectations.url(`sidebar destination ${label}`, new RegExp(`${href.replace('/', '\\/')}$`));

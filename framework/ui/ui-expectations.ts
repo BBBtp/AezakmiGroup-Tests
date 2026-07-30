@@ -80,6 +80,18 @@ export class UiExpectations {
     );
   }
 
+  notContainsText(target: string, locator: Locator, value: string | RegExp): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `notContainsText=${String(value)}`, () =>
+      expect(locator).not.toContainText(value),
+    );
+  }
+
+  nonEmptyText(target: string, locator: Locator): Promise<void> {
+    return loggedExpectation(this.page, target, locator, 'text is not empty', () =>
+      expect(locator).toHaveText(/\S/),
+    );
+  }
+
   url(target: string, value: string | RegExp, options?: { timeout?: number }): Promise<void> {
     const body = this.page.locator('body');
     return loggedExpectation(this.page, target, body, `url=${String(value)}`, () =>

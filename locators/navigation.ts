@@ -1,6 +1,17 @@
 export const dashboardTestIds = {
   page: 'dashboard',
   title: 'dashboard-title__title',
+  chart: 'mrr-chart',
+  defaultPeriod: 'mrr-chart__header__tabs__7',
+  totalMrrCard: 'mrr-cards-0',
+  changeCards: [
+    'card__top-mrr-day-gain',
+    'card__top-mrr-day-loss',
+    'card__top-mrr-week-gain',
+    'card__top-mrr-week-loss',
+    'card__top-mrr-month-gain',
+    'card__top-mrr-month-loss',
+  ],
   controls: [
     'mrr-chart__header__select-trigger',
     'mrr-chart__header__tabs__7',

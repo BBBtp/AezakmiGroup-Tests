@@ -4,7 +4,7 @@ import path from 'node:path';
 import { z } from 'zod';
 import { DoqaApiError, DoqaClient } from './doqa-client.mjs';
 
-const server = new McpServer({ name: 'crm-doqa', version: '0.1.0' });
+const server = new McpServer({ name: 'crm-doqa', version: '0.2.0' });
 const outputSchema = { result: z.unknown() };
 
 function getClient() {
@@ -197,6 +197,56 @@ server.registerTool(
           title,
         }),
       );
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_analyze_run_failures',
+  {
+    title: 'Analyze failed DoQA run elements',
+    description:
+      'Read-only triage of failed, broken and blocked run elements. Returns evidence and existing run defects without creating anything.',
+    inputSchema: {
+      runId: z.number().int().positive(),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ runId }) => {
+    try {
+      return result(await getClient().analyzeRunFailures(runId));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_create_product_defect',
+  {
+    title: 'Create a verified DoQA product defect',
+    description:
+      'Dry-run by default. Deduplicates active defects by test-case marker and creates a tracker-linked defect only for an explicitly confirmed product failure.',
+    inputSchema: {
+      runId: z.number().int().positive(),
+      caseId: z.number().int().positive(),
+      classification: z.enum(['product', 'test', 'infrastructure', 'needs_review']),
+      evidence: z.string().min(1),
+      title: z.string().min(1).max(255).optional(),
+      actualResult: z.string().min(1).optional(),
+      expectedResult: z.string().min(1).optional(),
+      priority: z.enum(['high', 'medium', 'low']).default('high'),
+      apply: z.boolean().default(false),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async (input) => {
+    try {
+      return result(await getClient().prepareRunDefect(input));
     } catch (error) {
       return failure(error);
     }

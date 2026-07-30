@@ -24,4 +24,28 @@ test.describe('Контроль доступа', () => {
       await authSessions.expectAnonymousAccessBlocked(protectedPaths);
     });
   });
+
+  test('Обычный пользователь не получает административные действия', async ({
+    applicationShell,
+    dashboardPage,
+    loginPage,
+    regularUser,
+  }) => {
+    await allure.allureId('568');
+
+    await loginPage.navigate();
+    await loginPage.login(regularUser.email, regularUser.password);
+    await loginPage.expectAuthenticated();
+
+    for (const destination of ['Employees', 'Users', 'Parameters']) {
+      await applicationShell.expectSidebarDestinationHidden(destination);
+    }
+
+    for (const path of ['/users', '/parameters']) {
+      await dashboardPage.navigateTo(path);
+      await applicationShell.expectDangerousActionsHidden();
+    }
+
+    await dashboardPage.navigate();
+  });
 });

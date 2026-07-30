@@ -33,14 +33,19 @@ npm run doqa:run -- --project=regression --workers=1
 npm run doqa:publish     # публикация уже собранного Allure-каталога
 ```
 
-`doqa:run` запускает тесты и публикует свежие Allure results в DoQA. Публикация выполняется только
-после зелёного прогона: setup-, skipped-результаты и записи без единственного числового
-`ALLURE_ID` исключаются, а созданный run проверяется по количеству тестов, progress, элементам и
-связям с DoQA ID. Не используйте эту команду для исследовательских локальных прогонов.
+`doqa:run` запускает тесты и публикует свежие Allure results в DoQA. Passed, failed, broken и
+skipped результаты с единственным числовым `ALLURE_ID` попадают в run; setup и записи без
+корректного ID исключаются. Созданный run проверяется по количеству тестов, progress, элементам и
+связям с DoQA ID. Красный результат публикуется, но команда сохраняет ненулевой exit code для CI.
+Не используйте её для исследовательских локальных прогонов.
 
 MCP не принимает токены в аргументах инструментов. Для публикации он читает
 `DOQA_AUTOTEST_TOKEN` из окружения и разрешает выбирать только имя файла внутри
 `DOQA_REPORT_DIR`. `doqa_improve_case` работает как dry-run, пока явно не передан `apply: true`.
+После failed/broken run инструмент `doqa_analyze_run_failures` выполняет read-only triage.
+`doqa_create_product_defect` также работает как dry-run по умолчанию, проверяет активные дубли
+`[AUTO][TC-<id>]` и создаёт баг только для подтверждённой классификации `product`. После записи
+проверяются DoQA bug ID и ссылка настроенного трекера.
 
 ## Архитектура
 
@@ -96,8 +101,8 @@ Nightly-прогон сам по себе ничего не публикует �
 - `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, опционально `DOQA_PROJECT_ID`;
 - `DOQA_TOKEN`, `DOQA_AUTOTEST_TOKEN`.
 
-Публикация начинается только после успешного завершения всех regression-групп, объединяет их
-Allure results и повторно выполняет preflight и post-upload verification.
+Публикация начинается после завершения всех regression-групп, включая завершённые failed jobs,
+объединяет их Allure results и повторно выполняет preflight и post-upload verification.
 
 Для smoke job настройте repository secrets:
 

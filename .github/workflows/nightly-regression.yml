@@ -164,12 +164,15 @@ jobs:
           retention-days: 14
 
   publish-doqa:
-    name: Publish verified run to DoQA
+    name: Publish completed run to DoQA
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' &&
+      ${{ always() &&
+          github.event_name == 'workflow_dispatch' &&
           inputs.publish_to_doqa &&
-          needs['regression-core'].result == 'success' &&
-          needs['regression-settings'].result == 'success' }}
+          (needs['regression-core'].result == 'success' ||
+           needs['regression-core'].result == 'failure') &&
+          (needs['regression-settings'].result == 'success' ||
+           needs['regression-settings'].result == 'failure') }}
     needs:
       - regression-core
       - regression-settings

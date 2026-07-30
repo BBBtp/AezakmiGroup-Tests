@@ -9,6 +9,7 @@ export async function prepareAllureResults(sourceDir, outputDir) {
   const accepted = [];
   const excluded = [];
   const ids = new Set();
+  const statusCounts = {};
 
   for (const entry of resultFiles) {
     const sourcePath = path.join(sourceDir, entry.name);
@@ -26,7 +27,7 @@ export async function prepareAllureResults(sourceDir, outputDir) {
       excluded.push({ file: entry.name, name: result.name, reason: 'missing_or_invalid_allure_id' });
       continue;
     }
-    if (result.status !== 'passed') {
+    if (!['passed', 'failed', 'broken', 'skipped'].includes(result.status)) {
       excluded.push({
         file: entry.name,
         name: result.name,
@@ -40,6 +41,7 @@ export async function prepareAllureResults(sourceDir, outputDir) {
     }
     ids.add(allureId);
     accepted.push({ entry, result, allureId });
+    statusCounts[result.status] = (statusCounts[result.status] ?? 0) + 1;
   }
 
   if (accepted.length === 0) {
@@ -81,7 +83,8 @@ export async function prepareAllureResults(sourceDir, outputDir) {
 
   return {
     testCount: accepted.length,
-    allureIds: [...ids],
+    allureIds: [...ids].sort((left, right) => Number(left) - Number(right)),
+    statusCounts,
     excluded,
     copiedFiles: [...copied],
   };

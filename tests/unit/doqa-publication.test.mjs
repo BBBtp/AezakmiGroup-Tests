@@ -6,7 +6,7 @@ import test from 'node:test';
 
 import { publishAllureResults } from '../../scripts/doqa-publication.mjs';
 
-test('publishAllureResults uploads a filtered archive and verifies the created run', async (t) => {
+test('publishAllureResults uploads and verifies a completed run with a failed test', async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'crm-doqa-publication-test-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const allureDir = path.join(root, 'allure-results');
@@ -15,7 +15,7 @@ test('publishAllureResults uploads a filtered archive and verifies the created r
     path.join(allureDir, 'mapped-result.json'),
     JSON.stringify({
       name: 'Mapped test',
-      status: 'passed',
+      status: 'failed',
       labels: [{ name: 'ALLURE_ID', value: '812' }],
     }),
   );
@@ -27,7 +27,7 @@ test('publishAllureResults uploads a filtered archive and verifies the created r
       return { runId: 321 };
     },
     async getRun() {
-      return { id: 321, counts: { tests: 1 }, progress: { passed: 1 } };
+      return { id: 321, counts: { tests: 1 }, progress: { failed: 1 } };
     },
     async listRunElements() {
       return [{ viewId: 812 }];
@@ -40,4 +40,5 @@ test('publishAllureResults uploads a filtered archive and verifies the created r
   assert.equal(uploaded.type, 'allure');
   assert.equal(result.verification.runId, 321);
   assert.deepEqual(result.preflight.allureIds, ['812']);
+  assert.deepEqual(result.preflight.statusCounts, { failed: 1 });
 });

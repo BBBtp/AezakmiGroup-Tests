@@ -26,6 +26,9 @@ flowchart TD
   Tests --> Allure[Allure raw results]
   Allure --> Upload[POST /api/autotests/report]
   Upload --> DoQA
+  DoQA --> Triage[Failed run triage]
+  Triage -->|confirmed product| Defect[DoQA defect]
+  Defect --> Tracker[Yandex Tracker]
 ```
 
 ### `tests/`
@@ -116,20 +119,24 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 
 ### `mcp/`
 
-`doqa-client.mjs` работает с API DoQA: ищет кандидатов, читает кейсы, переводит кейс в работу и
-загружает отчёты. PATCH использует ETag той же версии, которая была прочитана и
+`doqa-client.mjs` работает с API DoQA: ищет кандидатов, читает кейсы, переводит кейс в работу,
+загружает отчёты и безопасно управляет дефектами элементов прогона. PATCH использует ETag той же версии, которая была прочитана и
 проанализирована; при `412 Precondition Failed` клиент повторно читает кейс и не перезаписывает
-чужое изменение. `server.mjs` предоставляет операции как MCP-инструменты с read/write
+чужое изменение. Defect flow читает run element и tracker relation, выполняет dry-run,
+дедупликацию активных багов по маркеру `[AUTO][TC-<id>]`, а после записи проверяет DoQA bug и
+внешнюю tracker-ссылку. `server.mjs` предоставляет операции как MCP-инструменты с read/write
 аннотациями и структурированным результатом. Секрет отчёта берётся только из окружения, а путь
 ограничен доверенным каталогом.
 
 ### `scripts/`
 
 `doqa-run.mjs` запускает Playwright, собирает свежий Allure-архив и отправляет его в DoQA.
-`allure-report.mjs` оставляет только прошедшие результаты с одним уникальным числовым
-`ALLURE_ID` и их вложения. Пустой архив, неуспешный preflight и дубли ID блокируют публикацию.
+`allure-report.mjs` оставляет завершённые passed/failed/broken/skipped результаты с одним
+уникальным числовым `ALLURE_ID` и их вложения. Пустой архив, некорректный preflight и дубли ID
+блокируют публикацию.
 После загрузки проверяются `counts.tests`, `progress`, элементы run и соответствие Allure ID
-кейсам DoQA.
+кейсам DoQA. Ненулевой exit code Playwright остаётся ненулевым для CI, но больше не скрывает
+результат от DoQA.
 
 ### `.agents/skills/`
 

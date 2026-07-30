@@ -26,16 +26,12 @@ const exitCode = await new Promise((resolve, reject) => {
 
 let publishError = null;
 try {
-  if (exitCode !== 0) {
-    throw new Error(`Playwright exited with code ${exitCode}; publishing a failed preflight is blocked`);
-  }
-
   const title = process.env.DOQA_RUN_TITLE?.trim() || `Автотесты ${new Date().toLocaleString('ru-RU')}`;
   const result = await publishAllureResults({
     allureDir,
     title,
   });
-  console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify({ playwrightExitCode: exitCode, ...result }, null, 2));
 } catch (error) {
   publishError = error;
   console.error(`DoQA run was not created: ${error.message}`);

@@ -1,6 +1,7 @@
 import { NetworkController } from '@framework/network';
 import { BrowserDiagnostics } from '@framework/playwright';
 import { LoginPage } from '@modules/auth';
+import { ChecksPage } from '@modules/checks';
 import { EmployeeCreatePage } from '@modules/employees';
 import { KpiPage, KpiSettingsPage } from '@modules/kpi';
 import { ApplicationShellComponent, DashboardPage } from '@modules/navigation';
@@ -8,6 +9,7 @@ import { coreTest, type CoreFixtures } from './core-fixtures';
 
 export type UiFixtures = {
   loginPage: LoginPage;
+  checksPage: ChecksPage;
   employeeCreatePage: EmployeeCreatePage;
   kpiPage: KpiPage;
   kpiSettingsPage: KpiSettingsPage;
@@ -20,6 +22,10 @@ export type UiFixtures = {
 export const uiTest = coreTest.extend<UiFixtures>({
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+
+  checksPage: async ({ page }, use) => {
+    await use(new ChecksPage(page));
   },
 
   employeeCreatePage: async ({ page }, use) => {

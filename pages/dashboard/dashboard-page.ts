@@ -1,18 +1,21 @@
 import { type Locator, type Page } from '@playwright/test';
 import { dashboardSections, dashboardTestIds } from '@locators/navigation';
 import { ApplicationShellComponent } from '../../components/common/application-shell-component';
+import { DashboardMetricsComponent } from '../../components/dashboard/dashboard-metrics-component';
 import { BasePage } from '../base-page';
 
 export class DashboardPage extends BasePage {
   readonly root: Locator;
   readonly title: Locator;
   readonly shell: ApplicationShellComponent;
+  readonly metrics: DashboardMetricsComponent;
 
   constructor(page: Page) {
     super(page);
     this.root = this.locate.testId(dashboardTestIds.page);
     this.title = this.locate.testId(dashboardTestIds.title);
     this.shell = new ApplicationShellComponent(page);
+    this.metrics = new DashboardMetricsComponent(page);
   }
 
   async navigate(): Promise<void> {
@@ -40,5 +43,9 @@ export class DashboardPage extends BasePage {
     for (const testId of dashboardTestIds.controls) {
       await this.expectations.visible(`Dashboard control ${testId}`, this.locate.testId(testId));
     }
+  }
+
+  async expectMetricsHealthy(): Promise<void> {
+    await this.metrics.expectHealthy();
   }
 }

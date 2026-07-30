@@ -8,3 +8,4 @@ export {
   type KpiSettingsTableName,
 } from './kpi-settings';
 export { applicationShellLocators, dashboardSections, dashboardTestIds } from './navigation';
+export { checksTestIds } from './checks';

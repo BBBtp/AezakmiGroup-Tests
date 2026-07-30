@@ -50,6 +50,10 @@ Run each changed Playwright scenario directly. Run smoke or regression in propor
 - Use dry-run before safe normalization.
 - Preserve ETag/versionUuid optimistic locking.
 - Never publish an empty report.
+- Completed reports may contain failed, broken or skipped mapped tests.
+- Triage every failed/broken run element after upload. Create a defect only for an explicitly
+  confirmed product failure, after a dry-run duplicate check.
+- Verify the created DoQA defect and its external tracker link.
 - After upload, verify run test count, progress and run elements.
 - Do not pass or print tokens, passwords, `.env` contents or storage state.
 

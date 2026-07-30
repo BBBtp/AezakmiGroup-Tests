@@ -7,7 +7,7 @@ import test from 'node:test';
 import { validateReportPath } from '../../mcp/doqa-client.mjs';
 import { prepareAllureResults, verifyDoqaRun, writeZipArchive } from '../../scripts/allure-report.mjs';
 
-test('prepareAllureResults excludes setup results and keeps mapped tests with attachments', async (t) => {
+test('prepareAllureResults keeps mapped passed, failed and skipped tests with attachments', async (t) => {
   const root = await temporaryDirectory(t);
   const source = path.join(root, 'source');
   const output = path.join(root, 'publishable');
@@ -33,13 +33,22 @@ test('prepareAllureResults excludes setup results and keeps mapped tests with at
       labels: [{ name: 'ALLURE_ID', value: '813' }],
     }),
   );
+  await writeFile(
+    path.join(source, 'failed-result.json'),
+    JSON.stringify({
+      name: 'Failed mapped test',
+      status: 'failed',
+      labels: [{ name: 'ALLURE_ID', value: '814' }],
+    }),
+  );
   await writeFile(path.join(source, 'evidence.txt'), 'diagnostic evidence');
 
   const result = await prepareAllureResults(source, output);
 
-  assert.equal(result.testCount, 1);
-  assert.deepEqual(result.allureIds, ['812']);
-  assert.equal(result.excluded.length, 2);
+  assert.equal(result.testCount, 3);
+  assert.deepEqual(result.allureIds, ['812', '813', '814']);
+  assert.deepEqual(result.statusCounts, { passed: 1, skipped: 1, failed: 1 });
+  assert.equal(result.excluded.length, 1);
   assert.equal(await readFile(path.join(output, 'evidence.txt'), 'utf8'), 'diagnostic evidence');
 });
 

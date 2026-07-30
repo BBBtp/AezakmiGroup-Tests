@@ -34,6 +34,7 @@ export async function publishAllureResults({
       preflight: {
         tests: preflight.testCount,
         allureIds: preflight.allureIds,
+        statusCounts: preflight.statusCounts,
         excludedResults: preflight.excluded.length,
       },
       verification,
