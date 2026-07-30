@@ -1,4 +1,6 @@
-import { Locator, expect } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { LocatorFactory, UiExpectations } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 
 /**
  * Компонент элемента участника (Contender Item) в списке.
@@ -22,16 +24,21 @@ export class ContenderItemComponent {
 
   /** Аватар с инициалами участника */
   readonly avatarLetter: Locator;
+  private readonly expectations: UiExpectations;
 
   /**
    * @param root Корневой локатор контейнера списка участников
    * @param index Индекс участника в списке (для формирования data-testid)
    */
   constructor(root: Locator, index: number) {
-    this.root = root.locator(`[data-testid="contender-${index}"]`);
-    this.name = this.root.locator(`[data-testid="contender-${index}__name"]`);
-    this.currency = this.root.locator(`[data-testid="contender-${index}__currency"] p`);
-    this.avatarLetter = this.root.locator(`[data-testid="contender-${index}-avatar"] p`).first();
+    const list = new LocatorFactory(root);
+    const testIds = kpiTestIds.topEmployees.contenderItem(index);
+    this.expectations = new UiExpectations(root.page());
+    this.root = list.testId(testIds.root);
+    const contender = list.within(this.root);
+    this.name = contender.testId(testIds.name);
+    this.currency = contender.css(testIds.currencySelector);
+    this.avatarLetter = contender.css(testIds.avatarSelector).first();
   }
 
   /**
@@ -42,10 +49,10 @@ export class ContenderItemComponent {
    * - корректность инициалов на аватаре (должны совпадать с первой и второй буквой имени).
    */
   async verify(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.name).toBeVisible();
-    await expect(this.currency).toBeVisible();
-    await expect(this.avatarLetter).toBeVisible();
+    await this.expectations.visible('KPI contender', this.root);
+    await this.expectations.visible('KPI contender name', this.name);
+    await this.expectations.visible('KPI contender currency', this.currency);
+    await this.expectations.visible('KPI contender avatar', this.avatarLetter);
 
     const nameText = (await this.name.textContent())?.trim() || '';
     const avatarText = (await this.avatarLetter.textContent())?.trim() || '';
@@ -54,6 +61,10 @@ export class ContenderItemComponent {
     // Ожидаемые инициалы: первая буква имени + первая буква фамилии
     const expectedInitials = (words[0]?.charAt(0) || '') + (words[1]?.charAt(0) || '');
 
-    await expect(avatarText.toUpperCase()).toBe(expectedInitials.toUpperCase());
+    if (avatarText.toUpperCase() !== expectedInitials.toUpperCase()) {
+      throw new Error(
+        `Contender avatar "${avatarText}" does not match expected initials "${expectedInitials}"`,
+      );
+    }
   }
 }

@@ -4,6 +4,13 @@
 
 These rules apply to the entire repository.
 
+## Project skill
+
+- Use `.agents/skills/crm-automate-doqa-case/SKILL.md` when creating, updating or migrating a
+  CRM Playwright test from a DoQA case.
+- Use the skill's DoQA publication path only when the user explicitly requests a DoQA write or
+  report upload.
+
 ## Required checks
 
 Before completing a code change, run:
@@ -43,6 +50,11 @@ Run each changed Playwright scenario directly. Run smoke or regression in propor
 - Use dry-run before safe normalization.
 - Preserve ETag/versionUuid optimistic locking.
 - Never publish an empty report.
+- Completed reports may contain failed, broken or skipped mapped tests.
+- Triage every failed/broken run element after upload. Prepare a bug draft only for an explicitly
+  confirmed product failure, after a read-only duplicate check.
+- Do not create DoQA or tracker defects automatically; return copy-ready text and reviewed
+  screenshot/video plus sanitized error context.
 - After upload, verify run test count, progress and run elements.
 - Do not pass or print tokens, passwords, `.env` contents or storage state.
 

@@ -9,6 +9,9 @@
       "@config/*": ["config/*"],
       "@fixtures": ["fixtures/index"],
       "@fixtures/*": ["fixtures/*"],
+      "@framework/*": ["framework/*"],
+      "@locators": ["locators/index"],
+      "@locators/*": ["locators/*"],
       "@modules/*": ["modules/*"],
       "@support/*": ["tests/support/*"],
       "@utils/*": ["utils/*"]

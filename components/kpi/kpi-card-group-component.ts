@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { kpiTestIds } from '@locators/kpi';
 import { CardComponent } from '../common/card-component';
 
 /**
@@ -27,8 +28,8 @@ export class KpiCardGroupComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.mrrCard = new CardComponent(page, 'card-mrr');
-    this.scoreCard = new CardComponent(page, 'card-score');
-    this.appsCard = new CardComponent(page, 'card-applications');
+    this.mrrCard = new CardComponent(page, kpiTestIds.cards.mrr);
+    this.scoreCard = new CardComponent(page, kpiTestIds.cards.score);
+    this.appsCard = new CardComponent(page, kpiTestIds.cards.applications);
   }
 }

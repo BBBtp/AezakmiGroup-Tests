@@ -1,5 +1,11 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { requireTestId } from '../../../utils/test-id';
+import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+
+export type PageHeaderTestIds = {
+  container: string;
+  title: string;
+  subtitle: string;
+};
 
 /**
  * Компонент заголовка страницы.
@@ -13,12 +19,7 @@ import { requireTestId } from '../../../utils/test-id';
  * - восстановления пароля;
  * и других страницах с единым layout-заголовком.
  */
-export class PageHeaderComponent {
-  /**
-   * Экземпляр страницы Playwright
-   */
-  page: Page;
-
+export class PageHeaderComponent extends UiObject {
   /**
    * Заголовок страницы
    */
@@ -34,16 +35,16 @@ export class PageHeaderComponent {
    * @param containerTestId data-testid контейнера,
    * внутри которого расположен заголовок страницы
    */
-  constructor(page: Page, containerTestId: string) {
-    this.page = page;
-    const normalizedContainerTestId = requireTestId(containerTestId, 'PageHeaderComponent');
+  constructor(page: Page, testIds: PageHeaderTestIds) {
+    super(page);
 
     // Корневой контейнер заголовка
-    const container = page.locator(`[data-testid="${normalizedContainerTestId}"]`);
+    const container = this.locate.testId(testIds.container);
+    const header = this.locate.within(container);
 
     // Локаторы элементов заголовка
-    this.title = container.locator('[data-testid="login__title"]');
-    this.subtitle = container.locator('[data-testid="login__subtitle"]');
+    this.title = header.testId(testIds.title);
+    this.subtitle = header.testId(testIds.subtitle);
   }
 
   /**
@@ -76,10 +77,10 @@ export class PageHeaderComponent {
    * проверка подзаголовка не выполняется.
    */
   async verifyContent(expectedTitle: string, expectedSubtitle?: string): Promise<void> {
-    await expect(this.title).toHaveText(expectedTitle);
+    await this.expectations.text('page title', this.title, expectedTitle);
 
     if (expectedSubtitle) {
-      await expect(this.subtitle).toHaveText(expectedSubtitle);
+      await this.expectations.text('page subtitle', this.subtitle, expectedSubtitle);
     }
   }
 }

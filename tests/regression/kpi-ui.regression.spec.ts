@@ -1,8 +1,6 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test, testData } from '@fixtures';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('KPI UI', () => {
   test.beforeEach(async ({ kpiPage }) => {
@@ -11,28 +9,18 @@ test.describe('KPI UI', () => {
 
   test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
     await allure.allureId('802');
-    await expect(kpiPage.subtitle).toBeVisible();
-    await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
+    await kpiPage.expectSubtitle(testData.texts.kpi.basePage.title);
   });
 
-  test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage }) => {
+  test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage, network }) => {
     await allure.allureId('805');
-    await kpiPage.page.route('**/staff/api/v1/kpi/managers/statistics*', async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'Mocked server error' }),
-      });
+    await network.failNext('**/staff/api/v1/kpi/managers/statistics*', 'GET', {
+      message: 'Mocked server error',
     });
-
-    const failedStatistics = kpiPage.page.waitForResponse(
-      (response) =>
-        response.url().includes('/staff/api/v1/kpi/managers/statistics') && response.status() === 500,
-    );
-    await kpiPage.page.goto('/kpi', { waitUntil: 'domcontentloaded' });
+    const failedStatistics = network.waitForFailedResponse('/staff/api/v1/kpi/managers/statistics', 'GET');
+    await network.navigate('/kpi', { waitUntil: 'domcontentloaded' });
     await failedStatistics;
-    await expect(kpiPage.errorContent).toBeVisible();
-    await expect(kpiPage.mainContent).toBeHidden();
+    await kpiPage.expectErrorState();
   });
 
   test('Проверка отображения карточек KPI', async ({ kpiPage }) => {
@@ -49,30 +37,31 @@ test.describe('KPI UI', () => {
     const filters = kpiPage.filters;
 
     await filters.verifyVisible();
-    await expect(filters.tabs).not.toHaveCount(0);
-    await expect(filters.activeTab).toBeVisible();
+    await filters.verifyActiveTab();
   });
 
-  test('График производительности отображается и табы переключаются', async ({ kpiPage }) => {
+  test('График производительности отображается и табы переключаются', async ({
+    kpiPage,
+    browserDiagnostics,
+  }) => {
     await allure.allureId('808');
     const chart = kpiPage.chart;
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('KPI performance chart');
 
     await chart.verifyVisible();
-    await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
-    expect(errors).toEqual([]);
-    await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
-    expect(errors).toEqual([]);
+    await chart.selectMrr();
+    consoleErrors.expectNoErrors();
+    await chart.selectScore();
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Top Employees отображается', async ({ kpiPage }) => {
     await allure.allureId('809');
     const top = kpiPage.topEmployees;
 
-    await expect(top.root).toBeVisible();
-    await expect(top.title).toBeVisible();
-    await expect(top.podium).toBeVisible();
-    expect(await top.getContendersCount()).toBeGreaterThan(0);
+    await top.verifyVisible('Top employees');
+    await top.verifyPodium();
+    await top.verifyContenders();
   });
 });

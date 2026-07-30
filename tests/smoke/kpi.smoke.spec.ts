@@ -1,28 +1,23 @@
 import { test } from '@fixtures';
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
   test.beforeEach(async ({ kpiPage }) => {
     await kpiPage.navigate();
   });
 
-  test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
+  test('Кнопка настроек отображается и кликабельна', async ({ kpiPage, browserDiagnostics }) => {
     await allure.allureId('803');
-    const btn = kpiPage.settingsButton;
-    await expect(btn).toBeVisible();
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-    await loggedClick(kpiPage.page, 'KPI: open settings', btn);
-    await kpiPage.page.waitForURL(/\/kpi\/settings/);
-    expect(errors.length).toBe(0);
+    await kpiPage.expectSettingsActionVisible();
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('open KPI settings');
+    await kpiPage.openSettings();
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Основной контент рендерится, error-content скрыт', async ({ kpiPage }) => {
     await allure.allureId('804');
-    await expect(kpiPage.mainContent).toBeVisible();
-    await expect(kpiPage.errorContent).toBeHidden();
+    await kpiPage.expectMainContentVisible();
   });
 
   test('Таблица сотрудников отображается и можно открыть карточку сотрудника', async ({ kpiPage }) => {
@@ -30,22 +25,11 @@ test.describe('Страница KPI', () => {
     const table = kpiPage.employeesTable;
 
     await test.step('Таблица отображается', async () => {
-      await expect(table.root).toBeVisible();
-    });
-    await test.step('Есть хотя бы одна строка', async () => {
-      const count = await table.getRowCount();
-      expect(count).toBeGreaterThan(0);
+      await table.expectPopulated();
     });
     await test.step('Кнопка Open открывает страницу сотрудника', async () => {
-      const rows = await table.getRows();
-      const firstRow = rows[0];
-      const oldUrl = kpiPage.page.url();
-      await Promise.all([
-        kpiPage.page.waitForURL(/\/kpi\/.+/),
-        loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton),
-      ]);
-      await expect(kpiPage.page).toHaveURL(/\/kpi\/.+/);
-      expect(kpiPage.page.url()).not.toBe(oldUrl);
+      await table.openFirstEmployee();
+      await kpiPage.expectEmployeeDetailsUrl();
     });
   });
 });

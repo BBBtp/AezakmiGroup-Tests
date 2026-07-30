@@ -1,9 +1,9 @@
 import { Locator, Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 import { KpiSettingsEditValueForm } from '../forms/kpi-settings-edit-value-form';
-import { composeTestId, requireTestId } from '../../../../utils/test-id';
 
-export class KpiSettingsEditValueModal {
-  readonly page: Page;
+export class KpiSettingsEditValueModal extends UiObject {
   readonly tableName: string;
   readonly actionType: string;
   readonly value: string;
@@ -14,18 +14,15 @@ export class KpiSettingsEditValueModal {
   readonly deleteButton: Locator;
 
   constructor(page: Page, tableName: string, actionType: string, value: string) {
-    this.page = page;
+    super(page);
     this.tableName = tableName;
     this.actionType = actionType;
     this.value = value;
 
-    const baseTestId = requireTestId(
-      composeTestId([tableName, actionType, value]),
-      'KpiSettingsEditValueModal',
-    );
-    this.trigger = page.locator(`[data-testid="${baseTestId}__edit"]`);
-    this.modal = page.locator(`[data-testid="${baseTestId}__edit-modal"]`);
-    this.deleteButton = page.locator(`[data-testid="${baseTestId}__delete"]`);
+    const testIds = kpiSettingsTestIds.row(tableName, actionType, value);
+    this.trigger = this.locate.testId(testIds.editButton);
+    this.modal = this.locate.testId(testIds.editModal);
+    this.deleteButton = this.locate.testId(testIds.deleteButton);
     this.form = new KpiSettingsEditValueForm(page, tableName, actionType, value);
   }
 }

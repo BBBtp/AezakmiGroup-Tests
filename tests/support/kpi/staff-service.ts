@@ -1,6 +1,7 @@
-import { expect, type Page, type Response } from '@playwright/test';
+import { expect, type Response } from '@playwright/test';
 
-import { loggedAction } from '@utils/playwright-logger';
+import { NetworkController } from '@framework/network';
+import type { KpiPage } from '@modules/kpi';
 
 export const STAFF_KPI_API_PREFIX = '/staff/api/v1/kpi';
 
@@ -29,18 +30,15 @@ export function managerKpiEndpoints(employeeId: string) {
   ] as const;
 }
 
-export function isKpiStatisticsResponse(response: Response): boolean {
-  return (
-    response.request().method() === 'GET' &&
-    response.url().includes(`${STAFF_KPI_API_PREFIX}/managers/statistics?`)
-  );
-}
-
-export async function openKpiAndGetStatistics(page: Page): Promise<KpiStatistics> {
-  const responsePromise = page.waitForResponse(isKpiStatisticsResponse);
-  await loggedAction(page, 'navigate', 'KPI page', page.locator('body'), () =>
-    page.goto('/kpi', { waitUntil: 'domcontentloaded' }),
-  );
+export async function openKpiAndGetStatistics(
+  kpiPage: KpiPage,
+  network: NetworkController,
+): Promise<KpiStatistics> {
+  const responsePromise = network.waitForResponse({
+    url: (url) => url.includes(`${STAFF_KPI_API_PREFIX}/managers/statistics?`),
+    method: 'GET',
+  });
+  await kpiPage.navigate();
   const response = await responsePromise;
   await expectSuccessfulJson(response, 'KPI statistics');
   return response.json() as Promise<KpiStatistics>;

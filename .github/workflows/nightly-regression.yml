@@ -163,13 +163,69 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  publish-doqa:
-    name: Publish verified run to DoQA
+  bug-drafts:
+    name: Prepare bug drafts
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' &&
+      ${{ always() &&
+          (needs['regression-core'].result == 'success' ||
+           needs['regression-core'].result == 'failure') &&
+          (needs['regression-settings'].result == 'success' ||
+           needs['regression-settings'].result == 'failure') }}
+    needs:
+      - regression-core
+      - regression-settings
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ALLURE_RESULTS_DIR: collected-results/allure-results
+      BUG_DRAFTS_DIR: bug-drafts
+      DOQA_ENDPOINT: ${{ secrets.DOQA_ENDPOINT }}
+      DOQA_SPACE_ID: ${{ secrets.DOQA_SPACE_ID }}
+      DOQA_PROJECT_ID: ${{ secrets.DOQA_PROJECT_ID }}
+      DOQA_TOKEN: ${{ secrets.DOQA_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download regression artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: regression-results-*-${{ github.run_id }}
+          path: collected-results
+          merge-multiple: true
+
+      - name: Prepare read-only bug drafts
+        run: npm run bug:drafts
+
+      - name: Upload bug drafts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bug-drafts-${{ github.run_id }}
+          path: bug-drafts
+          if-no-files-found: warn
+          retention-days: 14
+
+  publish-doqa:
+    name: Publish completed run to DoQA
+    if: >-
+      ${{ always() &&
+          github.event_name == 'workflow_dispatch' &&
           inputs.publish_to_doqa &&
-          needs['regression-core'].result == 'success' &&
-          needs['regression-settings'].result == 'success' }}
+          (needs['regression-core'].result == 'success' ||
+           needs['regression-core'].result == 'failure') &&
+          (needs['regression-settings'].result == 'success' ||
+           needs['regression-settings'].result == 'failure') }}
     needs:
       - regression-core
       - regression-settings
@@ -179,6 +235,7 @@ jobs:
       name: doqa-production
     env:
       ALLURE_RESULTS_DIR: collected-results/allure-results
+      BUG_DRAFTS_DIR: bug-drafts
       DOQA_ENDPOINT: ${{ secrets.DOQA_ENDPOINT }}
       DOQA_SPACE_ID: ${{ secrets.DOQA_SPACE_ID }}
       DOQA_PROJECT_ID: ${{ secrets.DOQA_PROJECT_ID }}
@@ -208,3 +265,12 @@ jobs:
 
       - name: Publish and verify DoQA run
         run: npm run doqa:publish
+
+      - name: Upload run-linked bug drafts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: doqa-bug-drafts-${{ github.run_id }}
+          path: bug-drafts
+          if-no-files-found: warn
+          retention-days: 14

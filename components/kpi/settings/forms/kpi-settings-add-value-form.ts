@@ -1,9 +1,8 @@
-import { Locator, Page, expect } from '@playwright/test';
-import { requireTestId } from '../../../../utils/test-id';
-import { loggedClick, loggedFill } from '../../../../utils/playwright-logger';
+import { type Locator, type Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 
-export class KpiSettingsAddValueForm {
-  readonly page: Page;
+export class KpiSettingsAddValueForm extends UiObject {
   readonly tableName: string;
   readonly root: Locator;
   readonly actionTypeSelect: Locator;
@@ -23,108 +22,119 @@ export class KpiSettingsAddValueForm {
   readonly pointsInput: Locator;
 
   constructor(page: Page, tableName: string) {
-    this.page = page;
-    this.tableName = requireTestId(tableName, 'KpiSettingsAddValueForm');
-    this.root = page.locator(`[data-testid="${this.tableName}__add-form"]`);
-    this.actionTypeSelect = this.root.locator('[data-testid="action-type-select"]');
-    this.actionTypeTrigger = this.root.locator('[data-testid="action-type-select-trigger"]');
+    super(page);
+    const testIds = kpiSettingsTestIds.addForm(tableName);
+    this.tableName = kpiSettingsTestIds.table(tableName).root;
+    this.root = this.locate.testId(testIds.root);
+    const form = this.locate.within(this.root);
+    this.actionTypeSelect = form.testId(testIds.actionTypeSelect);
+    this.actionTypeTrigger = form.testId(testIds.actionTypeTrigger);
     // Content for select-like controls is rendered outside the form subtree.
-    this.actionTypeContent = this.page.locator('[data-testid="action-type-select-content"]');
-    this.actionTypeTriggerValue = this.page.locator('[data-testid="action-type-select-trigger-value"]');
-    this.valueBlock = this.root.locator('[data-testid="value-block"]');
-    this.valueTypeSelect = this.root.locator('[data-testid="value-type-select"]');
-    this.valueTypeTrigger = this.root.locator('[data-testid="value-type-select-trigger"]');
-    this.valueTypeTriggerValue = this.page.locator('[data-testid="value-type-select-trigger-value"]');
-    this.valueTypeContent = this.page.locator('[data-testid="value-type-select-content"]');
-    this.valueInput = this.root.locator('[data-testid="value-input"]');
-    this.pointsBlock = this.root.locator('[data-testid="points-block"]');
-    this.pointsRadio = this.root.locator('[data-testid="points-radio"]');
-    this.pointsRadioPlus = this.root.locator('[data-testid="points-radio__plus"]');
-    this.pointsRadioMinus = this.root.locator('[data-testid="points-radio__minus"]');
-    this.pointsInput = this.root.locator('[data-testid="points-input"]');
+    this.actionTypeContent = this.locate.testId(testIds.actionTypeContent);
+    this.actionTypeTriggerValue = this.locate.testId(testIds.actionTypeTriggerValue);
+    this.valueBlock = form.testId(testIds.valueBlock);
+    this.valueTypeSelect = form.testId(testIds.valueTypeSelect);
+    this.valueTypeTrigger = form.testId(testIds.valueTypeTrigger);
+    this.valueTypeTriggerValue = this.locate.testId(testIds.valueTypeTriggerValue);
+    this.valueTypeContent = this.locate.testId(testIds.valueTypeContent);
+    this.valueInput = form.testId(testIds.valueInput);
+    this.pointsBlock = form.testId(testIds.pointsBlock);
+    this.pointsRadio = form.testId(testIds.pointsRadio);
+    this.pointsRadioPlus = form.testId(testIds.pointsRadioPlus);
+    this.pointsRadioMinus = form.testId(testIds.pointsRadioMinus);
+    this.pointsInput = form.testId(testIds.pointsInput);
   }
   actionTypeOption(value: string): Locator {
-    return this.page.locator(`[data-testid="action-type-select_option-${value}"]`);
+    return this.locate.testId(kpiSettingsTestIds.addForm(this.tableName).actionTypeOption(value));
   }
   valueTypeOption(value: string): Locator {
-    return this.page.locator(`[data-testid="value-type-select_option-${value}"]`);
+    return this.locate.testId(kpiSettingsTestIds.addForm(this.tableName).valueTypeOption(value));
   }
 
   async openActionTypeSelect(): Promise<void> {
-    await loggedClick(this.page, `KPI settings ${this.tableName}: open action type`, this.actionTypeTrigger);
-    await expect(this.actionTypeContent).toBeVisible();
+    await this.actions.click(`KPI settings ${this.tableName}: open action type`, this.actionTypeTrigger);
+    await this.expectations.visible(`${this.tableName}: action type options`, this.actionTypeContent);
   }
 
   async openValueTypeSelect(): Promise<void> {
-    await loggedClick(this.page, `KPI settings ${this.tableName}: open value type`, this.valueTypeTrigger);
-    await expect(this.valueTypeContent).toBeVisible();
+    await this.actions.click(`KPI settings ${this.tableName}: open value type`, this.valueTypeTrigger);
+    await this.expectations.visible(`${this.tableName}: value type options`, this.valueTypeContent);
   }
 
   async selectActionType(value: string): Promise<void> {
     await this.openActionTypeSelect();
-    await loggedClick(
-      this.page,
+    await this.actions.click(
       `KPI settings ${this.tableName}: select action type ${value}`,
       this.actionTypeOption(value),
     );
-    await expect(this.actionTypeTriggerValue).toContainText(value);
+    await this.expectations.containsText(
+      `${this.tableName}: selected action type`,
+      this.actionTypeTriggerValue,
+      value,
+    );
   }
 
   async selectValueType(value: string): Promise<void> {
     await this.openValueTypeSelect();
-    await loggedClick(
-      this.page,
+    await this.actions.click(
       `KPI settings ${this.tableName}: select value type ${value}`,
       this.valueTypeOption(value),
     );
-    await expect(this.valueTypeTriggerValue).toContainText(value);
+    await this.expectations.containsText(
+      `${this.tableName}: selected value type`,
+      this.valueTypeTriggerValue,
+      value,
+    );
   }
 
   async fillValue(value: string): Promise<void> {
-    await loggedFill(this.page, `KPI settings ${this.tableName}: fill value`, this.valueInput, value);
+    await this.actions.fill(`KPI settings ${this.tableName}: fill value`, this.valueInput, value);
   }
 
   async expectActionTypeControlsVisible(): Promise<void> {
-    await expect(this.actionTypeSelect).toBeVisible();
-    await expect(this.actionTypeTrigger).toBeVisible();
-    await expect(this.actionTypeTriggerValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: action type select`, this.actionTypeSelect);
+    await this.expectations.visible(`${this.tableName}: action type trigger`, this.actionTypeTrigger);
+    await this.expectations.visible(`${this.tableName}: action type value`, this.actionTypeTriggerValue);
   }
 
   async expectValueControlsVisible(options: { includeInput?: boolean } = {}): Promise<void> {
-    await expect(this.valueBlock).toBeVisible();
-    await expect(this.valueTypeSelect).toBeVisible();
-    await expect(this.valueTypeTrigger).toBeVisible();
-    await expect(this.valueTypeTriggerValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value block`, this.valueBlock);
+    await this.expectations.visible(`${this.tableName}: value type select`, this.valueTypeSelect);
+    await this.expectations.visible(`${this.tableName}: value type trigger`, this.valueTypeTrigger);
+    await this.expectations.visible(`${this.tableName}: value type value`, this.valueTypeTriggerValue);
 
     if (options.includeInput ?? false) {
-      await expect(this.valueInput).toBeVisible();
+      await this.expectations.visible(`${this.tableName}: value input`, this.valueInput);
     }
   }
 
   async expectPointsControlsVisible(): Promise<void> {
-    await expect(this.pointsBlock).toBeVisible();
-    await expect(this.pointsRadio).toBeVisible();
-    await expect(this.pointsRadioPlus).toBeVisible();
-    await expect(this.pointsRadioMinus).toBeVisible();
-    await expect(this.pointsInput).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: points block`, this.pointsBlock);
+    await this.expectations.visible(`${this.tableName}: points radio`, this.pointsRadio);
+    await this.expectations.visible(`${this.tableName}: plus points`, this.pointsRadioPlus);
+    await this.expectations.visible(`${this.tableName}: minus points`, this.pointsRadioMinus);
+    await this.expectations.visible(`${this.tableName}: points input`, this.pointsInput);
   }
 
   async expectValueTypeOptionsVisible(values: string[]): Promise<void> {
     for (const value of values) {
-      await expect(this.valueTypeOption(value)).toBeVisible();
+      await this.expectations.visible(
+        `${this.tableName}: value type option ${value}`,
+        this.valueTypeOption(value),
+      );
     }
   }
 
   async expectActionTypeControlsHidden(): Promise<void> {
-    await expect(this.actionTypeSelect).toHaveCount(0);
-    await expect(this.actionTypeTrigger).toHaveCount(0);
+    await this.expectations.count(`${this.tableName}: action type select`, this.actionTypeSelect, 0);
+    await this.expectations.count(`${this.tableName}: action type trigger`, this.actionTypeTrigger, 0);
   }
 
   async expectValueControlsHidden(): Promise<void> {
-    await expect(this.valueBlock).toHaveCount(0);
+    await this.expectations.count(`${this.tableName}: value block`, this.valueBlock, 0);
   }
 
   async expectPointsControlsHidden(): Promise<void> {
-    await expect(this.pointsBlock).toHaveCount(0);
+    await this.expectations.count(`${this.tableName}: points block`, this.pointsBlock, 0);
   }
 }

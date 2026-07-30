@@ -1,7 +1,6 @@
 import { invalidUsers, test, testData as TestData } from '@fixtures';
 import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 test.describe('Валидация полей авторизации', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.navigate();
@@ -9,12 +8,8 @@ test.describe('Валидация полей авторизации', () => {
 
   test('Валидация пустых полей', async ({ loginPage }) => {
     await allure.allureId('791');
-    await loggedClick(
-      loginPage.page,
-      'login validation: submit empty form',
-      loginPage.loginForm.submitButton,
-    );
-    await expect(loginPage.page).toHaveURL(/login/);
+    await loginPage.loginForm.submit();
+    await loginPage.expectPageVisible();
     await loginPage.loginForm.assertInvalidEmailError();
     await loginPage.loginForm.assertInvalidPasswordError();
   });
@@ -25,20 +20,16 @@ test.describe('Валидация полей авторизации', () => {
       invalidUsers.invalidEmailFormat.email,
       invalidUsers.invalidEmailFormat.password,
     );
-    await loggedClick(
-      loginPage.page,
-      'login validation: submit invalid email',
-      loginPage.loginForm.submitButton,
-    );
-    await expect(loginPage.page).toHaveURL(/login/);
+    await loginPage.loginForm.submit();
+    await loginPage.expectPageVisible();
     await loginPage.loginForm.assertInvalidEmailError();
   });
 
   test('Неуспешная авторизация с неверным паролем', async ({ loginPage, adminUser }) => {
     await allure.allureId('793');
     await loginPage.login(adminUser.email, invalidUsers.wrongPassword.password);
-    await expect(loginPage.page).toHaveURL(/login/);
-    await expect(loginPage.errorMessage).toBeVisible();
+    await loginPage.expectPageVisible();
+    await loginPage.expectErrorVisible();
     const errorMessage = await loginPage.getErrorMessage();
     expect(errorMessage).toMatch(TestData.texts.login.errorMessages.invalidCredentials);
   });
@@ -46,7 +37,7 @@ test.describe('Валидация полей авторизации', () => {
   test('Неуспешная авторизация с несуществующим email', async ({ loginPage }) => {
     await allure.allureId('794');
     await loginPage.login(invalidUsers.wrongEmail.email, invalidUsers.wrongEmail.password);
-    await expect(loginPage.page).toHaveURL(/login/);
+    await loginPage.expectPageVisible();
     const errorMessage = await loginPage.getErrorMessage();
     expect(errorMessage).toMatch(TestData.texts.login.errorMessages.invalidCredentials);
   });

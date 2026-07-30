@@ -20,15 +20,17 @@
     "format": "node node_modules/prettier/bin/prettier.cjs --write .",
     "format:check": "node node_modules/prettier/bin/prettier.cjs --check .",
     "check:allure-ids": "node scripts/check-allure-ids.mjs",
+    "check:skills": "node scripts/check-project-skills.mjs",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check:flaky": "node scripts/check-flaky-results.mjs",
-    "quality": "npm run test:types && npm run lint && npm run format:check && npm run check:allure-ids && npm run check:architecture && npm run test:unit",
+    "quality": "npm run test:types && npm run lint && npm run format:check && npm run check:allure-ids && npm run check:skills && npm run check:architecture && npm run test:unit",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
     "mcp:doqa": "node mcp/server.mjs",
     "doqa:run": "node scripts/doqa-run.mjs",
     "doqa:publish": "node scripts/doqa-publish.mjs",
-    "doqa:summary": "node scripts/doqa-summary.mjs"
+    "doqa:summary": "node scripts/doqa-summary.mjs",
+    "bug:drafts": "node scripts/bug-draft-cli.mjs"
   },
   "files": [
     "components/**/*",

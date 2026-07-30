@@ -4,7 +4,7 @@ import path from 'node:path';
 import { z } from 'zod';
 import { DoqaApiError, DoqaClient } from './doqa-client.mjs';
 
-const server = new McpServer({ name: 'crm-doqa', version: '0.1.0' });
+const server = new McpServer({ name: 'crm-doqa', version: '0.3.0' });
 const outputSchema = { result: z.unknown() };
 
 function getClient() {
@@ -197,6 +197,54 @@ server.registerTool(
           title,
         }),
       );
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_analyze_run_failures',
+  {
+    title: 'Analyze failed DoQA run elements',
+    description:
+      'Read-only triage of failed, broken and blocked run elements. Returns evidence and existing run defects without creating anything.',
+    inputSchema: {
+      runId: z.number().int().positive(),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ runId }) => {
+    try {
+      return result(await getClient().analyzeRunFailures(runId));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_prepare_product_bug_draft',
+  {
+    title: 'Prepare a product bug draft',
+    description:
+      'Read-only. Prepares copy-ready bug fields for an explicitly confirmed product failure and checks active duplicates.',
+    inputSchema: {
+      runId: z.number().int().positive(),
+      caseId: z.number().int().positive(),
+      evidence: z.string().min(1),
+      title: z.string().min(1).max(255).optional(),
+      actualResult: z.string().min(1).optional(),
+      expectedResult: z.string().min(1).optional(),
+      priority: z.enum(['high', 'medium', 'low']).default('high'),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async (input) => {
+    try {
+      return result(await getClient().prepareProductBugDraft(input));
     } catch (error) {
       return failure(error);
     }

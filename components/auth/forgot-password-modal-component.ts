@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
+import { authTestIds } from '@locators/auth';
 import { ModalComponent } from '../common/modal-component';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Компонент модального окна «Забыли пароль».
@@ -30,11 +30,12 @@ export class ForgotPasswordModalComponent extends ModalComponent {
   constructor(page: Page) {
     // Инициализация базового модального компонента
     // login__forgot-password-modal — корневой data-testid модали
-    super(page, 'login__forgot-password-modal');
+    super(page, authTestIds.forgotPasswordModal);
 
     // Локаторы элементов внутри модального окна
-    this.telegramButton = this.modal.locator('[data-testid="login__telegram-button"]');
-    this.cancelButton = this.modal.locator('[data-testid="login__forgot-password-modal__close"]');
+    const modal = this.locate.within(this.modal);
+    this.telegramButton = modal.testId(authTestIds.telegramButton);
+    this.cancelButton = modal.testId(authTestIds.forgotPasswordCloseButton);
   }
 
   /**
@@ -45,7 +46,7 @@ export class ForgotPasswordModalComponent extends ModalComponent {
    * - сценариев восстановления пароля через Telegram.
    */
   async openTelegram(): Promise<void> {
-    await loggedClick(this.page, 'forgot password: open Telegram', this.telegramButton);
+    await this.actions.click('forgot password: open Telegram', this.telegramButton);
   }
 
   /**
@@ -72,15 +73,21 @@ export class ForgotPasswordModalComponent extends ModalComponent {
     await super.closeByButton();
   }
 
-  /**
-   * Возвращает значение атрибута `href` у кнопки Telegram.
-   *
-   * @returns ссылка Telegram или `null`, если атрибут отсутствует
-   *
-   * Используется для проверки корректности ссылки
-   * без фактического перехода.
-   */
-  async getTelegramButtonHref(): Promise<string | null> {
-    return await this.telegramButton.getAttribute('href');
+  async expectContentVisible(): Promise<void> {
+    await this.waitForOpen();
+    await this.expectations.visible('forgot password Telegram action', this.telegramButton);
+  }
+
+  async expectHidden(): Promise<void> {
+    await this.waitForClose();
+  }
+
+  async expectTelegramLink(): Promise<void> {
+    await this.expectations.attribute(
+      'forgot password Telegram link',
+      this.telegramButton,
+      'href',
+      /t\.me|telegram/i,
+    );
   }
 }

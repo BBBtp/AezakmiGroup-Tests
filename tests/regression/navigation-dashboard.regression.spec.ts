@@ -1,8 +1,6 @@
 import { allure } from 'allure-playwright';
-import { expect } from '@playwright/test';
 
 import { test } from '@fixtures';
-import { loggedClick } from '@utils/playwright-logger';
 
 const sections = [
   ['Dashboard', '/dashboard'],
@@ -25,45 +23,39 @@ const sections = [
 ] as const;
 
 test.describe('Навигация и Dashboard', () => {
-  test('Боковое меню содержит доступные разделы CRM', async ({ kpiPage }) => {
+  test('Боковое меню содержит доступные разделы CRM', async ({ applicationShell, dashboardPage }) => {
     await allure.allureId('571');
 
-    await kpiPage.page.goto('/dashboard');
+    await dashboardPage.navigate();
     for (const [label, href] of sections) {
-      const link = kpiPage.page.getByRole('link', { name: label, exact: true });
-      await expect(link).toBeVisible();
-      await expect(link).toHaveAttribute('href', href);
+      await applicationShell.expectSidebarDestination(label, href);
       // Some sidebar groups overlap their child links in the collapsed layout.
       // Verify the same destination directly after checking the rendered link.
-      await kpiPage.page.goto(href);
-      await expect(kpiPage.page).toHaveURL(new RegExp(`${href.replace('/', '\\/')}$`));
-      await kpiPage.page.goto('/dashboard');
+      await dashboardPage.navigateTo(href);
+      await dashboardPage.waitForUrl(new RegExp(`${href.replace('/', '\\/')}$`));
+      await dashboardPage.navigate();
     }
   });
 
-  test('Dashboard открывается из меню и содержит основные элементы', async ({ kpiPage }) => {
+  test('Dashboard открывается из меню и содержит основные элементы', async ({ kpiPage, dashboardPage }) => {
     await allure.allureId('572');
 
-    await kpiPage.page.goto('/kpi');
-    const dashboardLink = kpiPage.page.getByRole('link', { name: 'Dashboard', exact: true });
-    await loggedClick(kpiPage.page, 'sidebar: open Dashboard', dashboardLink);
-    await expect(kpiPage.page).toHaveURL(/\/dashboard$/);
-    await expect(kpiPage.page.getByTestId('dashboard')).toBeVisible();
-    await expect(kpiPage.page.getByTestId('dashboard-title__title')).toBeVisible();
+    await kpiPage.navigate();
+    await dashboardPage.openFromSidebar();
+    await dashboardPage.expectBusinessControls();
+  });
 
-    for (const label of ['Keywords', 'Push', 'Product', 'Notifications', 'Staff', 'Settings']) {
-      await expect(kpiPage.page.getByRole('button', { name: new RegExp(`^${label}`) })).toBeVisible();
-    }
+  test('Dashboard отображает метрики без технических значений после перезагрузки', async ({
+    dashboardPage,
+    network,
+  }) => {
+    await allure.allureId('574');
 
-    for (const testId of [
-      'mrr-chart__header__select-trigger',
-      'mrr-chart__header__tabs__7',
-      'mrr-chart__header__tabs__30',
-      'mrr-chart__header__tabs__84',
-      'mrr-chart__filter-btn',
-      'mrr-changes-list',
-    ]) {
-      await expect(kpiPage.page.getByTestId(testId)).toBeVisible();
-    }
+    await dashboardPage.navigate();
+    await dashboardPage.expectMetricsHealthy();
+
+    await network.reload({ waitUntil: 'commit' });
+    await dashboardPage.expectLoaded();
+    await dashboardPage.expectMetricsHealthy();
   });
 });

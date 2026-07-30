@@ -1,7 +1,5 @@
 import { test, testData } from '@fixtures';
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
-import { loggedClick } from '@utils/playwright-logger';
 
 test.describe('Страница KPI', () => {
   test.beforeEach(async ({ kpiPage }) => {
@@ -61,17 +59,17 @@ test.describe('Страница KPI', () => {
     });
   });
 
-  test('График отображается, табы переключаются без ошибок', async ({ kpiPage }) => {
+  test('График отображается, табы переключаются без ошибок', async ({ kpiPage, browserDiagnostics }) => {
     await allure.allureId('815');
     const chart = kpiPage.chart;
 
     await chart.verifyVisible();
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
-    await loggedClick(kpiPage.page, 'KPI chart: MRR tab', chart.mrrTab);
-    expect(errors).toHaveLength(0);
-    await loggedClick(kpiPage.page, 'KPI chart: Score tab', chart.scoreTab);
-    expect(errors).toHaveLength(0);
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('KPI performance chart');
+    await chart.selectMrr();
+    consoleErrors.expectNoErrors();
+    await chart.selectScore();
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Таблица сотрудников: строки отображаются и корректны', async ({ kpiPage }) => {
@@ -87,16 +85,9 @@ test.describe('Страница KPI', () => {
     await allure.allureId('816');
     const table = kpiPage.employeesTable;
 
-    const rows = await table.getRows();
-    expect(rows.length).toBeGreaterThan(0);
-    const firstRow = rows[0];
-    const baseUrl = kpiPage.page.url();
-    await Promise.all([
-      kpiPage.page.waitForURL(/\/kpi\/.+/),
-      loggedClick(kpiPage.page, 'employees table: open first employee', firstRow.openButton),
-    ]);
-    const newUrl = kpiPage.page.url();
-    expect(newUrl).not.toBe(baseUrl);
+    await table.expectPopulated();
+    await table.openFirstEmployee();
+    await kpiPage.expectEmployeeDetailsUrl();
   });
 
   test('Таблица сотрудников: сортировка по колонкам', async ({ kpiPage }) => {

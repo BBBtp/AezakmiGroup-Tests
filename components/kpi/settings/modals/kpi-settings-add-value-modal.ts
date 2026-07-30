@@ -1,12 +1,11 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 import { KpiSettingsAddValueForm } from '../forms/kpi-settings-add-value-form';
-import { requireTestId } from '../../../../utils/test-id';
-import { loggedClick, loggedFill } from '../../../../utils/playwright-logger';
 
 export type KpiSettingsAddValueTableName = 'ab-tests' | 'total-mrr';
 
-export class KpiSettingsAddValueModal {
-  readonly page: Page;
+export class KpiSettingsAddValueModal extends UiObject {
   readonly tableName: KpiSettingsAddValueTableName;
 
   readonly trigger: Locator;
@@ -21,86 +20,90 @@ export class KpiSettingsAddValueModal {
   readonly form: KpiSettingsAddValueForm;
 
   constructor(page: Page, tableName: KpiSettingsAddValueTableName) {
-    this.page = page;
-    this.tableName = requireTestId(tableName, 'KpiSettingsAddValueModal') as KpiSettingsAddValueTableName;
+    super(page);
+    this.tableName = kpiSettingsTestIds.table(tableName).root as KpiSettingsAddValueTableName;
+    const testIds = kpiSettingsTestIds.addModal(this.tableName);
 
-    this.trigger = page.locator(`[data-testid="${this.tableName}__add-value"]`);
-    this.modal = page.locator(`[data-testid="${this.tableName}__add-modal"]`);
-    this.progressStepActionType = page.locator(`[data-testid="${this.tableName}-Action type"]`);
-    this.progressStepValue = page.locator(`[data-testid="${this.tableName}-Value"]`);
-    this.progressStepPoints = page.locator(`[data-testid="${this.tableName}-Points"]`);
-    this.backButton = page.locator(`[data-testid="${this.tableName}__button-prev"]`);
-    this.nextButton = page.locator(`[data-testid="${this.tableName}__button-next"]`);
-    this.loadingIndicator = page.locator(`[data-testid="${this.tableName}__loading"]`);
-    this.errorBlock = this.modal
-      .locator(`[data-testid="${this.tableName}__error"]`)
-      .or(this.modal.getByText('Failed to create value'))
-      .first();
+    this.trigger = this.locate.testId(testIds.trigger);
+    this.modal = this.locate.testId(testIds.root);
+    this.progressStepActionType = this.locate.testId(testIds.actionTypeStep);
+    this.progressStepValue = this.locate.testId(testIds.valueStep);
+    this.progressStepPoints = this.locate.testId(testIds.pointsStep);
+    this.backButton = this.locate.testId(testIds.backButton);
+    this.nextButton = this.locate.testId(testIds.nextButton);
+    this.loadingIndicator = this.locate.testId(testIds.loading);
+    const modal = this.locate.within(this.modal);
+    this.errorBlock = modal.testId(testIds.error).or(modal.text('Failed to create value')).first();
 
     this.form = new KpiSettingsAddValueForm(page, this.tableName);
   }
 
   async waitForOpen(): Promise<void> {
-    await expect(this.modal).toBeVisible();
-    await expect(this.form.root).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: add modal`, this.modal);
+    await this.expectations.visible(`${this.tableName}: add form`, this.form.root);
   }
 
   async expectShellVisible(): Promise<void> {
     await this.waitForOpen();
-    await expect(this.progressStepActionType).toBeVisible();
-    await expect(this.progressStepValue).toBeVisible();
-    await expect(this.progressStepPoints).toBeVisible();
-    await expect(this.form.actionTypeSelect).toBeVisible();
-    await expect(this.form.actionTypeTrigger).toBeVisible();
-    await expect(this.nextButton).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: action type step`, this.progressStepActionType);
+    await this.expectations.visible(`${this.tableName}: value step`, this.progressStepValue);
+    await this.expectations.visible(`${this.tableName}: points step`, this.progressStepPoints);
+    await this.expectations.visible(`${this.tableName}: action type select`, this.form.actionTypeSelect);
+    await this.expectations.visible(`${this.tableName}: action type trigger`, this.form.actionTypeTrigger);
+    await this.expectations.visible(`${this.tableName}: next action`, this.nextButton);
+  }
+
+  async expectCreateErrorVisible(): Promise<void> {
+    await this.waitForOpen();
+    await this.expectations.visible(`${this.tableName}: create error`, this.errorBlock);
   }
 
   async clickNextSafely(): Promise<void> {
-    await expect(this.nextButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings ${this.tableName}: next`, this.nextButton);
+    await this.expectations.enabled(`${this.tableName}: next action`, this.nextButton);
+    await this.actions.click(`KPI settings ${this.tableName}: next`, this.nextButton);
   }
 
   async clickBackSafely(): Promise<void> {
-    await expect(this.backButton).toBeEnabled();
-    await loggedClick(this.page, `KPI settings ${this.tableName}: back`, this.backButton);
+    await this.expectations.enabled(`${this.tableName}: back action`, this.backButton);
+    await this.actions.click(`KPI settings ${this.tableName}: back`, this.backButton);
   }
 
   async assertNextEnabled(): Promise<void> {
-    await expect(this.nextButton).toBeEnabled();
+    await this.expectations.enabled(`${this.tableName}: next action`, this.nextButton);
   }
 
   async assertNextDisabled(): Promise<void> {
-    await expect(this.nextButton).toBeDisabled();
+    await this.expectations.disabled(`${this.tableName}: next action`, this.nextButton);
   }
 
   async assertBackEnabled(): Promise<void> {
-    await expect(this.backButton).toBeEnabled();
+    await this.expectations.enabled(`${this.tableName}: back action`, this.backButton);
   }
 
   async assertBackDisabled(): Promise<void> {
-    await expect(this.backButton).toBeDisabled();
+    await this.expectations.disabled(`${this.tableName}: back action`, this.backButton);
   }
 
   async assertAbTestsActionTypeStep(): Promise<void> {
-    await expect(this.progressStepActionType).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: action type step`, this.progressStepActionType);
     await this.form.expectActionTypeControlsVisible();
     await this.form.expectValueControlsHidden();
     await this.form.expectPointsControlsHidden();
-    await expect(this.backButton).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: back action`, this.backButton);
     await this.assertNextDisabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertTotalMrrActionTypeStep(): Promise<void> {
-    await expect(this.progressStepActionType).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: action type step`, this.progressStepActionType);
     await this.form.expectActionTypeControlsVisible();
     await this.form.expectValueControlsHidden();
     await this.form.expectPointsControlsHidden();
     await this.assertBackDisabled();
     await this.assertNextDisabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertActionTypeStepShell(): Promise<void> {
@@ -128,39 +131,39 @@ export class KpiSettingsAddValueModal {
   }
 
   async assertAbTestsValueStep(): Promise<void> {
-    await expect(this.progressStepValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value step`, this.progressStepValue);
     await this.form.expectValueControlsVisible();
     await this.assertNextDisabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertAbTestsValueConfiguredStep(): Promise<void> {
-    await expect(this.progressStepValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value step`, this.progressStepValue);
     await this.form.expectValueControlsVisible({ includeInput: true });
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertTotalMrrValueStep(): Promise<void> {
-    await expect(this.progressStepValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value step`, this.progressStepValue);
     await this.form.expectActionTypeControlsHidden();
     await this.form.expectValueControlsVisible({ includeInput: true });
     await this.form.expectPointsControlsHidden();
     await this.assertBackEnabled();
     await this.assertNextDisabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertTotalMrrValueConfiguredStep(): Promise<void> {
-    await expect(this.progressStepValue).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: value step`, this.progressStepValue);
     await this.form.expectActionTypeControlsHidden();
     await this.form.expectValueControlsVisible({ includeInput: true });
     await this.form.expectPointsControlsHidden();
     await this.assertBackEnabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertValueStepShell(): Promise<void> {
@@ -179,13 +182,16 @@ export class KpiSettingsAddValueModal {
       await this.form.expectValueTypeOptionsVisible(['Reached $N', 'Increased by N%', 'Fell by N%']);
     }
 
-    await loggedClick(
-      this.page,
+    await this.actions.click(
       `KPI settings ${this.tableName}: select value type ${value}`,
       this.form.valueTypeOption(value),
     );
-    await expect(this.form.valueTypeTriggerValue).toContainText(value);
-    await expect(this.form.valueInput).toBeVisible();
+    await this.expectations.containsText(
+      `${this.tableName}: selected value type`,
+      this.form.valueTypeTriggerValue,
+      value,
+    );
+    await this.expectations.visible(`${this.tableName}: value input`, this.form.valueInput);
     await this.assertNextDisabled();
   }
 
@@ -196,11 +202,11 @@ export class KpiSettingsAddValueModal {
 
   async selectPointsType(type: 'plus' | 'minus'): Promise<void> {
     const option = type === 'plus' ? this.form.pointsRadioPlus : this.form.pointsRadioMinus;
-    await loggedClick(this.page, `KPI settings ${this.tableName}: select points ${type}`, option);
+    await this.actions.click(`KPI settings ${this.tableName}: select points ${type}`, option);
   }
 
   async fillPoints(value: string): Promise<void> {
-    await loggedFill(this.page, `KPI settings ${this.tableName}: fill points`, this.form.pointsInput, value);
+    await this.actions.fill(`KPI settings ${this.tableName}: fill points`, this.form.pointsInput, value);
     await this.assertNextEnabled();
   }
 
@@ -220,20 +226,20 @@ export class KpiSettingsAddValueModal {
   }
 
   async assertAbTestsPointsStep(): Promise<void> {
-    await expect(this.progressStepPoints).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: points step`, this.progressStepPoints);
     await this.form.expectPointsControlsVisible();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertTotalMrrPointsStep(): Promise<void> {
-    await expect(this.progressStepPoints).toBeVisible();
+    await this.expectations.visible(`${this.tableName}: points step`, this.progressStepPoints);
     await this.form.expectActionTypeControlsHidden();
     await this.form.expectValueControlsHidden();
     await this.form.expectPointsControlsVisible();
     await this.assertBackEnabled();
-    await expect(this.loadingIndicator).toBeHidden();
-    await expect(this.errorBlock).toBeHidden();
+    await this.expectations.hidden(`${this.tableName}: loading`, this.loadingIndicator);
+    await this.expectations.hidden(`${this.tableName}: error`, this.errorBlock);
   }
 
   async assertPointsStepShell(): Promise<void> {

@@ -1,9 +1,9 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
+import { authSelectors, authTestIds, authText } from '@locators/auth';
 import { BasePage } from '../base-page';
 import { LoginFormComponent } from '../../components/forms/login-form-component';
 import { ForgotPasswordModalComponent } from '../../components/auth/forgot-password-modal-component';
 import { PageHeaderComponent } from '../../components/common/login/page-header-component';
-import { loggedClick } from '../../utils/playwright-logger';
 
 /**
  * Страница логина
@@ -29,12 +29,16 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.loginContainer = page.locator('[data-testid="login"]');
+    this.loginContainer = this.locate.testId(authTestIds.page);
     this.loginForm = new LoginFormComponent(page);
     this.forgotPasswordModal = new ForgotPasswordModalComponent(page);
-    this.pageHeader = new PageHeaderComponent(page, 'login');
-    this.errorMessage = page.locator('.error-message, [role="alert"]');
-    this.successMessage = page.locator('.success-message, .notification-success');
+    this.pageHeader = new PageHeaderComponent(page, {
+      container: authTestIds.page,
+      title: authTestIds.title,
+      subtitle: authTestIds.subtitle,
+    });
+    this.errorMessage = this.locate.css(authSelectors.errorMessage);
+    this.successMessage = this.locate.css(authSelectors.successMessage);
   }
 
   /** Переход на страницу логина */
@@ -47,7 +51,7 @@ export class LoginPage extends BasePage {
   async waitForPageLoad(): Promise<void> {
     await this.waitForLoad();
     await this.loginForm.waitForFormReady();
-    await expect(this.loginContainer).toBeVisible();
+    await this.expectations.visible('login page', this.loginContainer);
   }
 
   /**
@@ -72,7 +76,7 @@ export class LoginPage extends BasePage {
 
   /** Открыть модальное окно "Забыли пароль" */
   async openForgotPasswordModal(): Promise<void> {
-    await loggedClick(this.page, 'login: forgot password', this.loginForm.forgotPasswordButton);
+    await this.actions.click('login: forgot password', this.loginForm.forgotPasswordButton);
     await this.forgotPasswordModal.waitForOpen();
   }
 
@@ -93,9 +97,24 @@ export class LoginPage extends BasePage {
 
   /** Проверка контента страницы логина */
   async verifyPageContent(): Promise<void> {
-    await this.pageHeader.verifyContent(
-      'Log in to your account',
-      'Welcome back! Please enter your credentials to get started',
-    );
+    await this.pageHeader.verifyContent(authText.title, authText.subtitle);
+  }
+
+  async expectPageVisible(): Promise<void> {
+    await this.expectations.url('login URL', /login/);
+    await this.expectations.visible('login page', this.loginContainer);
+  }
+
+  async expectPrimaryControlsVisible(): Promise<void> {
+    await this.verifyPageContent();
+    await this.loginForm.expectPrimaryControlsVisible();
+  }
+
+  async expectErrorVisible(): Promise<void> {
+    await this.expectations.visible('login error message', this.errorMessage);
+  }
+
+  async expectAuthenticated(): Promise<void> {
+    await this.expectations.url('authenticated dashboard URL', /dashboard/);
   }
 }

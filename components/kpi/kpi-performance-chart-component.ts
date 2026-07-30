@@ -1,4 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 
 /**
  * Компонент графика KPI Performance.
@@ -9,7 +11,7 @@ import { Page, Locator, expect } from '@playwright/test';
  * - работу с вкладками графика (Score и MRR);
  * - получение заголовка графика.
  */
-export class KpiPerformanceChartComponent {
+export class KpiPerformanceChartComponent extends UiObject {
   /** Корневой элемент графика KPI */
   readonly root: Locator;
 
@@ -29,19 +31,29 @@ export class KpiPerformanceChartComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.root = page.locator('[data-testid="performance-chart"]');
-    this.title = this.root.locator('[data-testid="chart-title"]');
-    this.tabs = this.root.locator('[data-testid="chart-tabs"]');
-    this.scoreTab = this.root.locator('[data-testid="chart-tabs__Score"]');
-    this.mrrTab = this.root.locator('[data-testid="chart-tabs__MRR"]');
+    super(page);
+    this.root = this.locate.testId(kpiTestIds.chart.root);
+    const chart = this.locate.within(this.root);
+    this.title = chart.testId(kpiTestIds.chart.title);
+    this.tabs = chart.testId(kpiTestIds.chart.tabs);
+    this.scoreTab = chart.testId(kpiTestIds.chart.scoreTab);
+    this.mrrTab = chart.testId(kpiTestIds.chart.mrrTab);
   }
 
   /**
    * Проверяет видимость графика и основных вкладок
    */
   async verifyVisible(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.scoreTab).toBeVisible();
-    await expect(this.mrrTab).toBeVisible();
+    await this.expectations.visible('KPI performance chart', this.root);
+    await this.expectations.visible('KPI performance score tab', this.scoreTab);
+    await this.expectations.visible('KPI performance MRR tab', this.mrrTab);
+  }
+
+  async selectScore(): Promise<void> {
+    await this.actions.click('KPI chart: Score tab', this.scoreTab);
+  }
+
+  async selectMrr(): Promise<void> {
+    await this.actions.click('KPI chart: MRR tab', this.mrrTab);
   }
 }

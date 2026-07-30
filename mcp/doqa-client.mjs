@@ -49,12 +49,13 @@ export class DoqaClient {
   }
 
   async request(path, options = {}) {
+    const isMultipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const response = await this.fetch(`${this.config.endpoint}${path}`, {
       ...options,
       headers: {
         Authorization: `Bearer ${this.config.token}`,
         Accept: 'application/json',
-        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.body && !isMultipart ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
       },
     });
@@ -249,8 +250,132 @@ export class DoqaClient {
       method: 'POST',
       body: JSON.stringify(payload),
     });
-    const data = body?.data ?? body;
-    return Array.isArray(data) ? data : [];
+    return unwrapArray(body);
+  }
+
+  async listRunBugs({ page = 1, limit = 50, search, statuses, priorities, runIds } = {}) {
+    const query = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      ...(search ? { search } : {}),
+      ...(statuses?.length ? { statuses: statuses.join(',') } : {}),
+      ...(priorities?.length ? { priorities: priorities.join(',') } : {}),
+      ...(runIds?.length ? { runIds: runIds.join(',') } : {}),
+    });
+    const { body } = await this.request(
+      `/api/run-bugs/${encodeURIComponent(this.config.spaceId)}/list?${query}`,
+    );
+    return {
+      bugs: unwrapArray(body),
+      meta: body?.meta ?? body?.data?.meta ?? null,
+    };
+  }
+
+  async getRunBugs(runId) {
+    const { body } = await this.request(`/api/runs/${encodeURIComponent(runId)}/bugs`);
+    return unwrapArray(body);
+  }
+
+  async analyzeRunFailures(runId) {
+    const [run, elements, runBugs] = await Promise.all([
+      this.getRun(runId),
+      this.listRunElements(runId),
+      this.getRunBugs(runId),
+    ]);
+    const failures = elements
+      .filter((element) => ['failed', 'broken', 'blocked'].includes(element.status))
+      .map((element) => classifyRunFailure(element));
+    return {
+      run: {
+        id: run.id,
+        title: run.title,
+        progress: run.progress,
+        counts: run.counts,
+      },
+      failures,
+      existingRunBugs: runBugs.map(safeBugSummary),
+    };
+  }
+
+  async prepareProductBugDraft({
+    runId,
+    caseId,
+    evidence,
+    title,
+    actualResult,
+    expectedResult,
+    priority = 'high',
+  }) {
+    if (!evidence?.trim()) {
+      throw new DoqaApiError('Evidence is required for a confirmed product bug draft', 400, null);
+    }
+
+    const [run, elements, caseSnapshot] = await Promise.all([
+      this.getRun(runId),
+      this.listRunElements(runId),
+      this.getCase(caseId),
+    ]);
+    const element = elements.find((candidate) =>
+      [candidate.allureId, candidate.caseId, candidate.testCaseId, candidate.viewId]
+        .filter((value) => value !== undefined && value !== null)
+        .map(String)
+        .includes(String(caseId)),
+    );
+    if (!element) {
+      throw new DoqaApiError(`Run ${runId} has no element mapped to case ${caseId}`, 404, null);
+    }
+    if (!['failed', 'broken', 'blocked'].includes(element.status)) {
+      throw new DoqaApiError(
+        `Run element for case ${caseId} is ${element.status}; refusing to prepare a bug draft`,
+        409,
+        null,
+      );
+    }
+
+    const marker = defectMarker(caseId);
+    const { bugs: matchingBugs } = await this.listRunBugs({
+      search: marker,
+      statuses: ['open', 'work', 'testing'],
+    });
+    const duplicate = matchingBugs.find(
+      (bug) => bug.title?.includes(marker) && ['open', 'work', 'testing'].includes(bug.status),
+    );
+    const sourceCase = caseSnapshot.case?.data ?? caseSnapshot.case;
+    const resolvedTitle = truncate(title?.trim() || `${marker} ${sourceCase.title}`, 255);
+    const resolvedActual =
+      actualResult?.trim() || failureText(element) || `Autotest finished with status ${element.status}`;
+    const resolvedExpected =
+      expectedResult?.trim() || htmlToText(sourceCase.expectedResult) || 'The scenario passes';
+    const content = buildBugDraftContent({
+      marker,
+      run,
+      caseId,
+      element,
+      evidence: evidence.trim(),
+      actualResult: resolvedActual,
+      expectedResult: resolvedExpected,
+    });
+    return {
+      runId,
+      caseId,
+      runElementId: element.id,
+      status: element.status,
+      classification: 'product',
+      confirmedProduct: true,
+      marker,
+      title: resolvedTitle,
+      priority,
+      actualResult: resolvedActual,
+      expectedResult: resolvedExpected,
+      content,
+      duplicate: duplicate
+        ? {
+            found: true,
+            existingBug: safeBugSummary(duplicate),
+          }
+        : { found: false },
+      readOnly: true,
+    };
   }
 
   async discoverFolders(tree) {
@@ -375,6 +500,101 @@ export class DoqaClient {
 
 function stableKey(operation, payload) {
   return createHash('sha256').update(operation).update(JSON.stringify(payload)).digest('hex');
+}
+
+export function classifyRunFailure(element = {}) {
+  const actualResult = failureText(element);
+  const text = actualResult.toLowerCase();
+  let classification = 'needs_review';
+  let confidence = 'low';
+  const signals = [];
+
+  if (/econnrefused|enotfound|net::err_|dns|socket hang up|browser.*disconnected|502|503|504/.test(text)) {
+    classification = 'infrastructure';
+    confidence = 'high';
+    signals.push('infrastructure_signature');
+  } else if (
+    /strict mode violation|locator.*resolved to|element\(s\) not found|test timeout|page has been closed/.test(
+      text,
+    )
+  ) {
+    classification = 'test_or_product';
+    confidence = 'medium';
+    signals.push('playwright_observation_failure');
+  }
+
+  return {
+    runElementId: element.id,
+    caseId: element.allureId ?? element.caseId ?? element.testCaseId ?? element.viewId ?? element.autotestId,
+    title: element.title,
+    status: element.status,
+    classification,
+    confidence,
+    signals,
+    actualResult,
+  };
+}
+
+export function defectMarker(caseId) {
+  if (!Number.isInteger(Number(caseId)) || Number(caseId) <= 0) {
+    throw new DoqaApiError('A positive caseId is required for a defect marker', 400, null);
+  }
+  return `[AUTO][TC-${Number(caseId)}]`;
+}
+
+function failureText(element = {}) {
+  const info = element.progressInfo;
+  if (typeof info === 'string') return info.trim();
+  if (info && typeof info === 'object') {
+    return String(info.error ?? info.message ?? info.details ?? info.actualResult ?? '').trim();
+  }
+  return '';
+}
+
+function buildBugDraftContent({ marker, run, caseId, element, evidence, actualResult, expectedResult }) {
+  return [
+    `${marker} Подтверждённый дефект продукта`,
+    '',
+    `DoQA run: ${run.id} — ${run.title ?? ''}`,
+    `Test case: #${caseId} — ${element.title ?? ''}`,
+    'Классификация: product',
+    `Основание: ${evidence}`,
+    '',
+    `Ожидаемый результат: ${expectedResult}`,
+    '',
+    `Фактический результат: ${actualResult}`,
+  ].join('\n');
+}
+
+function safeBugSummary(bug) {
+  if (!bug || typeof bug !== 'object') return null;
+  return {
+    id: bug.id,
+    title: bug.title,
+    status: bug.status,
+    priority: bug.priority,
+    runId: bug.runId ?? bug.run?.id ?? null,
+    runElementId: bug.runElementId ?? null,
+    integration: bug.integration
+      ? {
+          title: bug.integration.title ?? null,
+          type: bug.integration.type ?? null,
+          link: bug.integration.link ?? null,
+        }
+      : null,
+  };
+}
+
+function unwrapArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== 'object') return [];
+  if (Array.isArray(value.data)) return value.data;
+  if (value.data && typeof value.data === 'object') return unwrapArray(value.data);
+  return [];
+}
+
+function truncate(value, maxLength) {
+  return value.length <= maxLength ? value : `${value.slice(0, maxLength - 1)}…`;
 }
 
 export async function validateReportPath(

@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import dotenv from 'dotenv';
 
+import { generateBugDrafts, resetBugDraftOutput } from './bug-drafts.mjs';
 import { publishAllureResults } from './doqa-publication.mjs';
 
 dotenv.config();
@@ -24,22 +25,38 @@ const exitCode = await new Promise((resolve, reject) => {
   child.on('close', (code) => resolve(code ?? 1));
 });
 
-let publishError = null;
+let publication;
+let publishError;
 try {
-  if (exitCode !== 0) {
-    throw new Error(`Playwright exited with code ${exitCode}; publishing a failed preflight is blocked`);
-  }
-
   const title = process.env.DOQA_RUN_TITLE?.trim() || `Автотесты ${new Date().toLocaleString('ru-RU')}`;
-  const result = await publishAllureResults({
+  publication = await publishAllureResults({
     allureDir,
     title,
   });
-  console.log(JSON.stringify(result, null, 2));
 } catch (error) {
   publishError = error;
   console.error(`DoQA run was not created: ${error.message}`);
   if (error.details) console.error(`DoQA details: ${JSON.stringify(error.details)}`);
 }
 
-process.exitCode = Number(exitCode) || (publishError ? 1 : 0);
+let bugDrafts;
+let bugDraftError;
+if (publication) {
+  try {
+    const bugDraftsDir = path.resolve(process.env.BUG_DRAFTS_DIR?.trim() || 'bug-drafts');
+    await resetBugDraftOutput(bugDraftsDir);
+    bugDrafts = await generateBugDrafts({
+      allureDir,
+      outputDir: bugDraftsDir,
+      runId: publication.verification.runId,
+    });
+  } catch (error) {
+    bugDraftError = error;
+    console.error(`Bug drafts were not prepared: ${error.message}`);
+  }
+}
+
+if (publication) {
+  console.log(JSON.stringify({ playwrightExitCode: exitCode, ...publication, bugDrafts }, null, 2));
+}
+process.exitCode = Number(exitCode) || (publishError || bugDraftError ? 1 : 0);

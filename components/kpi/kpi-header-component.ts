@@ -1,4 +1,6 @@
 import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { kpiTestIds } from '@locators/kpi';
 
 /**
  * Компонент заголовка KPI блока.
@@ -9,7 +11,7 @@ import { Page, Locator } from '@playwright/test';
  * - подзаголовок блока;
  * - блок ошибок.
  */
-export class KpiHeaderComponent {
+export class KpiHeaderComponent extends UiObject {
   /** Корневой элемент KPI блока */
   readonly root: Locator;
 
@@ -26,9 +28,11 @@ export class KpiHeaderComponent {
    * @param page Экземпляр страницы Playwright
    */
   constructor(page: Page) {
-    this.root = page.locator('[data-testid="kpi"]');
-    this.settingsButton = this.root.locator('[data-testid="settings-button"]');
-    this.subtitle = this.root.locator('[data-testid="subtitle"]');
-    this.errorBlock = this.root.locator('[data-testid="error-content"]');
+    super(page);
+    this.root = this.locate.testId(kpiTestIds.page);
+    const header = this.locate.within(this.root);
+    this.settingsButton = header.testId(kpiTestIds.settingsButton);
+    this.subtitle = header.testId(kpiTestIds.subtitle);
+    this.errorBlock = header.testId(kpiTestIds.errorContent);
   }
 }

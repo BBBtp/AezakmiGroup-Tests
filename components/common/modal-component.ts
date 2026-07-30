@@ -1,6 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { requireTestId } from '../../utils/test-id';
-import { loggedAction, loggedClick } from '../../utils/playwright-logger';
+import { type Page, type Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { commonComponentSelectors } from '@locators/common';
 
 /**
  * Базовый компонент модального окна.
@@ -13,12 +13,7 @@ import { loggedAction, loggedClick } from '../../utils/playwright-logger';
  *
  * Этот компонент используется как базовый для всех Page Object модалей.
  */
-export class ModalComponent {
-  /**
-   * Экземпляр страницы Playwright
-   */
-  page: Page;
-
+export class ModalComponent extends UiObject {
   /**
    * Корневой элемент модального окна
    */
@@ -39,35 +34,32 @@ export class ModalComponent {
    * @param modalTestId data-testid корневого модального окна
    */
   constructor(page: Page, modalTestId: string) {
-    this.page = page;
-    const normalizedModalTestId = requireTestId(modalTestId, 'ModalComponent');
+    super(page);
+    const selectors = commonComponentSelectors.modal(modalTestId);
 
     // Корень модального окна
-    this.modal = page.locator(`[data-testid="${normalizedModalTestId}"]`);
+    this.modal = this.locate.testId(selectors.root);
 
     // Кнопка закрытия модального окна
-    this.closeButton = this.modal
-      .locator(
-        '[data-testid$="__close"], [aria-label="Close"], [aria-label="close"], button:has-text("Close")',
-      )
-      .first();
+    const modal = this.locate.within(this.modal);
+    this.closeButton = modal.css(selectors.close).first();
 
     // Заголовок модального окна
-    this.title = this.modal.locator('.modal-title, h2, h3');
+    this.title = modal.css(selectors.title);
   }
 
   /**
    * Ожидает открытия модального окна
    */
   async waitForOpen(): Promise<void> {
-    await expect(this.modal).toBeVisible();
+    await this.expectations.visible('modal', this.modal);
   }
 
   /**
    * Ожидает закрытия модального окна
    */
   async waitForClose(): Promise<void> {
-    await expect(this.modal).not.toBeVisible();
+    await this.expectations.hidden('modal', this.modal);
   }
 
   /**
@@ -76,7 +68,7 @@ export class ModalComponent {
    */
   async close(): Promise<void> {
     if (await this.closeButton.isVisible()) {
-      await loggedClick(this.page, 'modal: close button', this.closeButton);
+      await this.actions.click('modal: close button', this.closeButton);
     } else {
       await this.closeByClickOutside();
     }
@@ -87,15 +79,11 @@ export class ModalComponent {
    * Закрывает модальное окно кликом вне него
    */
   async closeByClickOutside(): Promise<void> {
-    await loggedAction(this.page, 'click', 'modal: click outside', this.modal, () =>
-      this.page.mouse.click(1, 1),
-    );
+    await this.actions.run('click', 'modal: click outside', this.modal, () => this.page.mouse.click(1, 1));
     if (await this.modal.isVisible().catch(() => false)) {
-      await loggedAction(this.page, 'press', 'modal: Escape', this.modal, () =>
-        this.page.keyboard.press('Escape'),
-      );
+      await this.actions.run('press', 'modal: Escape', this.modal, () => this.page.keyboard.press('Escape'));
       if (await this.modal.isVisible().catch(() => false)) {
-        await loggedAction(this.page, 'click', 'modal: second click outside', this.modal, () =>
+        await this.actions.run('click', 'modal: second click outside', this.modal, () =>
           this.page.mouse.click(1, 1),
         );
       }
@@ -114,8 +102,8 @@ export class ModalComponent {
    * Закрывает модальное окно через кнопку закрытия
    */
   async closeByButton(): Promise<void> {
-    await expect(this.closeButton).toBeVisible();
-    await loggedClick(this.page, 'modal: close button', this.closeButton);
+    await this.expectations.visible('modal close action', this.closeButton);
+    await this.actions.click('modal: close button', this.closeButton);
     await this.waitForClose();
   }
 
@@ -123,9 +111,7 @@ export class ModalComponent {
    * Закрывает модальное окно нажатием Escape
    */
   async closeByEscape(): Promise<void> {
-    await loggedAction(this.page, 'press', 'modal: Escape', this.modal, () =>
-      this.page.keyboard.press('Escape'),
-    );
+    await this.actions.run('press', 'modal: Escape', this.modal, () => this.page.keyboard.press('Escape'));
     await this.waitForClose();
   }
 

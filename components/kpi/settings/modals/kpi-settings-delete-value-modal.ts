@@ -1,8 +1,8 @@
 import { Locator, Page } from '@playwright/test';
-import { composeTestId, requireTestId } from '../../../../utils/test-id';
+import { UiObject } from '@framework/ui';
+import { kpiSettingsTestIds } from '@locators/kpi-settings';
 
-export class KpiSettingsDeleteValueModal {
-  readonly page: Page;
+export class KpiSettingsDeleteValueModal extends UiObject {
   readonly baseTestId: string;
 
   readonly modal: Locator;
@@ -11,15 +11,12 @@ export class KpiSettingsDeleteValueModal {
   readonly loader: Locator;
 
   constructor(page: Page, tableName: string, actionType: string, value: string) {
-    this.page = page;
-    this.baseTestId = requireTestId(
-      composeTestId([tableName, actionType, value]),
-      'KpiSettingsDeleteValueModal',
-    );
-
-    this.modal = page.locator(`[data-testid="${this.baseTestId}__delete-modal"]`);
-    this.confirmButton = page.locator('[data-testid="delete-item__del-btn"]');
-    this.cancelButton = page.locator('[data-testid="delete-item__cancel-btn"]');
-    this.loader = page.locator('[data-testid="delete-item__loader"]');
+    super(page);
+    const testIds = kpiSettingsTestIds.row(tableName, actionType, value);
+    this.baseTestId = testIds.base;
+    this.modal = this.locate.testId(testIds.deleteModal);
+    this.confirmButton = this.locate.testId(kpiSettingsTestIds.deleteConfirm);
+    this.cancelButton = this.locate.testId(kpiSettingsTestIds.deleteCancel);
+    this.loader = this.locate.testId(kpiSettingsTestIds.deleteLoader);
   }
 }

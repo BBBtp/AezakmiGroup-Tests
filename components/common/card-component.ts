@@ -1,5 +1,6 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { requireTestId } from '../../utils/test-id';
+import { Page, Locator } from '@playwright/test';
+import { UiObject } from '@framework/ui';
+import { commonComponentSelectors } from '@locators/common';
 
 /**
  * Компонент карточки с метриками.
@@ -14,7 +15,7 @@ import { requireTestId } from '../../utils/test-id';
  * Компонент ориентирован на использование в автотестах
  * аналитических и дашбордных страниц.
  */
-export class CardComponent {
+export class CardComponent extends UiObject {
   /**
    * Корневой элемент карточки
    */
@@ -64,15 +65,15 @@ export class CardComponent {
    * - `${testId}__*main`
    */
   constructor(page: Page, testId: string) {
-    const normalizedTestId = requireTestId(testId, 'CardComponent');
-    this.root = page.locator(`[data-testid="${normalizedTestId}"]`);
-    this.title = this.root.locator(`[data-testid="${normalizedTestId}__title"]`);
-    this.mainValue = this.root.locator(
-      `[data-testid^="${normalizedTestId}__"][data-testid$="currency"], [data-testid$="main"]`,
-    );
-    this.absValue = this.root.locator(`[data-testid="${normalizedTestId}__abs"]`);
-    this.percentValue = this.root.locator(`[data-testid="${normalizedTestId}__percentage-value"]`);
-    this.period = this.root.locator(`[data-testid="${normalizedTestId}__period"]`);
+    super(page);
+    const selectors = commonComponentSelectors.card(testId);
+    this.root = this.locate.testId(selectors.root);
+    const card = this.locate.within(this.root);
+    this.title = card.testId(selectors.title);
+    this.mainValue = card.css(selectors.mainValue);
+    this.absValue = card.testId(selectors.absoluteValue);
+    this.percentValue = card.testId(selectors.percentageValue);
+    this.period = card.testId(selectors.period);
   }
 
   /**
@@ -87,14 +88,12 @@ export class CardComponent {
    * - отображение всех ключевых значений карточки.
    */
   async assertVisible(cardTitle: string): Promise<void> {
-    await expect(this.root).toBeVisible();
-
-    await expect(this.title).toBeVisible();
-    await expect(this.title).toContainText(cardTitle);
-
-    await expect(this.mainValue).toBeVisible();
-    await expect(this.absValue).toBeVisible();
-    await expect(this.percentValue).toBeVisible();
-    await expect(this.period).toBeVisible();
+    await this.expectations.visible(`${cardTitle} KPI card`, this.root);
+    await this.expectations.visible(`${cardTitle} KPI card title`, this.title);
+    await this.expectations.containsText(`${cardTitle} KPI card title`, this.title, cardTitle);
+    await this.expectations.visible(`${cardTitle} KPI card main value`, this.mainValue);
+    await this.expectations.visible(`${cardTitle} KPI card absolute value`, this.absValue);
+    await this.expectations.visible(`${cardTitle} KPI card percentage`, this.percentValue);
+    await this.expectations.visible(`${cardTitle} KPI card period`, this.period);
   }
 }
