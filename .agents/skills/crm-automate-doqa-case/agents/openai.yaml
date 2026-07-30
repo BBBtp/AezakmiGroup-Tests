@@ -1,0 +1,4 @@
+interface:
+  display_name: 'CRM DoQA Automation'
+  short_description: 'Автоматизация CRM-кейсов из DoQA'
+  default_prompt: 'Use $crm-automate-doqa-case to analyze a DoQA case and implement its CRM Playwright test.'

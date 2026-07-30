@@ -60,6 +60,7 @@ MCP не принимает токены в аргументах инструм�
 - `framework/playwright` — дополнительные сессии и автоматически очищаемая browser-диагностика.
 - `mcp` — интеграция с DoQA.
 - `scripts` — проверки репозитория и управляемые workflow.
+- `.agents/skills/crm-automate-doqa-case` — проектный Codex skill для реализации кейса из DoQA.
 
 Подробности: [архитектура](docs/ARCHITECTURE.md), [workflow](docs/WORKFLOW.md), [логирование](docs/LOGGING.md).
 
@@ -76,6 +77,8 @@ MCP не принимает токены в аргументах инструм�
 Авторизованные `smoke` и `regression` зависят от setup-project. Проекты `smoke-auth` и `regression-auth` запускаются без сохранённой admin-сессии, поэтому проверки логина и контроля доступа не зависят от успешного setup.
 
 Правила, обязательные для разработчиков и агентов, находятся в [AGENTS.md](AGENTS.md).
+Для создания или изменения автотеста из DoQA используйте проектный skill
+`$crm-automate-doqa-case`; его структура и метаданные проверяются внутри `npm run quality`.
 
 ## CI
 

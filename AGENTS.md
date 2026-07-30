@@ -4,6 +4,13 @@
 
 These rules apply to the entire repository.
 
+## Project skill
+
+- Use `.agents/skills/crm-automate-doqa-case/SKILL.md` when creating, updating or migrating a
+  CRM Playwright test from a DoQA case.
+- Use the skill's DoQA publication path only when the user explicitly requests a DoQA write or
+  report upload.
+
 ## Required checks
 
 Before completing a code change, run:

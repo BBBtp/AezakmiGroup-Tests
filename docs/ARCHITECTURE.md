@@ -131,6 +131,13 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 После загрузки проверяются `counts.tests`, `progress`, элементы run и соответствие Allure ID
 кейсам DoQA.
 
+### `.agents/skills/`
+
+Репозиторий хранит project-scoped Codex skills вместе с кодом. `crm-automate-doqa-case`
+маршрутизирует реализацию кейса через locator contracts, modules, fixtures, lifecycle и проверки
+DoQA. `check-project-skills.mjs` проверяет frontmatter, UI metadata, ссылки на references и
+отсутствие шаблонных TODO при каждом `npm run quality`.
+
 ## Статусы
 
 ```text
