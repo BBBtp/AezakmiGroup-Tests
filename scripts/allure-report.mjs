@@ -6,10 +6,8 @@ export async function prepareAllureResults(sourceDir, outputDir) {
   await mkdir(outputDir, { recursive: true });
   const entries = await readdir(sourceDir, { withFileTypes: true });
   const resultFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('-result.json'));
-  const accepted = [];
+  const latestById = new Map();
   const excluded = [];
-  const ids = new Set();
-  const statusCounts = {};
 
   for (const entry of resultFiles) {
     const sourcePath = path.join(sourceDir, entry.name);
@@ -36,16 +34,45 @@ export async function prepareAllureResults(sourceDir, outputDir) {
       continue;
     }
     const allureId = allureIds[0];
-    if (ids.has(allureId)) {
+    const candidate = {
+      entry,
+      result,
+      allureId,
+      identity: allureTestIdentity(result),
+    };
+    const current = latestById.get(allureId);
+    if (current && current.identity !== candidate.identity) {
       throw new Error(`Allure report contains duplicate test-case ID ${allureId}`);
     }
-    ids.add(allureId);
-    accepted.push({ entry, result, allureId });
-    statusCounts[result.status] = (statusCounts[result.status] ?? 0) + 1;
+    if (!current || compareAllureResults(current, candidate) < 0) {
+      if (current) {
+        excluded.push({
+          file: current.entry.name,
+          name: current.result.name,
+          reason: 'superseded_retry',
+        });
+      }
+      latestById.set(allureId, candidate);
+    } else {
+      excluded.push({
+        file: candidate.entry.name,
+        name: candidate.result.name,
+        reason: 'superseded_retry',
+      });
+    }
   }
 
+  const accepted = [...latestById.values()].sort(
+    (left, right) => Number(left.allureId) - Number(right.allureId),
+  );
   if (accepted.length === 0) {
     throw new Error('No publishable Allure test results with one numeric ALLURE_ID were found');
+  }
+
+  const ids = new Set(accepted.map(({ allureId }) => allureId));
+  const statusCounts = {};
+  for (const { result } of accepted) {
+    statusCounts[result.status] = (statusCounts[result.status] ?? 0) + 1;
   }
 
   const copied = new Set();
@@ -88,6 +115,27 @@ export async function prepareAllureResults(sourceDir, outputDir) {
     excluded,
     copiedFiles: [...copied],
   };
+}
+
+function allureTestIdentity(result) {
+  for (const value of [result.historyId, result.testCaseId, result.fullName]) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return JSON.stringify({
+    name: result.name ?? null,
+    package: labelValue(result, 'package'),
+    suite: labelValue(result, 'suite'),
+  });
+}
+
+function compareAllureResults(left, right) {
+  const leftTimestamp = Number(left.result.stop ?? left.result.start ?? 0);
+  const rightTimestamp = Number(right.result.stop ?? right.result.start ?? 0);
+  return leftTimestamp - rightTimestamp || left.entry.name.localeCompare(right.entry.name);
+}
+
+function labelValue(result, name) {
+  return result.labels?.find((label) => label.name === name)?.value ?? null;
 }
 
 export function verifyDoqaRun(run, elements, expectedIds) {

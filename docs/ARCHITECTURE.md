@@ -135,8 +135,9 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 
 `doqa-run.mjs` запускает Playwright, собирает свежий Allure-архив и отправляет его в DoQA.
 `allure-report.mjs` оставляет завершённые passed/failed/broken/skipped результаты с одним
-уникальным числовым `ALLURE_ID` и их вложения. Пустой архив, некорректный preflight и дубли ID
-блокируют публикацию.
+уникальным числовым `ALLURE_ID` и их вложения. Retry одного теста определяется по Allure
+`historyId`/`testCaseId`/`fullName`, и в отчёт попадает только последняя попытка. Одинаковый ID у
+разных тестовых историй, пустой архив и некорректный preflight блокируют публикацию.
 После загрузки проверяются `counts.tests`, `progress`, элементы run и соответствие Allure ID
 кейсам DoQA. Ненулевой exit code Playwright остаётся ненулевым для CI, но больше не скрывает
 результат от DoQA. `bug-drafts.mjs` читает failed/broken Allure results, получает ожидаемый

@@ -64,6 +64,62 @@ test('prepareAllureResults rejects duplicate Allure IDs', async (t) => {
   await assert.rejects(prepareAllureResults(source, path.join(root, 'output')), /duplicate test-case ID 900/);
 });
 
+test('prepareAllureResults publishes only the final retry of the same test', async (t) => {
+  const root = await temporaryDirectory(t);
+  const source = path.join(root, 'source');
+  const output = path.join(root, 'publishable');
+  await mkdir(source);
+  await writeFile(
+    path.join(source, 'first-result.json'),
+    allureResult({
+      status: 'failed',
+      stop: 100,
+      attachment: 'first.png',
+    }),
+  );
+  await writeFile(
+    path.join(source, 'retry-result.json'),
+    allureResult({
+      status: 'passed',
+      stop: 200,
+      attachment: 'retry.png',
+    }),
+  );
+  await writeFile(path.join(source, 'first.png'), 'first');
+  await writeFile(path.join(source, 'retry.png'), 'retry');
+
+  const result = await prepareAllureResults(source, output);
+
+  assert.equal(result.testCount, 1);
+  assert.deepEqual(result.allureIds, ['568']);
+  assert.deepEqual(result.statusCounts, { passed: 1 });
+  assert.deepEqual(result.excluded, [
+    {
+      file: 'first-result.json',
+      name: 'Regular user access',
+      reason: 'superseded_retry',
+    },
+  ]);
+  assert.equal(await readFile(path.join(output, 'retry.png'), 'utf8'), 'retry');
+  await assert.rejects(readFile(path.join(output, 'first.png'), 'utf8'), { code: 'ENOENT' });
+});
+
+test('prepareAllureResults still rejects the same Allure ID for different test histories', async (t) => {
+  const root = await temporaryDirectory(t);
+  const source = path.join(root, 'source');
+  await mkdir(source);
+  await writeFile(
+    path.join(source, 'first-result.json'),
+    allureResult({ historyId: 'history-a', status: 'passed', stop: 100 }),
+  );
+  await writeFile(
+    path.join(source, 'second-result.json'),
+    allureResult({ historyId: 'history-b', status: 'passed', stop: 200 }),
+  );
+
+  await assert.rejects(prepareAllureResults(source, path.join(root, 'output')), /duplicate test-case ID 568/);
+});
+
 test('validateReportPath enforces trusted directory, type, size and non-empty archive', async (t) => {
   const root = await temporaryDirectory(t);
   const trusted = path.join(root, 'trusted');
@@ -116,6 +172,20 @@ test('verifyDoqaRun checks counts, progress, elements and Allure ID mapping', ()
     /missing test-case mappings.*813/,
   );
 });
+
+function allureResult({ historyId = 'regular-user-access-history', status, stop, attachment }) {
+  return JSON.stringify({
+    name: 'Regular user access',
+    fullName: 'regression/access-control.regression.spec.ts:28:7',
+    historyId,
+    testCaseId: 'regular-user-access-test',
+    status,
+    start: stop - 10,
+    stop,
+    labels: [{ name: 'ALLURE_ID', value: '568' }],
+    attachments: attachment ? [{ source: attachment }] : [],
+  });
+}
 
 async function temporaryDirectory(t) {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'crm-doqa-test-'));
