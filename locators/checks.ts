@@ -1,6 +1,18 @@
 export const checksTestIds = {
   page: 'checks-page',
   editKeywordsButton: 'edit-keywords-button',
+  archiveButton: 'archive-button',
+  tableList: 'check-table-list',
+  stateTabs: {
+    new: 'state-filter-tabs__new',
+    returned: 'state-filter-tabs__returned',
+    all: 'state-filter-tabs__all',
+  },
+  dateTabs: {
+    today: 'date-filter-tabs__0',
+    yesterday: 'date-filter-tabs__1',
+  },
+  datePickerButton: 'date-picker-button',
   editKeywordsModal: 'edit-keys-modal',
   editKeywordsModalTitle: 'edit-keys-modal__title',
   editKeywordsModalClose: 'edit-keys-modal__close',

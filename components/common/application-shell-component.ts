@@ -30,9 +30,25 @@ export class ApplicationShellComponent extends UiObject {
     }
   }
 
-  async openSidebarDestination(label: string, href: string): Promise<void> {
-    await this.actions.click(`sidebar: open ${label}`, this.sidebarLink(label));
+  async openSidebarDestination(label: string, href: string, groupLabel?: string): Promise<void> {
+    if (groupLabel) {
+      const group = this.locate.role('button', { name: groupLabel, exact: true });
+      await this.expectations.visible(`sidebar group ${groupLabel}`, group);
+      if ((await group.getAttribute('aria-expanded')) !== 'true') {
+        await this.actions.click(`sidebar: expand ${groupLabel}`, group);
+      }
+      await this.expectations.attribute(
+        `expanded sidebar group ${groupLabel}`,
+        group,
+        'aria-expanded',
+        'true',
+      );
+    }
+
+    const link = this.sidebarLink(label);
+    await this.actions.click(`sidebar: open ${label}`, link);
     await this.expectations.url(`sidebar destination ${label}`, new RegExp(`${href.replace('/', '\\/')}$`));
+    await this.expectations.attribute(`active sidebar destination ${label}`, link, 'aria-current', 'page');
   }
 
   async logout(): Promise<void> {

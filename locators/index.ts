@@ -9,3 +9,4 @@ export {
 } from './kpi-settings';
 export { applicationShellLocators, dashboardSections, dashboardTestIds } from './navigation';
 export { checksTestIds } from './checks';
+export { nichesTestIds, statisticsTestIds, suggestsTestIds, topKeywordsTestIds } from './master-sections';

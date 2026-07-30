@@ -1,18 +1,19 @@
-import { type Locator, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
-import { checksTestIds } from '@locators/checks';
+import { ApplicationShellComponent } from '../../components/common/application-shell-component';
+import { ChecksOverviewComponent } from '../../components/checks/checks-overview-component';
 import { EditKeywordsModalComponent } from '../../components/checks/edit-keywords-modal-component';
 import { BasePage } from '../base-page';
 
 export class ChecksPage extends BasePage {
-  readonly root: Locator;
-  readonly editKeywordsButton: Locator;
+  readonly shell: ApplicationShellComponent;
+  readonly overview: ChecksOverviewComponent;
   readonly editKeywordsModal: EditKeywordsModalComponent;
 
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.testId(checksTestIds.page);
-    this.editKeywordsButton = this.locate.testId(checksTestIds.editKeywordsButton);
+    this.shell = new ApplicationShellComponent(page);
+    this.overview = new ChecksOverviewComponent(page);
     this.editKeywordsModal = new EditKeywordsModalComponent(page);
   }
 
@@ -21,13 +22,22 @@ export class ChecksPage extends BasePage {
     await this.expectLoaded();
   }
 
+  async openFromSidebar(): Promise<void> {
+    await this.shell.openSidebarDestination('Checks', '/checks', 'Keywords');
+    await this.expectLoaded();
+  }
+
   async expectLoaded(): Promise<void> {
-    await this.expectations.visible('Checks page', this.root);
-    await this.expectations.visible('Edit keywords action', this.editKeywordsButton);
+    await this.overview.expectHealthy();
+    await this.expectations.visible('Checks: Edit keywords action', this.overview.editKeywordsButton);
+  }
+
+  async expectBusinessControls(): Promise<void> {
+    await this.overview.expectBusinessControls();
   }
 
   async openEditKeywords(): Promise<EditKeywordsModalComponent> {
-    await this.actions.click('Checks: edit keywords', this.editKeywordsButton);
+    await this.actions.click('Checks: edit keywords', this.overview.editKeywordsButton);
     await this.editKeywordsModal.expectListOpen();
     return this.editKeywordsModal;
   }
