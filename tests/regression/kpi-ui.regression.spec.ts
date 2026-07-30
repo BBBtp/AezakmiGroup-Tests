@@ -10,8 +10,7 @@ test.describe('KPI UI', () => {
 
   test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
     await allure.allureId('802');
-    await expect(kpiPage.subtitle).toBeVisible();
-    await expect(kpiPage.subtitle).toHaveText(testData.texts.kpi.basePage.title);
+    await kpiPage.expectSubtitle(testData.texts.kpi.basePage.title);
   });
 
   test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage, network }) => {
@@ -22,8 +21,7 @@ test.describe('KPI UI', () => {
     const failedStatistics = network.waitForFailedResponse('/staff/api/v1/kpi/managers/statistics', 'GET');
     await network.navigate('/kpi', { waitUntil: 'domcontentloaded' });
     await failedStatistics;
-    await expect(kpiPage.errorContent).toBeVisible();
-    await expect(kpiPage.mainContent).toBeHidden();
+    await kpiPage.expectErrorState();
   });
 
   test('Проверка отображения карточек KPI', async ({ kpiPage }) => {
@@ -40,8 +38,7 @@ test.describe('KPI UI', () => {
     const filters = kpiPage.filters;
 
     await filters.verifyVisible();
-    await expect(filters.tabs).not.toHaveCount(0);
-    await expect(filters.activeTab).toBeVisible();
+    await filters.verifyActiveTab();
   });
 
   test('График производительности отображается и табы переключаются', async ({ kpiPage }) => {
@@ -61,9 +58,8 @@ test.describe('KPI UI', () => {
     await allure.allureId('809');
     const top = kpiPage.topEmployees;
 
-    await expect(top.root).toBeVisible();
-    await expect(top.title).toBeVisible();
-    await expect(top.podium).toBeVisible();
+    await top.verifyVisible('Top employees');
+    await top.verifyPodium();
     expect(await top.getContendersCount()).toBeGreaterThan(0);
   });
 });

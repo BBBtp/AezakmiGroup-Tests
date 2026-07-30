@@ -105,4 +105,27 @@ export class KpiPage extends BasePage {
     await this.waitForLoad();
     await this.expectations.visible('KPI main content', this.mainContent, { timeout: 30000 });
   }
+
+  async expectSettingsActionVisible(): Promise<void> {
+    await this.expectations.visible('KPI settings action', this.settingsButton);
+  }
+
+  async expectMainContentVisible(): Promise<void> {
+    await this.expectations.visible('KPI main content', this.mainContent);
+    await this.expectations.hidden('KPI error content', this.errorContent);
+  }
+
+  async expectErrorState(): Promise<void> {
+    await this.expectations.visible('KPI error content', this.errorContent);
+    await this.expectations.hidden('KPI main content', this.mainContent);
+  }
+
+  async expectSubtitle(value: string): Promise<void> {
+    await this.expectations.visible('KPI subtitle', this.subtitle);
+    await this.expectations.text('KPI subtitle', this.subtitle, value);
+  }
+
+  async expectEmployeeDetailsUrl(): Promise<void> {
+    await this.expectations.url('KPI employee details URL', /\/kpi\/.+/);
+  }
 }

@@ -1,6 +1,6 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
-import { requireTestId } from '../../utils/test-id';
+import { commonComponentSelectors } from '@locators/common';
 
 /**
  * Базовый компонент модального окна.
@@ -35,33 +35,31 @@ export class ModalComponent extends UiObject {
    */
   constructor(page: Page, modalTestId: string) {
     super(page);
-    const normalizedModalTestId = requireTestId(modalTestId, 'ModalComponent');
+    const selectors = commonComponentSelectors.modal(modalTestId);
 
     // Корень модального окна
-    this.modal = this.locate.testId(normalizedModalTestId);
+    this.modal = this.locate.testId(selectors.root);
 
     // Кнопка закрытия модального окна
     const modal = this.locate.within(this.modal);
-    this.closeButton = modal
-      .css('[data-testid$="__close"], [aria-label="Close"], [aria-label="close"], button:has-text("Close")')
-      .first();
+    this.closeButton = modal.css(selectors.close).first();
 
     // Заголовок модального окна
-    this.title = modal.css('.modal-title, h2, h3');
+    this.title = modal.css(selectors.title);
   }
 
   /**
    * Ожидает открытия модального окна
    */
   async waitForOpen(): Promise<void> {
-    await expect(this.modal).toBeVisible();
+    await this.expectations.visible('modal', this.modal);
   }
 
   /**
    * Ожидает закрытия модального окна
    */
   async waitForClose(): Promise<void> {
-    await expect(this.modal).not.toBeVisible();
+    await this.expectations.hidden('modal', this.modal);
   }
 
   /**
@@ -104,7 +102,7 @@ export class ModalComponent extends UiObject {
    * Закрывает модальное окно через кнопку закрытия
    */
   async closeByButton(): Promise<void> {
-    await expect(this.closeButton).toBeVisible();
+    await this.expectations.visible('modal close action', this.closeButton);
     await this.actions.click('modal: close button', this.closeButton);
     await this.waitForClose();
   }

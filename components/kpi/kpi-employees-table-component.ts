@@ -61,6 +61,11 @@ export class KpiEmployeesTableComponent extends UiObject {
     }
   }
 
+  async expectPopulated(): Promise<void> {
+    await this.expectations.visible('KPI employees table', this.root);
+    await this.expectations.nonEmpty('KPI employee rows', this.rowsRoot);
+  }
+
   /** Возвращает количество строк в таблице */
   async getRowCount(): Promise<number> {
     return await this.rowsRoot.count();

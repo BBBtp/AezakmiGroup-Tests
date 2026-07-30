@@ -15,18 +15,17 @@ test.describe('Функциональность авторизации', () => {
   test('Работа модального окна восстановления пароля', async ({ loginPage }) => {
     await allure.allureId('795');
     await loginPage.openForgotPasswordModal();
-    await expect(loginPage.forgotPasswordModal.modal).toBeVisible();
-    await expect(loginPage.forgotPasswordModal.telegramButton).toBeVisible();
+    await loginPage.forgotPasswordModal.expectContentVisible();
     await loginPage.forgotPasswordModal.closeByButton();
-    await expect(loginPage.forgotPasswordModal.modal).toBeHidden();
+    await loginPage.forgotPasswordModal.expectHidden();
   });
 
   test('Закрытие модалки через оверлей', async ({ loginPage }) => {
     await allure.allureId('796');
     await loginPage.openForgotPasswordModal();
-    await expect(loginPage.forgotPasswordModal.modal).toBeVisible();
+    await loginPage.forgotPasswordModal.expectContentVisible();
     await loginPage.forgotPasswordModal.closeByOverlay();
-    await expect(loginPage.forgotPasswordModal.modal).toBeHidden();
+    await loginPage.forgotPasswordModal.expectHidden();
   });
 
   test('Кнопка "Remember me" работает (UI)', async ({ loginPage }) => {
@@ -78,11 +77,11 @@ test.describe('Функциональность авторизации', () => {
 
   test('Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {
     await allure.allureId('799');
-    await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'password');
+    await loginPage.loginForm.expectPasswordType('password');
     await loginPage.loginForm.togglePasswordVisibility();
-    await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'text');
+    await loginPage.loginForm.expectPasswordType('text');
     await loginPage.loginForm.togglePasswordVisibility();
-    await expect(loginPage.loginForm.passwordInput).toHaveAttribute('type', 'password');
+    await loginPage.loginForm.expectPasswordType('password');
   });
 
   test('Переход по Telegram ссылке', async ({ loginPage }) => {

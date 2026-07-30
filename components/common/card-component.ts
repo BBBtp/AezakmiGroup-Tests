@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
-import { requireTestId } from '../../utils/test-id';
+import { commonComponentSelectors } from '@locators/common';
 
 /**
  * Компонент карточки с метриками.
@@ -66,16 +66,14 @@ export class CardComponent extends UiObject {
    */
   constructor(page: Page, testId: string) {
     super(page);
-    const normalizedTestId = requireTestId(testId, 'CardComponent');
-    this.root = this.locate.testId(normalizedTestId);
+    const selectors = commonComponentSelectors.card(testId);
+    this.root = this.locate.testId(selectors.root);
     const card = this.locate.within(this.root);
-    this.title = card.testId(`${normalizedTestId}__title`);
-    this.mainValue = card.css(
-      `[data-testid^="${normalizedTestId}__"][data-testid$="currency"], [data-testid$="main"]`,
-    );
-    this.absValue = card.testId(`${normalizedTestId}__abs`);
-    this.percentValue = card.testId(`${normalizedTestId}__percentage-value`);
-    this.period = card.testId(`${normalizedTestId}__period`);
+    this.title = card.testId(selectors.title);
+    this.mainValue = card.css(selectors.mainValue);
+    this.absValue = card.testId(selectors.absoluteValue);
+    this.percentValue = card.testId(selectors.percentageValue);
+    this.period = card.testId(selectors.period);
   }
 
   /**

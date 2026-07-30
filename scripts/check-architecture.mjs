@@ -20,10 +20,7 @@ const rawNetworkMethods = new Set(['goto', 'route', 'unroute', 'waitForRequest',
 const violations = [];
 function usesCentralizedLocatorContract(file) {
   const relative = path.relative(root, file);
-  return (
-    relative.startsWith(`${path.join('pages', 'kpi')}${path.sep}`) ||
-    relative.startsWith(`${path.join('components', 'kpi')}${path.sep}`)
-  );
+  return relative.startsWith(`pages${path.sep}`) || relative.startsWith(`components${path.sep}`);
 }
 
 async function collectTypeScriptFiles(directory) {
@@ -89,7 +86,7 @@ for (const implementationRoot of implementationRoots) {
       ) {
         const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
         violations.push(
-          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI UI must use UiExpectations instead of raw expect()`,
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: UI implementation must use UiExpectations instead of raw expect()`,
         );
       }
       if (
@@ -102,7 +99,7 @@ for (const implementationRoot of implementationRoots) {
       ) {
         const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
         violations.push(
-          `${path.relative(root, file)}:${line + 1}:${character + 1}: KPI selector must come from @locators/kpi or @locators/kpi-settings`,
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: UI testId/CSS selector must come from a typed @locators contract`,
         );
       }
       if (
@@ -160,6 +157,6 @@ if (violations.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    'Architecture validation passed: public modules, centralized KPI locators, managed UI actions/expectations and network access are enforced.',
+    'Architecture validation passed: public modules, centralized UI locator contracts, managed actions/expectations and network access are enforced.',
   );
 }

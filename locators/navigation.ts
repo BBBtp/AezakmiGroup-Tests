@@ -19,3 +19,8 @@ export const dashboardSections = [
   'Staff',
   'Settings',
 ] as const;
+
+export const applicationShellLocators = {
+  logoutAccessibleName: /log\s*out/i,
+  logoutFallbackSelector: 'button[class*="logout"]',
+} as const;

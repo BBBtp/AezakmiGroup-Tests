@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { dashboardSections, dashboardTestIds } from '@locators/navigation';
 import { ApplicationShellComponent } from '../../components/common/application-shell-component';
 import { BasePage } from '../base-page';
@@ -26,16 +26,19 @@ export class DashboardPage extends BasePage {
   }
 
   async expectLoaded(): Promise<void> {
-    await expect(this.root).toBeVisible();
-    await expect(this.title).toBeVisible();
+    await this.expectations.visible('Dashboard root', this.root);
+    await this.expectations.visible('Dashboard title', this.title);
   }
 
   async expectBusinessControls(): Promise<void> {
     for (const label of dashboardSections) {
-      await expect(this.locate.role('button', { name: new RegExp(`^${label}`) })).toBeVisible();
+      await this.expectations.visible(
+        `Dashboard section ${label}`,
+        this.locate.role('button', { name: new RegExp(`^${label}`) }),
+      );
     }
     for (const testId of dashboardTestIds.controls) {
-      await expect(this.locate.testId(testId)).toBeVisible();
+      await this.expectations.visible(`Dashboard control ${testId}`, this.locate.testId(testId));
     }
   }
 }

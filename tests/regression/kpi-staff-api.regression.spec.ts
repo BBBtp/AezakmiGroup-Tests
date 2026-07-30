@@ -94,7 +94,7 @@ test.describe('KPI staff service', () => {
     await employeeCreatePage.openWorkingInfo();
     await employeeCreatePage.selectAsoManagerPosition();
 
-    await expect(employeeCreatePage.asoManagerOption).toBeVisible();
+    await employeeCreatePage.expectAsoManagerOptionVisible();
   });
 
   test('Все KPI API-запросы UI идут через staff service', async ({ kpiPage, network }) => {

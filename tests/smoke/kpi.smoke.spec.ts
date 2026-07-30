@@ -9,7 +9,7 @@ test.describe('Страница KPI', () => {
 
   test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
     await allure.allureId('803');
-    await expect(kpiPage.settingsButton).toBeVisible();
+    await kpiPage.expectSettingsActionVisible();
     const errors: string[] = [];
     kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
     await kpiPage.openSettings();
@@ -18,8 +18,7 @@ test.describe('Страница KPI', () => {
 
   test('Основной контент рендерится, error-content скрыт', async ({ kpiPage }) => {
     await allure.allureId('804');
-    await expect(kpiPage.mainContent).toBeVisible();
-    await expect(kpiPage.errorContent).toBeHidden();
+    await kpiPage.expectMainContentVisible();
   });
 
   test('Таблица сотрудников отображается и можно открыть карточку сотрудника', async ({ kpiPage }) => {
@@ -27,16 +26,12 @@ test.describe('Страница KPI', () => {
     const table = kpiPage.employeesTable;
 
     await test.step('Таблица отображается', async () => {
-      await expect(table.root).toBeVisible();
-    });
-    await test.step('Есть хотя бы одна строка', async () => {
-      const count = await table.getRowCount();
-      expect(count).toBeGreaterThan(0);
+      await table.expectPopulated();
     });
     await test.step('Кнопка Open открывает страницу сотрудника', async () => {
       const oldUrl = kpiPage.page.url();
       await table.openFirstEmployee();
-      await expect(kpiPage.page).toHaveURL(/\/kpi\/.+/);
+      await kpiPage.expectEmployeeDetailsUrl();
       expect(kpiPage.page.url()).not.toBe(oldUrl);
     });
   });

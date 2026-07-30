@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 import { UiObject } from '@framework/ui';
 import { authTestIds } from '@locators/auth';
 import TestData from '../../fixtures/test-data';
@@ -36,9 +36,6 @@ export class LoginFormComponent extends UiObject {
   /** Кнопка «Забыли пароль?» */
   forgotPasswordButton: Locator;
 
-  /** Дублирующий локатор кнопки видимости пароля */
-  passwordVisibilityToggle: Locator;
-
   /**
    * @param page Экземпляр страницы Playwright
    */
@@ -51,7 +48,6 @@ export class LoginFormComponent extends UiObject {
     this.rememberMeCheckbox = this.locate.testId(authTestIds.rememberMeCheckbox);
     this.submitButton = this.locate.testId(authTestIds.submitButton);
     this.forgotPasswordButton = this.locate.testId(authTestIds.forgotPasswordButton);
-    this.passwordVisibilityToggle = this.toggleButtonPasswordVisibility;
   }
 
   /**
@@ -71,7 +67,9 @@ export class LoginFormComponent extends UiObject {
    */
   async assertErrorVisible(text: string): Promise<void> {
     const error = this.locate.text(text, { exact: true });
-    await expect(error).toBeVisible({ timeout: TestData.timeouts.action });
+    await this.expectations.visible(`login error: ${text}`, error, {
+      timeout: TestData.timeouts.action,
+    });
   }
 
   /**
@@ -80,7 +78,7 @@ export class LoginFormComponent extends UiObject {
    */
   async assertErrorHidden(text: string): Promise<void> {
     const error = this.locate.text(text, { exact: true });
-    await expect(error).not.toBeVisible();
+    await this.expectations.hidden(`login error: ${text}`, error);
   }
 
   /** Проверяет отображение ошибки «Неверный email» */
@@ -119,7 +117,7 @@ export class LoginFormComponent extends UiObject {
 
   /** Переключает видимость пароля */
   async togglePasswordVisibility(): Promise<void> {
-    await this.actions.click('login: toggle password visibility', this.passwordVisibilityToggle);
+    await this.actions.click('login: toggle password visibility', this.toggleButtonPasswordVisibility);
   }
 
   /** Переключает чекбокс «Запомнить меня» */
@@ -155,8 +153,18 @@ export class LoginFormComponent extends UiObject {
 
   /** Ожидает готовность формы к взаимодействию */
   async waitForFormReady(): Promise<void> {
-    await expect(this.form).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.submitButton).toBeVisible();
+    await this.expectations.visible('login form', this.form);
+    await this.expectations.visible('login email input', this.emailInput);
+    await this.expectations.visible('login submit action', this.submitButton);
+  }
+
+  async expectPrimaryControlsVisible(): Promise<void> {
+    await this.waitForFormReady();
+    await this.expectations.visible('login password input', this.passwordInput);
+    await this.expectations.visible('login forgot password action', this.forgotPasswordButton);
+  }
+
+  async expectPasswordType(type: 'password' | 'text'): Promise<void> {
+    await this.expectations.attribute('login password input type', this.passwordInput, 'type', type);
   }
 }

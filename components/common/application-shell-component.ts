@@ -1,5 +1,6 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import { UiObject } from '@framework/ui';
+import { applicationShellLocators } from '@locators/navigation';
 
 export class ApplicationShellComponent extends UiObject {
   constructor(page: Page) {
@@ -12,22 +13,22 @@ export class ApplicationShellComponent extends UiObject {
 
   async expectSidebarDestination(label: string, href: string): Promise<void> {
     const link = this.sidebarLink(label);
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', href);
+    await this.expectations.visible(`sidebar destination ${label}`, link);
+    await this.expectations.attribute(`sidebar destination ${label}`, link, 'href', href);
   }
 
   async openSidebarDestination(label: string, href: string): Promise<void> {
     await this.actions.click(`sidebar: open ${label}`, this.sidebarLink(label));
-    await expect(this.page).toHaveURL(new RegExp(`${href.replace('/', '\\/')}$`));
+    await this.expectations.url(`sidebar destination ${label}`, new RegExp(`${href.replace('/', '\\/')}$`));
   }
 
   async logout(): Promise<void> {
     // TODO(CRM): remove the CSS fallback after the icon-only button receives a stable accessible name/test id.
     const button = this.locate
-      .role('button', { name: /log\s*out/i })
-      .or(this.locate.css('button[class*="logout"]'))
+      .role('button', { name: applicationShellLocators.logoutAccessibleName })
+      .or(this.locate.css(applicationShellLocators.logoutFallbackSelector))
       .first();
     await this.actions.click('profile: logout', button);
-    await expect(this.page).toHaveURL(/\/login/);
+    await this.expectations.url('login after logout', /\/login/);
   }
 }

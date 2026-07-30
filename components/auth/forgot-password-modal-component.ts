@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { authTestIds } from '@locators/auth';
 import { ModalComponent } from '../common/modal-component';
 
 /**
@@ -29,12 +30,12 @@ export class ForgotPasswordModalComponent extends ModalComponent {
   constructor(page: Page) {
     // Инициализация базового модального компонента
     // login__forgot-password-modal — корневой data-testid модали
-    super(page, 'login__forgot-password-modal');
+    super(page, authTestIds.forgotPasswordModal);
 
     // Локаторы элементов внутри модального окна
     const modal = this.locate.within(this.modal);
-    this.telegramButton = modal.testId('login__telegram-button');
-    this.cancelButton = modal.testId('login__forgot-password-modal__close');
+    this.telegramButton = modal.testId(authTestIds.telegramButton);
+    this.cancelButton = modal.testId(authTestIds.forgotPasswordCloseButton);
   }
 
   /**
@@ -82,5 +83,14 @@ export class ForgotPasswordModalComponent extends ModalComponent {
    */
   async getTelegramButtonHref(): Promise<string | null> {
     return await this.telegramButton.getAttribute('href');
+  }
+
+  async expectContentVisible(): Promise<void> {
+    await this.waitForOpen();
+    await this.expectations.visible('forgot password Telegram action', this.telegramButton);
+  }
+
+  async expectHidden(): Promise<void> {
+    await this.waitForClose();
   }
 }
