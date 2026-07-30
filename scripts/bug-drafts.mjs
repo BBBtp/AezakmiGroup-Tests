@@ -73,22 +73,33 @@ export async function generateBugDrafts({ allureDir, outputDir, runId, client })
 
 export async function readFailedAllureResults(allureDir) {
   const entries = await readdir(allureDir, { withFileTypes: true });
-  const failures = [];
+  const latestResults = new Map();
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('-result.json')) continue;
     const result = JSON.parse(await readFile(path.join(allureDir, entry.name), 'utf8'));
-    if (!['failed', 'broken'].includes(result.status)) continue;
     const ids = (result.labels ?? [])
       .filter((label) => String(label.name).toUpperCase() === 'ALLURE_ID')
       .map((label) => String(label.value).trim());
     if (ids.length !== 1 || !/^\d+$/.test(ids[0])) continue;
-    failures.push({
+    const candidate = {
       caseId: ids[0],
       file: entry.name,
       result,
-    });
+    };
+    const current = latestResults.get(candidate.caseId);
+    if (!current || compareAllureResults(current, candidate) < 0) {
+      latestResults.set(candidate.caseId, candidate);
+    }
   }
-  return failures.sort((left, right) => Number(left.caseId) - Number(right.caseId));
+  return [...latestResults.values()]
+    .filter(({ result }) => ['failed', 'broken'].includes(result.status))
+    .sort((left, right) => Number(left.caseId) - Number(right.caseId));
+}
+
+function compareAllureResults(left, right) {
+  const leftTimestamp = Number(left.result.stop ?? left.result.start ?? 0);
+  const rightTimestamp = Number(right.result.stop ?? right.result.start ?? 0);
+  return leftTimestamp - rightTimestamp || left.file.localeCompare(right.file);
 }
 
 export function buildBugDraft({ failure, sourceCase, runId, attachments = [], duplicate }) {

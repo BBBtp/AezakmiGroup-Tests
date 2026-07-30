@@ -141,7 +141,8 @@ cleanup. `KpiSettingsLifecycle` выбирает свободные данные
 кейсам DoQA. Ненулевой exit code Playwright остаётся ненулевым для CI, но больше не скрывает
 результат от DoQA. `bug-drafts.mjs` читает failed/broken Allure results, получает ожидаемый
 бизнес-результат из DoQA, исключает stdout/stderr/trace, редактирует чувствительные строки в
-error-context и создаёт `bug.md`, `draft.json`, screenshot/video для ручного оформления.
+error-context и создаёт один `bug.md`, `draft.json`, screenshot/video на Allure ID по результату
+последней retry-попытки для ручного оформления.
 Визуальные вложения требуют просмотра перед загрузкой.
 
 ### `.agents/skills/`
