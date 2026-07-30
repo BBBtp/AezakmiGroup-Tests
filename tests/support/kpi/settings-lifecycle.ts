@@ -1,5 +1,3 @@
-import { expect } from '@playwright/test';
-
 import type { TestDataFactory } from '@framework/data';
 import type { CleanupHandle, CleanupRegistry } from '@framework/lifecycle';
 import type { NetworkController } from '@framework/network';
@@ -47,7 +45,7 @@ export class ManagedKpiSettingsAction {
     await failedEdit;
 
     await this.row.expectEditModalVisible();
-    await expect(this.row.errorBlock).toBeVisible();
+    await this.row.expectEditErrorVisible();
     await this.row.expectEditable();
   }
 
@@ -65,22 +63,34 @@ export class ManagedKpiSettingsAction {
 
 export class KpiSettingsLifecycle {
   constructor(
-    readonly page: KpiSettingsPage,
+    private readonly settingsPage: KpiSettingsPage,
     private readonly cleanup: CleanupRegistry,
     private readonly dataFactory: TestDataFactory,
     private readonly network: NetworkController,
   ) {}
 
   async navigate(): Promise<void> {
-    await this.page.navigate();
+    await this.settingsPage.navigate();
+  }
+
+  openAbTestsModal(): Promise<KpiSettingsAddValueModal> {
+    return this.settingsPage.openAbTestsAddModal();
+  }
+
+  openTotalMrrModal(): Promise<KpiSettingsAddValueModal> {
+    return this.settingsPage.openTotalMrrAddModal();
+  }
+
+  async expectScoreReadOnly(): Promise<void> {
+    await this.settingsPage.scoreTable.expectReadOnlyShellVisible();
   }
 
   nextAbTestPercent(actionType: 'Internal test' | 'External test' = 'Internal test') {
-    return pickAvailableAbTestPercent(this.page, this.dataFactory, actionType);
+    return pickAvailableAbTestPercent(this.settingsPage, this.dataFactory, actionType);
   }
 
   nextTotalMrrReachedValue() {
-    return pickAvailableTotalMrrReachedValue(this.page, this.dataFactory);
+    return pickAvailableTotalMrrReachedValue(this.settingsPage, this.dataFactory);
   }
 
   async createAbTest({
@@ -88,12 +98,12 @@ export class KpiSettingsLifecycle {
     actionType = 'Internal test',
   }: CreateAbTestOptions): Promise<ManagedKpiSettingsAction> {
     const value = await this.nextAbTestPercent(actionType);
-    const row = this.page.createAbTestRow(actionType, `Completed with ${value}% +`);
-    const cleanupHandle = registerKpiSettingsCleanup(this.cleanup, this.page, row);
+    const row = this.settingsPage.createAbTestRow(actionType, `Completed with ${value}% +`);
+    const cleanupHandle = registerKpiSettingsCleanup(this.cleanup, this.settingsPage, row, this.network);
 
     await createKpiSettingsAction({
       row,
-      openModal: () => this.page.openAbTestsAddModal(),
+      openModal: () => this.settingsPage.openAbTestsAddModal(),
       fillModal: (modal) =>
         modal.runAbTestsAddModalFlow(actionType, 'Completed with a success over N%', value),
       createPoints: points,
@@ -105,12 +115,12 @@ export class KpiSettingsLifecycle {
 
   async createTotalMrr({ points }: CreateTotalMrrOptions): Promise<ManagedKpiSettingsAction> {
     const value = await this.nextTotalMrrReachedValue();
-    const row = this.page.createTotalMrrRow('MRR milestones', `Reached $${value}`);
-    const cleanupHandle = registerKpiSettingsCleanup(this.cleanup, this.page, row);
+    const row = this.settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
+    const cleanupHandle = registerKpiSettingsCleanup(this.cleanup, this.settingsPage, row, this.network);
 
     await createKpiSettingsAction({
       row,
-      openModal: () => this.page.openTotalMrrAddModal(),
+      openModal: () => this.settingsPage.openTotalMrrAddModal(),
       fillModal: (modal) => modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value),
       createPoints: points,
       network: this.network,
@@ -121,16 +131,16 @@ export class KpiSettingsLifecycle {
 
   async expectAbTestCreateFailure(points: string): Promise<void> {
     const value = await this.nextAbTestPercent();
-    const row = this.page.createAbTestRow('Internal test', `Completed with ${value}% +`);
-    const modal = await this.page.openAbTestsAddModal();
+    const row = this.settingsPage.createAbTestRow('Internal test', `Completed with ${value}% +`);
+    const modal = await this.settingsPage.openAbTestsAddModal();
     await modal.runAbTestsAddModalFlow('Internal test', 'Completed with a success over N%', value);
     await this.expectCreateFailure(modal, row, points, 'POST');
   }
 
   async expectTotalMrrCreateFailure(points: string): Promise<void> {
     const value = await this.nextTotalMrrReachedValue();
-    const row = this.page.createTotalMrrRow('MRR milestones', `Reached $${value}`);
-    const modal = await this.page.openTotalMrrAddModal();
+    const row = this.settingsPage.createTotalMrrRow('MRR milestones', `Reached $${value}`);
+    const modal = await this.settingsPage.openTotalMrrAddModal();
     await modal.runTotalMrrAddModalFlow('Change of SUM MRR', 'Reached $N', value);
     await this.expectCreateFailure(modal, row, points, 'POST');
   }
@@ -148,8 +158,7 @@ export class KpiSettingsLifecycle {
     await modal.submitCreate();
     await failedCreate;
 
-    await expect(modal.modal).toBeVisible();
-    await expect(modal.errorBlock).toBeVisible();
+    await modal.expectCreateErrorVisible();
     await row.expectDeleted();
   }
 }

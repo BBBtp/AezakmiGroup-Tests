@@ -1,5 +1,6 @@
-import type { Browser, BrowserContextOptions, Page } from '@playwright/test';
+import type { Browser, BrowserContextOptions } from '@playwright/test';
 import type { CleanupRegistry } from '@framework/lifecycle';
+import { ManagedTestSession } from './managed-test-session';
 
 export class TestSessionFactory {
   private sequence = 0;
@@ -9,10 +10,10 @@ export class TestSessionFactory {
     private readonly cleanup: CleanupRegistry,
   ) {}
 
-  async newPage(options: BrowserContextOptions = {}): Promise<Page> {
+  async newSession(options: BrowserContextOptions = {}): Promise<ManagedTestSession> {
     const context = await this.browser.newContext(options);
     this.sequence += 1;
     this.cleanup.register(`browser context #${this.sequence}`, () => context.close());
-    return context.newPage();
+    return new ManagedTestSession(await context.newPage(), this.cleanup);
   }
 }

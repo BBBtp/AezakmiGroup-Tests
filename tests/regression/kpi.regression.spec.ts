@@ -1,5 +1,4 @@
 import { test, testData } from '@fixtures';
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 test.describe('Страница KPI', () => {
@@ -60,17 +59,17 @@ test.describe('Страница KPI', () => {
     });
   });
 
-  test('График отображается, табы переключаются без ошибок', async ({ kpiPage }) => {
+  test('График отображается, табы переключаются без ошибок', async ({ kpiPage, browserDiagnostics }) => {
     await allure.allureId('815');
     const chart = kpiPage.chart;
 
     await chart.verifyVisible();
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('KPI performance chart');
     await chart.selectMrr();
-    expect(errors).toHaveLength(0);
+    consoleErrors.expectNoErrors();
     await chart.selectScore();
-    expect(errors).toHaveLength(0);
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Таблица сотрудников: строки отображаются и корректны', async ({ kpiPage }) => {
@@ -86,13 +85,9 @@ test.describe('Страница KPI', () => {
     await allure.allureId('816');
     const table = kpiPage.employeesTable;
 
-    const rows = await table.getRows();
-    expect(rows.length).toBeGreaterThan(0);
-    const firstRow = rows[0];
-    const baseUrl = kpiPage.page.url();
-    await firstRow.open();
-    const newUrl = kpiPage.page.url();
-    expect(newUrl).not.toBe(baseUrl);
+    await table.expectPopulated();
+    await table.openFirstEmployee();
+    await kpiPage.expectEmployeeDetailsUrl();
   });
 
   test('Таблица сотрудников: сортировка по колонкам', async ({ kpiPage }) => {

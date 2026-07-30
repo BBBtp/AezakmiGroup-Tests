@@ -48,7 +48,7 @@ MCP не принимает токены в аргументах инструм�
 - `tests/regression` — подробные бизнес-сценарии.
 - `tests/setup` — создание storage state только для авторизованных проектов.
 - `tests/support` — API-контракты, lifecycle тестовых данных и общие domain helpers.
-- `fixtures` — пользователи, авторизация и lifecycle страниц.
+- `fixtures` — послойная композиция core, UI и domain lifecycle.
 - `modules` — публичная граница домена для тестов и fixtures.
 - `pages` — композиция страниц.
 - `components` — локаторы и действия отдельных UI-блоков.
@@ -57,7 +57,7 @@ MCP не принимает токены в аргументах инструм�
 - `framework/network` — навигация, API-ожидания, request capture и одноразовые моки.
 - `framework/data` — фабрика уникальных и свободных тестовых значений.
 - `framework/lifecycle` — LIFO-уборщики, выполняемые даже после падения теста.
-- `framework/playwright` — управляемые расширения Playwright, включая дополнительные сессии.
+- `framework/playwright` — дополнительные сессии и автоматически очищаемая browser-диагностика.
 - `mcp` — интеграция с DoQA.
 - `scripts` — проверки репозитория и управляемые workflow.
 

@@ -1,5 +1,4 @@
 import { test } from '@fixtures';
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 test.describe('Страница KPI', () => {
@@ -7,13 +6,13 @@ test.describe('Страница KPI', () => {
     await kpiPage.navigate();
   });
 
-  test('Кнопка настроек отображается и кликабельна', async ({ kpiPage }) => {
+  test('Кнопка настроек отображается и кликабельна', async ({ kpiPage, browserDiagnostics }) => {
     await allure.allureId('803');
     await kpiPage.expectSettingsActionVisible();
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('open KPI settings');
     await kpiPage.openSettings();
-    expect(errors.length).toBe(0);
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Основной контент рендерится, error-content скрыт', async ({ kpiPage }) => {
@@ -29,10 +28,8 @@ test.describe('Страница KPI', () => {
       await table.expectPopulated();
     });
     await test.step('Кнопка Open открывает страницу сотрудника', async () => {
-      const oldUrl = kpiPage.page.url();
       await table.openFirstEmployee();
       await kpiPage.expectEmployeeDetailsUrl();
-      expect(kpiPage.page.url()).not.toBe(oldUrl);
     });
   });
 });

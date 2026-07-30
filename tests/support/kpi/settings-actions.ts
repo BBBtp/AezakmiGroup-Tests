@@ -1,7 +1,6 @@
-import { expect } from '@playwright/test';
 import type { TestDataFactory } from '@framework/data';
 import type { CleanupHandle, CleanupRegistry } from '@framework/lifecycle';
-import { NetworkController } from '@framework/network';
+import type { NetworkController } from '@framework/network';
 
 import { KpiSettingsActionRowComponent, KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
 import { STAFF_KPI_API_PREFIX } from './staff-service';
@@ -79,9 +78,10 @@ export function registerKpiSettingsCleanup(
   cleanup: CleanupRegistry,
   settingsPage: KpiSettingsPage,
   row: KpiSettingsActionRowComponent,
+  network: NetworkController,
 ): CleanupHandle {
   return cleanup.register(`KPI settings row ${row.tableName}/${row.actionType}/${row.value}`, () =>
-    deleteKpiSettingsActionIfPresent(settingsPage, row),
+    deleteKpiSettingsActionIfPresent(settingsPage, row, network),
   );
 }
 
@@ -116,13 +116,13 @@ export async function editKpiSettingsAction(
 export async function deleteKpiSettingsActionIfPresent(
   settingsPage: KpiSettingsPage,
   row: KpiSettingsActionRowComponent,
+  network: NetworkController,
 ): Promise<void> {
   await settingsPage.navigate();
 
   if ((await row.deleteButton.count()) === 0 || !(await row.deleteButton.isEnabled())) return;
 
   await row.openDeleteModal();
-  const network = new NetworkController(settingsPage.page);
   await runAndWaitForSettingsAction(network, 'DELETE', () => row.confirmDelete());
-  await expect(row.deleteButton).toHaveCount(0);
+  await row.expectDeleted();
 }

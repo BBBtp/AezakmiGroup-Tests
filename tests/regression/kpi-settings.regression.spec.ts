@@ -1,5 +1,5 @@
 import { test } from '@fixtures';
-import { KpiSettingsAddValueModal, KpiSettingsPage } from '@modules/kpi';
+import { KpiSettingsAddValueModal } from '@modules/kpi';
 import { allure } from 'allure-playwright';
 
 test.describe('Страница KPI Settings', () => {
@@ -11,12 +11,10 @@ test.describe('Страница KPI Settings', () => {
   });
 
   test.describe('add-modal для ab-tests', () => {
-    let settingsPage: KpiSettingsPage;
     let modal: KpiSettingsAddValueModal;
 
     test.beforeEach(async ({ kpiSettingsLifecycle }) => {
-      settingsPage = kpiSettingsLifecycle.page;
-      modal = await settingsPage.openAbTestsAddModal();
+      modal = await kpiSettingsLifecycle.openAbTestsModal();
     });
 
     test('содержит все шаги и базовые контролы', async ({ kpiSettingsLifecycle }) => {
@@ -46,12 +44,10 @@ test.describe('Страница KPI Settings', () => {
   });
 
   test.describe('add-modal для total-mrr', () => {
-    let settingsPage: KpiSettingsPage;
     let modal: KpiSettingsAddValueModal;
 
     test.beforeEach(async ({ kpiSettingsLifecycle }) => {
-      settingsPage = kpiSettingsLifecycle.page;
-      modal = await settingsPage.openTotalMrrAddModal();
+      modal = await kpiSettingsLifecycle.openTotalMrrModal();
     });
 
     test('содержит все шаги и базовые контролы', async ({ kpiSettingsLifecycle }) => {
@@ -84,7 +80,7 @@ test.describe('Страница KPI Settings', () => {
 
   test('Score-таблица отображается и edit-кнопки недоступны', async ({ kpiSettingsLifecycle }) => {
     await allure.allureId('827');
-    await kpiSettingsLifecycle.page.scoreTable.expectReadOnlyShellVisible();
+    await kpiSettingsLifecycle.expectScoreReadOnly();
   });
 
   test('A/B tests: создаёт, редактирует и удаляет тестовое значение', async ({ kpiSettingsLifecycle }) => {

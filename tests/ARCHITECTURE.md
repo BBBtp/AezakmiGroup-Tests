@@ -1,7 +1,8 @@
 # Test architecture
 
 - `modules/<domain>` is the public boundary for Auth, KPI and Employees. Tests and fixtures import pages or public components only from here.
-- `fixtures` owns authentication, test users and page lifecycles. Import it through `@fixtures`.
+- `fixtures/core-fixtures`, `ui-fixtures` and `domain-fixtures` own infrastructure, public UI objects
+  and domain lifecycles respectively. Import the composed test only through `@fixtures`.
 - `tests/setup` creates admin storage state for authenticated projects. Auth and access-control projects do not depend on it.
 - `tests/smoke` and `tests/regression` contain only business scenarios.
 - `tests/support/<domain>` contains reusable API contracts, test identifiers and test-data lifecycle.
@@ -11,7 +12,8 @@
 - `framework/lifecycle` owns the LIFO cleanup registry; register compensation before every mutation.
 - `framework/network` owns navigation, response waits, request capture and one-shot route mocks.
 - `framework/data` owns unique labels and allocation of free test values.
-- `framework/playwright` owns reusable Playwright extensions such as additional managed sessions.
+- `framework/playwright` owns managed sessions and auto-cleaned browser diagnostics. Business tests
+  never import Playwright runtime objects or access a module's raw `.page`.
 - `config` and `utils` are cross-domain infrastructure, imported through `@config/*` and `@utils/*`.
 
 Use the aliases in `tsconfig.json` for new code. Add a module export before exposing a new page or component to tests. Add a domain under `tests/support` when two or more scenarios share service contracts, test data lifecycle or an integration flow.
@@ -23,5 +25,6 @@ Every page and component takes test IDs, CSS fallbacks and stable accessible nam
 rejects inline test IDs/CSS and raw Playwright `expect()` throughout the UI implementation.
 
 Business tests must not call `locator`, `getBy*`, raw `page.goto/route/waitFor*` or diagnostic
-action helpers directly. Add UI behavior to the domain module and network behavior to the
-`network` fixture instead.
+action helpers directly. They also must not subscribe to browser events, mutate storage or create
+BrowserContext themselves. Add UI behavior to the domain module, reusable session flows to
+`tests/support/<domain>` and browser mechanics to managed fixtures instead.

@@ -131,26 +131,6 @@ export class LoginFormComponent extends UiObject {
     return isChecked === 'true';
   }
 
-  /** Возвращает текущее значение поля email */
-  async getEmailValue(): Promise<string> {
-    return await this.emailInput.inputValue();
-  }
-
-  /** Возвращает текущее значение поля пароль */
-  async getPasswordValue(): Promise<string> {
-    return await this.passwordInput.inputValue();
-  }
-
-  /** Возвращает тип поля пароля ('password' или 'text') */
-  async getPasswordType(): Promise<string> {
-    return (await this.passwordInput.getAttribute('type')) || 'password';
-  }
-
-  /** Проверяет, что кнопка Submit активна */
-  async isSubmitButtonEnabled(): Promise<boolean> {
-    return await this.submitButton.isEnabled();
-  }
-
   /** Ожидает готовность формы к взаимодействию */
   async waitForFormReady(): Promise<void> {
     await this.expectations.visible('login form', this.form);
@@ -166,5 +146,19 @@ export class LoginFormComponent extends UiObject {
 
   async expectPasswordType(type: 'password' | 'text'): Promise<void> {
     await this.expectations.attribute('login password input type', this.passwordInput, 'type', type);
+  }
+
+  async expectRememberMeChecked(checked: boolean): Promise<void> {
+    await this.expectations.attribute(
+      'login remember me state',
+      this.rememberMeCheckbox,
+      'aria-checked',
+      String(checked),
+    );
+  }
+
+  async expectCredentialValues(email: string, password: string): Promise<void> {
+    await this.expectations.value('login email value', this.emailInput, email);
+    await this.expectations.value('login password value', this.passwordInput, password);
   }
 }

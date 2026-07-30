@@ -17,6 +17,16 @@ const directLocatorMethods = new Set([
   'getByTitle',
 ]);
 const rawNetworkMethods = new Set(['goto', 'route', 'unroute', 'waitForRequest', 'waitForResponse']);
+const rawBrowserMethods = new Set(['evaluate', 'goBack', 'goForward', 'reload', 'url', 'on', 'off']);
+const forbiddenPlaywrightRuntimeImports = new Set([
+  'Browser',
+  'BrowserContext',
+  'Page',
+  'chromium',
+  'firefox',
+  'request',
+  'webkit',
+]);
 const violations = [];
 function usesCentralizedLocatorContract(file) {
   const relative = path.relative(root, file);
@@ -122,7 +132,32 @@ for (const testRoot of [path.join('tests', 'smoke'), path.join('tests', 'regress
   const files = await collectTypeScriptFiles(path.join(root, testRoot));
   for (const file of files) {
     const source = ts.createSourceFile(file, await fs.readFile(file, 'utf8'), ts.ScriptTarget.Latest, true);
+    source.forEachChild((node) => {
+      if (
+        !ts.isImportDeclaration(node) ||
+        !ts.isStringLiteral(node.moduleSpecifier) ||
+        node.moduleSpecifier.text !== '@playwright/test'
+      ) {
+        return;
+      }
+      const namedImports = node.importClause?.namedBindings;
+      if (!namedImports || !ts.isNamedImports(namedImports)) return;
+      for (const element of namedImports.elements) {
+        const importedName = element.propertyName?.text ?? element.name.text;
+        if (!forbiddenPlaywrightRuntimeImports.has(importedName)) continue;
+        const { line, character } = source.getLineAndCharacterOfPosition(element.getStart(source));
+        violations.push(
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must use fixtures instead of Playwright runtime "${importedName}"`,
+        );
+      }
+    });
     const visit = (node) => {
+      if (ts.isPropertyAccessExpression(node) && node.name.text === 'page') {
+        const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
+        violations.push(
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must not access a module's raw Page`,
+        );
+      }
       if (
         ts.isCallExpression(node) &&
         ts.isPropertyAccessExpression(node.expression) &&
@@ -136,13 +171,13 @@ for (const testRoot of [path.join('tests', 'smoke'), path.join('tests', 'regress
       if (
         ts.isCallExpression(node) &&
         ts.isPropertyAccessExpression(node.expression) &&
-        rawNetworkMethods.has(node.expression.name.text)
+        (rawNetworkMethods.has(node.expression.name.text) || rawBrowserMethods.has(node.expression.name.text))
       ) {
         const receiver = node.expression.expression.getText(source);
         if (receiver === 'page' || receiver.endsWith('.page')) {
           const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
           violations.push(
-            `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must use the network fixture instead of raw page.${node.expression.name.text}()`,
+            `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must use managed fixtures instead of raw page.${node.expression.name.text}()`,
           );
         }
       }
@@ -157,6 +192,6 @@ if (violations.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    'Architecture validation passed: public modules, centralized UI locator contracts, managed actions/expectations and network access are enforced.',
+    'Architecture validation passed: public modules, locator contracts, managed UI, network, sessions and browser diagnostics are enforced.',
   );
 }

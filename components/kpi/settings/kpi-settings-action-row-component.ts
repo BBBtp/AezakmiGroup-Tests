@@ -125,6 +125,10 @@ export class KpiSettingsActionRowComponent extends UiObject {
     await this.expectations.hidden('KPI settings edit modal', this.editModal);
   }
 
+  async expectEditErrorVisible(): Promise<void> {
+    await this.expectations.visible('KPI settings edit error', this.errorBlock);
+  }
+
   async openDeleteModal(): Promise<void> {
     await this.expectations.enabled('KPI settings delete action', this.deleteButton);
     await this.actions.click(`KPI settings: open delete ${this.actionType}/${this.value}`, this.deleteButton);

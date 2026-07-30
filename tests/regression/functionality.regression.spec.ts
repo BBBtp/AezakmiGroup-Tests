@@ -1,11 +1,4 @@
 import { test } from '@fixtures';
-import { chromium, expect } from '@playwright/test';
-import type { BrowserContext } from '@playwright/test';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import { LoginPage } from '@modules/auth';
-import { testSettings } from '@config/test-settings';
 import { allure } from 'allure-playwright';
 test.describe('Функциональность авторизации', () => {
   test.beforeEach(async ({ loginPage }) => {
@@ -30,49 +23,19 @@ test.describe('Функциональность авторизации', () => {
 
   test('Кнопка "Remember me" работает (UI)', async ({ loginPage }) => {
     await allure.allureId('797');
-    const initialState = await loginPage.loginForm.isRememberMeChecked();
-    expect(initialState).toBe(false);
+    await loginPage.loginForm.expectRememberMeChecked(false);
     await loginPage.loginForm.toggleRememberMe();
-    const newState = await loginPage.loginForm.isRememberMeChecked();
-    expect(newState).toBe(true);
+    await loginPage.loginForm.expectRememberMeChecked(true);
     await loginPage.loginForm.toggleRememberMe();
-    const finalState = await loginPage.loginForm.isRememberMeChecked();
-    expect(finalState).toBe(false);
+    await loginPage.loginForm.expectRememberMeChecked(false);
   });
 
   test('Кнопка "Remember me" сохраняет сессию между перезапусками браузерного контекста', async ({
     adminUser,
-    network,
+    authSessions,
   }) => {
     await allure.allureId('798');
-    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-remember-me-'));
-    const contextOptions = {
-      baseURL: testSettings.baseUrl,
-      viewport: { width: 1280, height: 720 },
-    };
-
-    let context: BrowserContext | undefined;
-
-    try {
-      context = await chromium.launchPersistentContext(userDataDir, contextOptions);
-      const page = context.pages()[0] ?? (await context.newPage());
-      const loginPage = new LoginPage(page);
-
-      await loginPage.navigate();
-      await loginPage.login(adminUser.email, adminUser.password, { remember: true });
-      await expect(page).toHaveURL(/dashboard/);
-      await context.close();
-
-      context = await chromium.launchPersistentContext(userDataDir, contextOptions);
-      const pageAfterRestart = context.pages()[0] ?? (await context.newPage());
-      await network.forPage(pageAfterRestart).navigate('/dashboard');
-      await expect(pageAfterRestart).toHaveURL(/dashboard/);
-    } finally {
-      if (context) {
-        await context.close();
-      }
-      fs.rmSync(userDataDir, { recursive: true, force: true });
-    }
+    await authSessions.expectRememberMePersists(adminUser);
   });
 
   test('Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {
@@ -87,17 +50,12 @@ test.describe('Функциональность авторизации', () => {
   test('Переход по Telegram ссылке', async ({ loginPage }) => {
     await allure.allureId('800');
     await loginPage.openForgotPasswordModal();
-    const telegramHref = await loginPage.forgotPasswordModal.getTelegramButtonHref();
-    expect(telegramHref).toBeTruthy();
-    expect(telegramHref).toMatch(/t\.me|telegram/i);
+    await loginPage.forgotPasswordModal.expectTelegramLink();
   });
 
   test('Поля сохраняют значения после неуспешной попытки', async ({ loginPage, adminUser }) => {
     await allure.allureId('801');
     await loginPage.login(adminUser.email, 'wrongpassword');
-    const emailValue = await loginPage.loginForm.getEmailValue();
-    const passwordValue = await loginPage.loginForm.getPasswordValue();
-    expect(emailValue).toBe(adminUser.email);
-    expect(passwordValue).toBe('wrongpassword');
+    await loginPage.loginForm.expectCredentialValues(adminUser.email, 'wrongpassword');
   });
 });

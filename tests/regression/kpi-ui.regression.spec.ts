@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test, testData } from '@fixtures';
@@ -41,17 +40,20 @@ test.describe('KPI UI', () => {
     await filters.verifyActiveTab();
   });
 
-  test('График производительности отображается и табы переключаются', async ({ kpiPage }) => {
+  test('График производительности отображается и табы переключаются', async ({
+    kpiPage,
+    browserDiagnostics,
+  }) => {
     await allure.allureId('808');
     const chart = kpiPage.chart;
-    const errors: string[] = [];
-    kpiPage.page.on('console', (msg) => msg.type() === 'error' && errors.push(msg.text()));
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('KPI performance chart');
 
     await chart.verifyVisible();
     await chart.selectMrr();
-    expect(errors).toEqual([]);
+    consoleErrors.expectNoErrors();
     await chart.selectScore();
-    expect(errors).toEqual([]);
+    consoleErrors.expectNoErrors();
+    consoleErrors.stop();
   });
 
   test('Top Employees отображается', async ({ kpiPage }) => {
@@ -60,6 +62,6 @@ test.describe('KPI UI', () => {
 
     await top.verifyVisible('Top employees');
     await top.verifyPodium();
-    expect(await top.getContendersCount()).toBeGreaterThan(0);
+    await top.verifyContenders();
   });
 });

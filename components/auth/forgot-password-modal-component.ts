@@ -73,18 +73,6 @@ export class ForgotPasswordModalComponent extends ModalComponent {
     await super.closeByButton();
   }
 
-  /**
-   * Возвращает значение атрибута `href` у кнопки Telegram.
-   *
-   * @returns ссылка Telegram или `null`, если атрибут отсутствует
-   *
-   * Используется для проверки корректности ссылки
-   * без фактического перехода.
-   */
-  async getTelegramButtonHref(): Promise<string | null> {
-    return await this.telegramButton.getAttribute('href');
-  }
-
   async expectContentVisible(): Promise<void> {
     await this.waitForOpen();
     await this.expectations.visible('forgot password Telegram action', this.telegramButton);
@@ -92,5 +80,14 @@ export class ForgotPasswordModalComponent extends ModalComponent {
 
   async expectHidden(): Promise<void> {
     await this.waitForClose();
+  }
+
+  async expectTelegramLink(): Promise<void> {
+    await this.expectations.attribute(
+      'forgot password Telegram link',
+      this.telegramButton,
+      'href',
+      /t\.me|telegram/i,
+    );
   }
 }

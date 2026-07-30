@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
-import { EmployeeCreatePage } from '@modules/employees';
 import {
   expectSuccessfulJson,
   isKpiApiRequest,
@@ -13,10 +12,10 @@ import {
 } from '@support/kpi';
 
 test.describe('KPI staff service', () => {
-  test('Основная статистика KPI возвращает стартовые баллы', async ({ kpiPage }) => {
+  test('Основная статистика KPI возвращает стартовые баллы', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.statistics);
 
-    const statistics = await openKpiAndGetStatistics(kpiPage.page);
+    const statistics = await openKpiAndGetStatistics(kpiPage, network);
 
     await test.step('Проверяем контракт statistics', async () => {
       expect(Array.isArray(statistics.full_stats)).toBe(true);
@@ -35,7 +34,7 @@ test.describe('KPI staff service', () => {
   test('Карточка ASO manager загружает все KPI endpoint', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.managerCard);
 
-    const statistics = await openKpiAndGetStatistics(kpiPage.page);
+    const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
     const employeeId = manager!.employee_id;
@@ -61,7 +60,7 @@ test.describe('KPI staff service', () => {
   test('Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.startingScore);
 
-    const statistics = await openKpiAndGetStatistics(kpiPage.page);
+    const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const candidates = statistics.full_stats
       .filter((item) => item.start_score !== null)
       .sort((left, right) => Number(right.start_score !== 0) - Number(left.start_score !== 0));
@@ -86,10 +85,9 @@ test.describe('KPI staff service', () => {
     expect(verified, 'No KPI settings row was available for managers returned by statistics').toBe(true);
   });
 
-  test('ASO manager доступен через Employees → Create employee', async ({ kpiPage }) => {
+  test('ASO manager доступен через Employees → Create employee', async ({ employeeCreatePage }) => {
     await allure.allureId(kpiAllureIds.asoManagerCreation);
 
-    const employeeCreatePage = new EmployeeCreatePage(kpiPage.page);
     await employeeCreatePage.navigate();
     await employeeCreatePage.openWorkingInfo();
     await employeeCreatePage.selectAsoManagerPosition();
@@ -102,7 +100,7 @@ test.describe('KPI staff service', () => {
 
     const apiRequests = network.captureRequests((request) => isKpiApiRequest(request.url()));
 
-    const statistics = await openKpiAndGetStatistics(kpiPage.page);
+    const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 
@@ -123,7 +121,7 @@ test.describe('KPI staff service', () => {
   }) => {
     await allure.allureId(kpiAllureIds.vacationsHistoryError);
 
-    const statistics = await openKpiAndGetStatistics(kpiPage.page);
+    const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 

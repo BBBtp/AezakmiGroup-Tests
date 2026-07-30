@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 import { test } from '@fixtures';
 
@@ -18,21 +17,11 @@ const protectedPaths = [
 ];
 
 test.describe('Контроль доступа', () => {
-  test('Неавторизованный доступ к основным разделам заблокирован', async ({ sessions, network }) => {
+  test('Неавторизованный доступ к основным разделам заблокирован', async ({ authSessions }) => {
     await allure.allureId('567');
 
-    const page = await sessions.newPage({
-      storageState: { cookies: [], origins: [] },
-    });
-    const pageNetwork = network.forPage(page);
-
     await test.step('Проверить доступ к закрытым URL без сессии', async () => {
-      for (const path of protectedPaths) {
-        await pageNetwork.navigate(path, { waitUntil: 'commit' });
-        await expect(page).toHaveURL(/\/login(?:[/?]|$)/, {
-          timeout: 15000,
-        });
-      }
+      await authSessions.expectAnonymousAccessBlocked(protectedPaths);
     });
   });
 });

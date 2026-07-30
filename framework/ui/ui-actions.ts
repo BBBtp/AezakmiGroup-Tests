@@ -43,4 +43,8 @@ export class UiActions {
       this.page.goto(url, options),
     );
   }
+
+  goBack(target = 'browser history: back') {
+    return loggedAction(this.page, 'navigate', target, this.page.locator('body'), () => this.page.goBack());
+  }
 }

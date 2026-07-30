@@ -31,4 +31,10 @@ export class ApplicationShellComponent extends UiObject {
     await this.actions.click('profile: logout', button);
     await this.expectations.url('login after logout', /\/login/);
   }
+
+  async logoutAndExpectHistoryBlocked(): Promise<void> {
+    await this.logout();
+    await this.actions.goBack('browser history after logout');
+    await this.expectations.url('login after browser history navigation', /\/login/);
+  }
 }

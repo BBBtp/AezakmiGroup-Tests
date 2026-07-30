@@ -53,6 +53,11 @@ export class KpiSettingsAddValueModal extends UiObject {
     await this.expectations.visible(`${this.tableName}: next action`, this.nextButton);
   }
 
+  async expectCreateErrorVisible(): Promise<void> {
+    await this.waitForOpen();
+    await this.expectations.visible(`${this.tableName}: create error`, this.errorBlock);
+  }
+
   async clickNextSafely(): Promise<void> {
     await this.expectations.enabled(`${this.tableName}: next action`, this.nextButton);
     await this.actions.click(`KPI settings ${this.tableName}: next`, this.nextButton);

@@ -62,6 +62,12 @@ export class UiExpectations {
     );
   }
 
+  value(target: string, locator: Locator, expected: string | RegExp): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `value=${String(expected)}`, () =>
+      expect(locator).toHaveValue(expected),
+    );
+  }
+
   text(target: string, locator: Locator, value: string | RegExp): Promise<void> {
     return loggedExpectation(this.page, target, locator, `text=${String(value)}`, () =>
       expect(locator).toHaveText(value),

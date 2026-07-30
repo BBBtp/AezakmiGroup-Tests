@@ -12,15 +12,17 @@ flowchart TD
   MCP --> Queue[Очередь кандидатов]
   Queue --> Tests[Business tests]
   Tests --> Fixtures[Fixtures]
+  Tests --> Support[Domain lifecycle and integration flows]
   Tests --> Modules[Domain modules]
   Fixtures --> Modules
+  Fixtures --> Support
   Modules --> Pages[Pages: domain flows]
   Pages --> Components[Components: local UI behavior]
   Pages --> UI[framework/ui]
   Components --> UI
   UI --> Locators[Domain locator catalogs]
   UI --> CRM[CRM web application]
-  Fixtures --> Lifecycle[Cleanup registry and test sessions]
+  Fixtures --> Lifecycle[Cleanup registry, sessions and browser diagnostics]
   Tests --> Allure[Allure raw results]
   Allure --> Upload[POST /api/autotests/report]
   Upload --> DoQA
@@ -28,9 +30,11 @@ flowchart TD
 
 ### `tests/`
 
-Сценарии smoke/regression содержат бизнес-шаги и проверки, но не создают локаторы напрямую.
-UI доступен только через публичный API `@modules/*`. Каждый автоматизированный тест содержит
-ровно один уникальный числовой `allure.allureId('<DoQA case id>')`.
+Сценарии smoke/regression содержат бизнес-шаги и проверки, но не создают локаторы и не управляют
+raw `Page`, BrowserContext, browser events или local storage напрямую. UI доступен только через
+публичный API `@modules/*`, а технические сессии и диагностика — через fixtures. Каждый
+автоматизированный тест содержит ровно один уникальный числовой
+`allure.allureId('<DoQA case id>')`.
 
 ### `modules/`
 
@@ -74,7 +78,16 @@ builder-функций. Один UI-домен не должен собират�
 `NetworkController` — единая точка для навигации, ожидания API-ответов, сбора запросов и
 одноразовых route-моков. Бизнес-тесты не вызывают `page.goto`, `page.route`,
 `page.waitForRequest` или `page.waitForResponse` напрямую. Благодаря этому HTTP-диагностика и
-политика моков меняются централизованно.
+политика моков меняются централизованно. Request capture автоматически регистрирует снятие
+listener в cleanup registry; ручной `stop()` выполняет раннюю уборку.
+
+### `framework/playwright/`
+
+`ManagedTestSession` даёт дополнительному BrowserContext только разрешённые операции:
+навигацию, URL-ожидания, reload и управляемое изменение storage. `TestSessionFactory` создаёт
+такие сессии и регистрирует закрытие контекста до возврата управления тесту.
+`BrowserDiagnostics` собирает console errors через `ConsoleErrorCapture`; listener всегда
+снимается вручную или при fixture teardown.
 
 ### `framework/data/`
 
@@ -83,18 +96,20 @@ builder-функций. Один UI-домен не должен собират�
 
 ### `fixtures/`
 
-Подготавливают пользователей и публичные доменные объекты поверх `page` текущего Playwright
-project. Fixture `cleanup` регистрирует компенсирующие операции до мутации и выполняет их в LIFO
-порядке даже при падении теста. `sessions` создаёт дополнительные BrowserContext и автоматически
-закрывает их через тот же registry. Явная успешная уборка вызывает `runNow`; если она упала,
-задача остаётся активной и повторяется в fixture teardown.
+Разделены по ответственности: `core-fixtures` владеет пользователями, cleanup, фабрикой данных и
+сессиями; `ui-fixtures` создаёт публичные domain objects, network и browser diagnostics;
+`domain-fixtures` собирает бизнес-lifecycle. Fixture `cleanup` регистрирует компенсирующие
+операции до мутации и выполняет их в LIFO-порядке даже при падении теста. Явная успешная уборка
+вызывает `runNow`; если она упала, задача остаётся активной и повторяется в fixture teardown.
 
 `tests/setup/auth.setup.ts` создаёт admin storage state только для авторизованных проектов.
 Проверки логина и контроля доступа запускаются отдельными проектами без этой зависимости.
 
 ### `tests/support/<domain>/`
 
-Общие API-контракты и доменные lifecycle-сервисы. `KpiSettingsLifecycle` выбирает свободные данные,
+Общие API-контракты и доменные lifecycle-сервисы. `AuthSessionLifecycle` инкапсулирует anonymous,
+stored, expired и persistent remember-me сессии, включая временные каталоги и гарантированный
+cleanup. `KpiSettingsLifecycle` выбирает свободные данные,
 регистрирует компенсацию до создания и возвращает `ManagedKpiSettingsAction`. Управляемая сущность
 инкапсулирует edit, negative API flow и раннее удаление; если тест падает, fixture выполняет
 оставшийся cleanup автоматически.

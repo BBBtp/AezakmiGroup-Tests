@@ -1,5 +1,6 @@
 import type { Page, Request, Response, Route } from '@playwright/test';
 
+import type { CleanupRegistry } from '@framework/lifecycle';
 import { UiActions } from '@framework/ui';
 
 export type UrlMatcher = string | RegExp | ((url: string) => boolean);
@@ -28,13 +29,13 @@ function matchesStatus(status: number, expected?: ResponseCriteria['status']): b
 
 export class NetworkController {
   private readonly actions: UiActions;
+  private captureSequence = 0;
 
-  constructor(readonly page: Page) {
+  constructor(
+    private readonly page: Page,
+    private readonly cleanup?: CleanupRegistry,
+  ) {
     this.actions = new UiActions(page);
-  }
-
-  forPage(page: Page): NetworkController {
-    return new NetworkController(page);
   }
 
   navigate(url: string, options?: Parameters<Page['goto']>[1]) {
@@ -91,14 +92,26 @@ export class NetworkController {
 
   captureRequests(predicate: (request: Request) => boolean): RequestCapture {
     const urls: string[] = [];
+    let active = true;
     const listener = (request: Request) => {
       if (predicate(request)) urls.push(request.url());
     };
     this.page.on('request', listener);
+    this.captureSequence += 1;
+    const cleanupHandle = this.cleanup?.register(`request capture #${this.captureSequence}`, () => {
+      if (!active) return;
+      this.page.off('request', listener);
+      active = false;
+    });
 
     return {
       urls,
-      stop: () => this.page.off('request', listener),
+      stop: () => {
+        if (!active) return;
+        this.page.off('request', listener);
+        active = false;
+        cleanupHandle?.dismiss();
+      },
     };
   }
 }
