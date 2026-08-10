@@ -20,10 +20,14 @@ test.describe('KPI UI', () => {
     await network.failNext('**/staff/api/v1/kpi/managers/statistics*', 'GET', {
       message: 'Mocked server error',
     });
-    const failedStatistics = network.waitForFailedResponse('/staff/api/v1/kpi/managers/statistics', 'GET');
-    await network.navigate('/kpi', { waitUntil: 'domcontentloaded' });
-    await failedStatistics;
-    await kpiPage.expectErrorState();
+    await network.waitForResponseWhile(
+      {
+        url: '/staff/api/v1/kpi/managers/statistics',
+        method: 'GET',
+        status: (status) => status >= 500,
+      },
+      () => kpiPage.navigateExpectingError(),
+    );
   });
 
   test('Проверка отображения карточек KPI', async ({ kpiPage }) => {

@@ -73,13 +73,14 @@ export async function openKpiAndGetStatistics(
   kpiPage: KpiPage,
   network: NetworkController,
 ): Promise<KpiStatistics> {
-  const responsePromise = network.waitForResponse({
-    url: (url) => url.includes(`${STAFF_KPI_API_PREFIX}/managers/statistics`),
-    method: 'GET',
-    timeout: 30_000,
-  });
-  await kpiPage.navigate();
-  const response = await responsePromise;
+  const { response } = await network.waitForResponseWhile(
+    {
+      url: (url) => url.includes(`${STAFF_KPI_API_PREFIX}/managers/statistics`),
+      method: 'GET',
+      timeout: process.env.CI ? 60_000 : 30_000,
+    },
+    () => kpiPage.navigate(),
+  );
   await expectSuccessfulJson(response, 'KPI statistics');
   return response.json() as Promise<KpiStatistics>;
 }

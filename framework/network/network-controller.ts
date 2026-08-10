@@ -59,6 +59,15 @@ export class NetworkController {
     );
   }
 
+  async waitForResponseWhile<T>(
+    criteria: ResponseCriteria,
+    action: () => Promise<T>,
+  ): Promise<{ response: Response; result: T }> {
+    const responsePromise = this.waitForResponse(criteria);
+    const [response, result] = await Promise.all([responsePromise, action()]);
+    return { response, result };
+  }
+
   waitForSuccessfulResponse(url: UrlMatcher, method?: string): Promise<Response> {
     return this.waitForResponse({
       url,
