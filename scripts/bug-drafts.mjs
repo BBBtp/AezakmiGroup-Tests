@@ -5,6 +5,7 @@ import { classifyRunFailure, defectMarker, DoqaClient } from '../mcp/doqa-client
 
 const activeBugStatuses = ['open', 'work', 'testing'];
 const allowedAttachmentTypes = new Set(['image/jpeg', 'image/png', 'text/markdown', 'video/webm']);
+const KPI_DATA_UNAVAILABLE = '[KPI_DATA_UNAVAILABLE]';
 
 export async function resetBugDraftOutput(outputDir, trustedRoot = process.cwd()) {
   const resolvedOutput = path.resolve(outputDir);
@@ -22,9 +23,14 @@ export async function generateBugDrafts({ allureDir, outputDir, runId, client })
   const failures = await readFailedAllureResults(allureDir);
   await mkdir(outputDir, { recursive: true });
   const drafts = [];
-  const effectiveClient = failures.length ? (client ?? new DoqaClient()) : null;
+  const excluded = failures
+    .map((failure) => ({ failure, exclusion: bugDraftExclusion(failure) }))
+    .filter(({ exclusion }) => exclusion !== null);
+  const excludedFiles = new Set(excluded.map(({ failure }) => failure.file));
+  const draftableFailures = failures.filter((failure) => !excludedFiles.has(failure.file));
+  const effectiveClient = draftableFailures.length ? (client ?? new DoqaClient()) : null;
 
-  for (const failure of failures) {
+  for (const failure of draftableFailures) {
     const [caseSnapshot, duplicateSearch] = await Promise.all([
       effectiveClient.getCase(Number(failure.caseId)),
       effectiveClient.listRunBugs({
@@ -55,11 +61,15 @@ export async function generateBugDrafts({ allureDir, outputDir, runId, client })
     drafts.push(draft);
   }
 
-  await writeFile(path.join(outputDir, 'README.md'), formatDraftIndex(drafts, runId), 'utf8');
+  await writeFile(path.join(outputDir, 'README.md'), formatDraftIndex(drafts, runId, excluded), 'utf8');
   return {
     outputDir,
     runId: runId ?? null,
     failures: failures.length,
+    excluded: excluded.map(({ failure, exclusion }) => ({
+      caseId: Number(failure.caseId),
+      ...exclusion,
+    })),
     drafts: drafts.map((draft) => ({
       caseId: draft.caseId,
       status: draft.status,
@@ -69,6 +79,18 @@ export async function generateBugDrafts({ allureDir, outputDir, runId, client })
       file: path.join(outputDir, `TC-${draft.caseId}`, 'bug.md'),
     })),
   };
+}
+
+export function bugDraftExclusion(failure) {
+  const message = String(failure?.result?.statusDetails?.message ?? '');
+  if (message.includes(KPI_DATA_UNAVAILABLE)) {
+    return {
+      classification: 'environment',
+      reason: 'kpi_test_data_unavailable',
+      evidence: redactSensitive(message),
+    };
+  }
+  return null;
 }
 
 export async function readFailedAllureResults(allureDir) {
@@ -281,21 +303,30 @@ function formatContent({
   return lines.join('\n');
 }
 
-function formatDraftIndex(drafts, runId) {
+function formatDraftIndex(drafts, runId, excluded = []) {
   const lines = ['# Черновики багов', '', runId ? `DoQA run: ${runId}` : 'DoQA run: не указан', ''];
-  if (!drafts.length) {
+  if (!drafts.length && !excluded.length) {
     lines.push('Failed/broken результатов с корректным Allure ID нет.', '');
     return lines.join('\n');
   }
-  lines.push('| ТК | Статус | Классификация | Дубль | Черновик |', '|---:|---|---|---|---|');
-  for (const draft of drafts) {
-    lines.push(
-      `| ${draft.caseId} | ${draft.status} | ${draft.classification.value} | ${
-        draft.duplicate.found ? `#${draft.duplicate.id}` : 'нет'
-      } | [открыть](TC-${draft.caseId}/bug.md) |`,
-    );
+  if (drafts.length) {
+    lines.push('| ТК | Статус | Классификация | Дубль | Черновик |', '|---:|---|---|---|---|');
+    for (const draft of drafts) {
+      lines.push(
+        `| ${draft.caseId} | ${draft.status} | ${draft.classification.value} | ${
+          draft.duplicate.found ? `#${draft.duplicate.id}` : 'нет'
+        } | [открыть](TC-${draft.caseId}/bug.md) |`,
+      );
+    }
+    lines.push('');
   }
-  lines.push('');
+  if (excluded.length) {
+    lines.push('## Исключено из продуктовых багов', '', '| ТК | Классификация | Причина |', '|---:|---|---|');
+    for (const { failure, exclusion } of excluded) {
+      lines.push(`| ${failure.caseId} | ${exclusion.classification} | ${exclusion.reason} |`);
+    }
+    lines.push('');
+  }
   return lines.join('\n');
 }
 

@@ -63,12 +63,16 @@ function evaluateString(node, seen = new Set()) {
 function isTestCall(node) {
   if (!ts.isCallExpression(node)) return false;
   if (ts.isIdentifier(node.expression)) return node.expression.text === 'test';
-  return (
-    ts.isPropertyAccessExpression(node.expression) &&
-    ts.isIdentifier(node.expression.expression) &&
-    node.expression.expression.text === 'test' &&
-    ['only', 'skip', 'fixme'].includes(node.expression.name.text)
-  );
+  if (
+    !ts.isPropertyAccessExpression(node.expression) ||
+    !ts.isIdentifier(node.expression.expression) ||
+    node.expression.expression.text !== 'test'
+  ) {
+    return false;
+  }
+  if (node.expression.name.text === 'only') return true;
+  if (!['skip', 'fixme'].includes(node.expression.name.text)) return false;
+  return node.arguments.some((argument) => ts.isArrowFunction(argument) || ts.isFunctionExpression(argument));
 }
 
 function isAllureIdCall(node) {

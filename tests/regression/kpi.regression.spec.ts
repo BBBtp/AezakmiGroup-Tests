@@ -1,13 +1,26 @@
 import { test, testData } from '@fixtures';
 import { allure } from 'allure-playwright';
+import {
+  assessKpiDataset,
+  hasKpiData,
+  kpiDataUnavailableMessage,
+  openKpiAndGetStatistics,
+  type KpiDataRequirement,
+} from '@support/kpi';
+
+async function skipWithoutKpiData(
+  requirement: KpiDataRequirement,
+  kpiPage: Parameters<typeof openKpiAndGetStatistics>[0],
+  network: Parameters<typeof openKpiAndGetStatistics>[1],
+): Promise<void> {
+  const dataset = assessKpiDataset(await openKpiAndGetStatistics(kpiPage, network));
+  test.skip(!hasKpiData(dataset, requirement), kpiDataUnavailableMessage(dataset, requirement));
+}
 
 test.describe('Страница KPI', () => {
-  test.beforeEach(async ({ kpiPage }) => {
-    await kpiPage.navigate();
-  });
-
   test('Фильтры: отображение, активный таб, переключение и изменение контента', async ({ kpiPage }) => {
     await allure.allureId('811');
+    await kpiPage.navigate();
     const filters = kpiPage.filters;
     const mainContent = kpiPage.mainContent;
 
@@ -24,8 +37,9 @@ test.describe('Страница KPI', () => {
     });
   });
 
-  test('Top Employees: подиум отображается полностью и корректно', async ({ kpiPage }) => {
+  test('Top Employees: подиум отображается полностью и корректно', async ({ kpiPage, network }) => {
     await allure.allureId('812');
+    await skipWithoutKpiData('podium', kpiPage, network);
     const top = kpiPage.topEmployees;
     await test.step('Блок отображается', async () => {
       await top.verifyVisible(testData.texts.kpi.basePage.topEmpTitle);
@@ -35,8 +49,9 @@ test.describe('Страница KPI', () => {
     });
   });
 
-  test('Top Employees: претенденты корректны и инициалы совпадают', async ({ kpiPage }) => {
+  test('Top Employees: претенденты корректны и инициалы совпадают', async ({ kpiPage, network }) => {
     await allure.allureId('813');
+    await skipWithoutKpiData('contenders', kpiPage, network);
     const top = kpiPage.topEmployees;
     const contendersCount = await top.getContendersCount();
     await test.step(`Проверяем отображение претендентов ${contendersCount} `, async () => {
@@ -46,6 +61,7 @@ test.describe('Страница KPI', () => {
 
   test('Карточки KPI отображаются и содержат значения', async ({ kpiPage }) => {
     await allure.allureId('814');
+    await kpiPage.navigate();
     const { mrrCard, scoreCard, appsCard } = kpiPage.cards;
 
     await test.step('Total MRR', async () => {
@@ -61,6 +77,7 @@ test.describe('Страница KPI', () => {
 
   test('График отображается, табы переключаются без ошибок', async ({ kpiPage, browserDiagnostics }) => {
     await allure.allureId('815');
+    await kpiPage.navigate();
     const chart = kpiPage.chart;
 
     await chart.verifyVisible();
@@ -72,8 +89,9 @@ test.describe('Страница KPI', () => {
     consoleErrors.stop();
   });
 
-  test('Таблица сотрудников: строки отображаются и корректны', async ({ kpiPage }) => {
+  test('Таблица сотрудников: строки отображаются и корректны', async ({ kpiPage, network }) => {
     await allure.allureId('817');
+    await skipWithoutKpiData('manager', kpiPage, network);
     const table = kpiPage.employeesTable;
 
     await test.step('Таблица отображается', async () => {
@@ -81,8 +99,9 @@ test.describe('Страница KPI', () => {
     });
   });
 
-  test('Таблица сотрудников: кнопка Open открывает страницу сотрудника', async ({ kpiPage }) => {
+  test('Таблица сотрудников: кнопка Open открывает страницу сотрудника', async ({ kpiPage, network }) => {
     await allure.allureId('816');
+    await skipWithoutKpiData('manager', kpiPage, network);
     const table = kpiPage.employeesTable;
 
     await table.expectPopulated();
@@ -90,8 +109,9 @@ test.describe('Страница KPI', () => {
     await kpiPage.expectEmployeeDetailsUrl();
   });
 
-  test('Таблица сотрудников: сортировка по колонкам', async ({ kpiPage }) => {
+  test('Таблица сотрудников: сортировка по колонкам', async ({ kpiPage, network }) => {
     await allure.allureId('818');
+    await skipWithoutKpiData('manager', kpiPage, network);
     const table = kpiPage.employeesTable;
 
     await test.step('Sort by Score', async () => {

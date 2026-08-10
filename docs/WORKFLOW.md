@@ -63,6 +63,10 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
   screenshot/video и очищенным error-context для каждого failed/broken результата.
 - При наличии retry в черновик попадает только последняя попытка каждого Allure ID; успешная
   финальная попытка не создаёт bug draft и отдельно учитывается flaky-проверкой.
+- Пустой KPI `full_stats` проваливает канонический TC-902. Остальные кейсы, которым нужны
+  менеджеры, `start_score`, подиум или претенденты, становятся skipped с сигналом
+  `KPI_DATA_UNAVAILABLE`; этот сигнал попадает в environment-раздел artifact и не создаёт
+  продуктовый bug draft.
 - Для этого job нужны repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, `DOQA_TOKEN` и
   опциональный `DOQA_PROJECT_ID`; токен используется только для чтения кейсов и активных багов.
 - Retry остаётся диагностическим механизмом: тест, прошедший со второй попытки, считается flaky и

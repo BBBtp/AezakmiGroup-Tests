@@ -3,8 +3,11 @@ import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
 import {
+  assessKpiDataset,
   expectSuccessfulJson,
+  hasKpiData,
   isKpiApiRequest,
+  kpiDataUnavailableMessage,
   kpiAllureIds,
   managerKpiEndpoints,
   managerKpiPath,
@@ -16,10 +19,11 @@ test.describe('KPI staff service', () => {
     await allure.allureId(kpiAllureIds.statistics);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
+    const dataset = assessKpiDataset(statistics);
 
     await test.step('Проверяем контракт statistics', async () => {
       expect(Array.isArray(statistics.full_stats)).toBe(true);
-      expect(statistics.full_stats.length).toBeGreaterThan(0);
+      expect(statistics.full_stats.length, kpiDataUnavailableMessage(dataset, 'manager')).toBeGreaterThan(0);
       expect(statistics.score).toBeDefined();
       expect(statistics.mrr).toBeDefined();
 
@@ -35,6 +39,8 @@ test.describe('KPI staff service', () => {
     await allure.allureId(kpiAllureIds.managerCard);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
+    const dataset = assessKpiDataset(statistics);
+    test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
     const employeeId = manager!.employee_id;
@@ -61,6 +67,8 @@ test.describe('KPI staff service', () => {
     await allure.allureId(kpiAllureIds.startingScore);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
+    const dataset = assessKpiDataset(statistics);
+    test.skip(!hasKpiData(dataset, 'starting-score'), kpiDataUnavailableMessage(dataset, 'starting-score'));
     const candidates = statistics.full_stats
       .filter((item) => item.start_score !== null)
       .sort((left, right) => Number(right.start_score !== 0) - Number(left.start_score !== 0));
@@ -101,6 +109,8 @@ test.describe('KPI staff service', () => {
     const apiRequests = network.captureRequests((request) => isKpiApiRequest(request.url()));
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
+    const dataset = assessKpiDataset(statistics);
+    test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 
@@ -122,6 +132,8 @@ test.describe('KPI staff service', () => {
     await allure.allureId(kpiAllureIds.vacationsHistoryError);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
+    const dataset = assessKpiDataset(statistics);
+    test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
     const manager = statistics.full_stats.find((item) => item.employee_id);
     expect(manager, 'A KPI manager is required for this test').toBeDefined();
 

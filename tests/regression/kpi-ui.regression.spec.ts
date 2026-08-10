@@ -1,14 +1,17 @@
 import { allure } from 'allure-playwright';
 
 import { test, testData } from '@fixtures';
+import {
+  assessKpiDataset,
+  hasKpiData,
+  kpiDataUnavailableMessage,
+  openKpiAndGetStatistics,
+} from '@support/kpi';
 
 test.describe('KPI UI', () => {
-  test.beforeEach(async ({ kpiPage }) => {
-    await kpiPage.navigate();
-  });
-
   test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
     await allure.allureId('802');
+    await kpiPage.navigate();
     await kpiPage.expectSubtitle(testData.texts.kpi.basePage.title);
   });
 
@@ -25,6 +28,7 @@ test.describe('KPI UI', () => {
 
   test('Проверка отображения карточек KPI', async ({ kpiPage }) => {
     await allure.allureId('806');
+    await kpiPage.navigate();
     const { mrrCard, scoreCard, appsCard } = kpiPage.cards;
 
     await mrrCard.assertVisible(testData.texts.kpi.basePage.cardMrrTitle);
@@ -34,6 +38,7 @@ test.describe('KPI UI', () => {
 
   test('Фильтры по месяцам видимы и работают', async ({ kpiPage }) => {
     await allure.allureId('807');
+    await kpiPage.navigate();
     const filters = kpiPage.filters;
 
     await filters.verifyVisible();
@@ -45,6 +50,7 @@ test.describe('KPI UI', () => {
     browserDiagnostics,
   }) => {
     await allure.allureId('808');
+    await kpiPage.navigate();
     const chart = kpiPage.chart;
     const consoleErrors = browserDiagnostics.captureConsoleErrors('KPI performance chart');
 
@@ -56,8 +62,10 @@ test.describe('KPI UI', () => {
     consoleErrors.stop();
   });
 
-  test('Top Employees отображается', async ({ kpiPage }) => {
+  test('Top Employees отображается', async ({ kpiPage, network }) => {
     await allure.allureId('809');
+    const dataset = assessKpiDataset(await openKpiAndGetStatistics(kpiPage, network));
+    test.skip(!hasKpiData(dataset, 'contenders'), kpiDataUnavailableMessage(dataset, 'contenders'));
     const top = kpiPage.topEmployees;
 
     await top.verifyVisible('Top employees');

@@ -9,6 +9,7 @@ export type ResponseCriteria = {
   url: UrlMatcher;
   method?: string;
   status?: number | ((status: number) => boolean);
+  timeout?: number;
 };
 
 export type RequestCapture = {
@@ -54,6 +55,7 @@ export class NetworkController {
         matchesUrl(response.url(), criteria.url) &&
         (!criteria.method || response.request().method() === criteria.method) &&
         matchesStatus(response.status(), criteria.status),
+      { timeout: criteria.timeout },
     );
   }
 
