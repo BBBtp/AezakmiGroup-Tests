@@ -121,4 +121,14 @@ export class UiExpectations {
       expect.poll(probe, options).toBeGreaterThanOrEqual(minimum),
     );
   }
+
+  screenshot(target: string, locator: Locator, name: string): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `screenshot=${name}`, () =>
+      expect(locator).toHaveScreenshot(name, {
+        animations: 'disabled',
+        caret: 'hide',
+        maxDiffPixelRatio: 0.03,
+      }),
+    );
+  }
 }

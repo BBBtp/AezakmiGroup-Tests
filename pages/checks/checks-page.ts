@@ -41,4 +41,10 @@ export class ChecksPage extends BasePage {
     await this.editKeywordsModal.expectListOpen();
     return this.editKeywordsModal;
   }
+
+  async expectArchiveRoundTrip(): Promise<void> {
+    await this.overview.openArchive();
+    await this.shell.openSidebarDestination('Checks', '/checks', 'Keywords');
+    await this.expectLoaded();
+  }
 }

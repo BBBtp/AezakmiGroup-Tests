@@ -173,6 +173,54 @@ test('generateBugDrafts ignores an earlier failure when the final retry passed',
   assert.equal(result.drafts.length, 0);
 });
 
+test('generateBugDrafts excludes a missing KPI dataset from product bug drafts', async (t) => {
+  const root = await temporaryDirectory(t);
+  const allureDir = path.join(root, 'allure-results');
+  const outputDir = path.join(root, 'bug-drafts');
+  await mkdir(allureDir);
+  await writeFile(
+    path.join(allureDir, 'kpi-result.json'),
+    JSON.stringify({
+      name: 'KPI statistics',
+      fullName: 'regression/kpi-staff-api.regression.spec.ts:15:7',
+      status: 'failed',
+      statusDetails: {
+        message:
+          '[KPI_DATA_UNAVAILABLE] requires at least 1 KPI manager(s); received managers=0, managersWithStartScore=0',
+      },
+      labels: [
+        { name: 'ALLURE_ID', value: '902' },
+        { name: 'parentSuite', value: 'regression' },
+      ],
+    }),
+  );
+  const client = {
+    async getCase() {
+      throw new Error('DoQA must not be called for an environment precondition');
+    },
+    async listRunBugs() {
+      throw new Error('Duplicate search must not run for an environment precondition');
+    },
+  };
+
+  const result = await generateBugDrafts({ allureDir, outputDir, runId: 400, client });
+  const index = await readFile(path.join(outputDir, 'README.md'), 'utf8');
+
+  assert.equal(result.failures, 1);
+  assert.equal(result.drafts.length, 0);
+  assert.deepEqual(result.excluded, [
+    {
+      caseId: 902,
+      classification: 'environment',
+      reason: 'kpi_test_data_unavailable',
+      evidence:
+        '[KPI_DATA_UNAVAILABLE] requires at least 1 KPI manager(s); received managers=0, managersWithStartScore=0',
+    },
+  ]);
+  assert.match(index, /Исключено из продуктовых багов/);
+  assert.match(index, /\| 902 \| environment \| kpi_test_data_unavailable \|/);
+});
+
 test('resetBugDraftOutput refuses to delete its trusted root', async (t) => {
   const root = await temporaryDirectory(t);
   await assert.rejects(resetBugDraftOutput(root, root), /must be a child/);

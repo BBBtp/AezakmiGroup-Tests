@@ -28,6 +28,8 @@ npm run quality          # обязательные статические пр�
 npm run test:unit        # unit-тесты инфраструктуры
 npm run test:smoke       # 8 критических пользовательских сценариев
 npm run test:regression  # подробный regression-набор
+npm run test:regression:statistics # фильтры и периоды Statistics
+npm run test:regression:top-keywords # фильтры, таблица и перевод Top-3000
 npm run test:auth        # тесты авторизации и сессии
 npm run doqa:run -- --project=regression --workers=1
 npm run doqa:publish     # публикация уже собранного Allure-каталога
@@ -48,7 +50,9 @@ MCP не принимает токены в аргументах инструм�
 классификации `product` и проверяет активные дубли `[AUTO][TC-<id>]`. Он ничего не записывает.
 Команда `bug:drafts` создаёт каталог `bug-drafts/TC-<id>` с `bug.md`, `draft.json`, screenshot,
 video и очищенным error-context. stdout/stderr и trace в пакет не попадают; screenshot/video
-отмечаются для визуальной проверки перед ручной загрузкой.
+отмечаются для визуальной проверки перед ручной загрузкой. Известные предусловия окружения,
+включая пустой KPI-набор с сигналом `KPI_DATA_UNAVAILABLE`, остаются в индексе artifact, но не
+создают продуктовый черновик.
 
 ## Архитектура
 
@@ -92,7 +96,7 @@ video и очищенным error-context. stdout/stderr и trace в пакет 
 
 GitHub Actions выполняет статический quality gate для pull request. После push в `main` дополнительно запускается smoke-набор.
 
-Каждую ночь в 01:00 МСК workflow `Nightly regression` запускает три независимые read-only группы
+Каждую ночь в 01:00 МСК workflow `Nightly regression` запускает пять независимых read-only групп
 параллельно, затем отдельно выполняет сценарии с общими KPI Settings. Каждый job сохраняет
 Allure, blob, HTML, JSON, JUnit, traces, screenshots и videos на 14 дней. Тест, прошедший только
 после retry, отмечается как flaky и делает соответствующую CI job красной.

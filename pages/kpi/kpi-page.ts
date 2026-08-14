@@ -78,6 +78,13 @@ export class KpiPage extends BasePage {
     await this.waitForPageLoad();
   }
 
+  /** Переход на KPI с ожидаемым состоянием ошибки API. */
+  async navigateExpectingError(): Promise<void> {
+    await this.navigateTo('/kpi');
+    await this.expectations.url('KPI URL', /\/kpi(?:\?.*)?$/);
+    await this.expectErrorState();
+  }
+
   /** Открывает KPI Settings и возвращает готовую страницу */
   async openSettings(): Promise<KpiSettingsPage> {
     await Promise.all([
@@ -102,8 +109,9 @@ export class KpiPage extends BasePage {
 
   /** Ожидание полной загрузки KPI страницы */
   async waitForPageLoad(): Promise<void> {
-    await this.waitForLoad();
-    await this.expectations.visible('KPI main content', this.mainContent, { timeout: 30000 });
+    const timeout = process.env.CI ? 60_000 : 30_000;
+    await this.expectations.url('KPI URL', /\/kpi(?:\?.*)?$/, { timeout });
+    await this.expectations.visible('KPI main content', this.mainContent, { timeout });
   }
 
   async expectSettingsActionVisible(): Promise<void> {

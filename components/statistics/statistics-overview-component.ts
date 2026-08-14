@@ -3,6 +3,8 @@ import { type Locator, type Page } from '@playwright/test';
 import { statisticsTestIds } from '@locators/master-sections';
 import { BusinessSectionComponent } from '../common/business-section-component';
 
+export type StatisticsPeriod = 'week' | 'month' | 'threeMonths';
+
 export class StatisticsOverviewComponent extends BusinessSectionComponent {
   readonly root: Locator;
   readonly title: Locator;
@@ -37,5 +39,45 @@ export class StatisticsOverviewComponent extends BusinessSectionComponent {
       ['calendar', this.calendarButton],
       ['Filters action', this.filtersButton],
     ]);
+  }
+
+  async expectFilterControls(): Promise<void> {
+    await this.expectations.visible('Statistics: calendar filter', this.calendarButton);
+    await this.expectations.enabled('Statistics: calendar filter', this.calendarButton);
+    await this.expectations.visible('Statistics: Filters action', this.filtersButton);
+    await this.expectations.enabled('Statistics: Filters action', this.filtersButton);
+  }
+
+  async expectPeriodActive(period: StatisticsPeriod): Promise<void> {
+    const tab = this.periodTab(period);
+    await this.expectations.attribute(`Statistics: active ${period} period`, tab, 'aria-selected', 'true');
+  }
+
+  async chartSnapshot(): Promise<string> {
+    return (await this.chart.textContent()) ?? '';
+  }
+
+  async selectPeriodAndExpectUpdate(period: StatisticsPeriod, previousSnapshot?: string): Promise<string> {
+    const previous = previousSnapshot ?? (await this.chartSnapshot());
+    const tab = this.periodTab(period);
+    await this.actions.click(`Statistics: select ${period} period`, tab);
+    await this.expectPeriodActive(period);
+    await this.expectations.textChanged(`Statistics chart after ${period} period`, this.chart, previous);
+    return this.chartSnapshot();
+  }
+
+  async selectPeriodAndExpectSnapshot(period: StatisticsPeriod, snapshot: string): Promise<void> {
+    const tab = this.periodTab(period);
+    await this.actions.click(`Statistics: restore ${period} period`, tab);
+    await this.expectPeriodActive(period);
+    await this.expectations.text(`Statistics chart restored for ${period} period`, this.chart, snapshot);
+  }
+
+  private periodTab(period: StatisticsPeriod): Locator {
+    return {
+      week: this.weekTab,
+      month: this.monthTab,
+      threeMonths: this.threeMonthsTab,
+    }[period];
   }
 }

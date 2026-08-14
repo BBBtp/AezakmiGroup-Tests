@@ -56,13 +56,17 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 ## Nightly regression
 
 - Расписание: ежедневно в 01:00 МСК.
-- Параллельные группы: auth, KPI read-only, navigation/session.
+- Параллельные группы: auth, KPI read-only, navigation/session, Statistics, Top-3000.
 - KPI Settings запускается после них, потому что сценарии меняют общие настройки CRM.
 - Все диагностические результаты сохраняются при любом исходе.
 - После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,
   screenshot/video и очищенным error-context для каждого failed/broken результата.
 - При наличии retry в черновик попадает только последняя попытка каждого Allure ID; успешная
   финальная попытка не создаёт bug draft и отдельно учитывается flaky-проверкой.
+- Пустой KPI `full_stats` проваливает канонический TC-902. Остальные кейсы, которым нужны
+  менеджеры, `start_score`, подиум или претенденты, становятся skipped с сигналом
+  `KPI_DATA_UNAVAILABLE`; этот сигнал попадает в environment-раздел artifact и не создаёт
+  продуктовый bug draft.
 - Для этого job нужны repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, `DOQA_TOKEN` и
   опциональный `DOQA_PROJECT_ID`; токен используется только для чтения кейсов и активных багов.
 - Retry остаётся диагностическим механизмом: тест, прошедший со второй попытки, считается flaky и

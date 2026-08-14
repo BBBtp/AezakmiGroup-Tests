@@ -3,10 +3,12 @@ import { test } from '@fixtures';
 
 const protectedPaths = [
   '/dashboard',
-  '/statistics',
+  '/success-rate',
+  '/subscriptions',
   '/keywords',
   '/checks',
-  '/niches',
+  '/niche-list',
+  '/sorted-apps',
   '/apps',
   '/ab-tests',
   '/kpi',
