@@ -144,6 +144,7 @@ export const nichesTestIds = {
       keywords: `niche-table__row-${index}-keywords-cell`,
       copy: `niche-table__row-${index}-copy-btn`,
       translate: `niche-table__row-${index}-translate-btn`,
+      translationLoading: `niche-table__row-${index}-translate-btn-loading`,
       actions: `niche-table__row-${index}-actions__dots__dots-button`,
       edit: `niche-table__row-${index}-actions__dots__edit-button`,
       delete: `niche-table__row-${index}-actions__dots__delete-button`,

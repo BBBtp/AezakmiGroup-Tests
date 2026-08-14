@@ -86,7 +86,21 @@ export class NicheDetailComponent extends UiObject {
   }
 
   async expectTranslationPending(index = 0): Promise<void> {
-    await this.expectations.disabled(`Niche translation: row ${index} pending`, this.row(index).translate);
+    await this.expectations.visible(
+      `Niche translation: row ${index} loading`,
+      this.row(index).translationLoading,
+    );
+  }
+
+  async expectTranslationReady(index = 0): Promise<void> {
+    await this.expectations.hidden(
+      `Niche translation: row ${index} loading completed`,
+      this.row(index).translationLoading,
+    );
+    await this.expectations.visible(
+      `Niche translation: row ${index} action restored`,
+      this.row(index).translate,
+    );
   }
 
   async openAddKeywords(): Promise<void> {
@@ -171,6 +185,7 @@ export class NicheDetailComponent extends UiObject {
       keywords: this.locate.testId(rowIds.keywords),
       copy: this.locate.testId(rowIds.copy),
       translate: this.locate.testId(rowIds.translate),
+      translationLoading: this.locate.testId(rowIds.translationLoading),
       actions: this.locate.testId(rowIds.actions),
       edit: this.locate.testId(rowIds.edit),
       delete: this.locate.testId(rowIds.delete),

@@ -79,7 +79,7 @@ test.describe('Niches → keyword translation', () => {
     await nichesPage.expectTranslationFailureNotice();
   });
 
-  test('блокирует повторный запуск во время перевода', async ({ network, nichesPage }) => {
+  test('показывает состояние загрузки перевода', async ({ network, nichesPage }) => {
     await allure.allureId('962');
     const requests = network.captureRequests(
       (request) => request.method() !== 'GET' && translationEndpoint.test(request.url()),
@@ -87,13 +87,12 @@ test.describe('Niches → keyword translation', () => {
     const held = await network.holdNextMutation(translationEndpoint);
     await nichesPage.detail.translateRow();
     await held.started;
+    await nichesPage.detail.expectTranslationPending();
     expect(requests.count).toBe(1);
 
-    await network.fulfillNextMutation(translationEndpoint, apiError, 409);
-    await nichesPage.detail.translateRow();
-    expect(requests.count, 'повторный клик не должен запускать второй запрос перевода').toBe(1);
-
     await held.abort();
+    await nichesPage.detail.expectTranslationReady();
+    expect(requests.count, 'loading state не должен запускать дополнительные запросы').toBe(1);
     requests.stop();
   });
 });
