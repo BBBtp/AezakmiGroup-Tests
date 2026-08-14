@@ -55,6 +55,24 @@ Page Objects собирают пользовательские и доменны
 действиями и структурой своего блока. Они наследуют `UiObject` и получают единый API:
 `locate`, `actions`, `expectations`. Вызов raw Playwright locator API и диагностического logger
 за пределами `framework/ui` запрещён архитектурной проверкой.
+Statistics period flow расположен в `StatisticsOverviewComponent`: компонент владеет typed
+вкладками Week/Month/3 months, проверяет активное состояние и наблюдаемое изменение графика, а
+`StatisticsPage` предоставляет тестам тонкий бизнес-API.
+Subscriptions использует отдельный доменный модуль для `/subscriptions`:
+`SubscriptionsFiltersComponent` владеет FilterPopover приложения, применением Select All,
+переходом к частичному выбору и проверкой итогового чипа через устойчивые test ID, а
+`SubscriptionsMetricsComponent` связывает карточки и таблицу с контролируемым API-контрактом.
+Домен Niches разделён по фактическим маршрутам интерфейса: `NichesOverviewComponent` владеет
+страницей `Niche list`, а `SortedAppsOverviewComponent` — страницей `Sorted by apps` и её
+контролами. Создание ASO Mobile расположено в `AsoMobileCreateComponent`: компонент владеет
+формой, loading/error/success состояниями и повторным открытием после отмены SSE.
+Top-3000 следует той же границе: `TopKeywordsOverviewComponent` владеет фильтрами, региональными
+вкладками, таблицей, пагинацией, переводом и модальным окном Top Apps, а `TopKeywordsPage`
+экспортирует сценариям только бизнес-операции. Все статические и динамические `data-testid`
+раздела собраны в едином контракте `topKeywordsTestIds`.
+Read-only smoke-проверки новых разделов используют `ReadOnlySectionsPage`: навигационные данные и
+устойчивые accessible controls собраны в `readOnlySectionLocators`, а общий компонент проверяет
+основной контент и технические значения без дублирования Page Objects для каждого раздела.
 
 ### `locators/`
 
@@ -83,11 +101,14 @@ builder-функций. Один UI-домен не должен собират�
 ### `framework/network/`
 
 `NetworkController` — единая точка для навигации, ожидания API-ответов, сбора запросов и
-одноразовых route-моков. Бизнес-тесты не вызывают `page.goto`, `page.route`,
+одноразовых и последовательных route-моков. Бизнес-тесты не вызывают `page.goto`, `page.route`,
 `page.waitForRequest` или `page.waitForResponse` напрямую. Благодаря этому HTTP-диагностика и
 политика моков меняются централизованно. `waitForResponseWhile` атомарно запускает ожидание ответа
 до действия, которое инициирует запрос, и исключает гонку между навигацией и API. Request capture автоматически регистрирует снятие
 listener в cleanup registry; ручной `stop()` выполняет раннюю уборку.
+SSE-сценарии используют `fulfillNextSse` для терминальных `result`/`error` событий и `holdNext`
+для управляемого незавершённого соединения. Удерживаемый route всегда снимается через cleanup,
+а `waitForRequestFailedWhile` подтверждает реальную отмену запроса при закрытии модалки.
 
 ### `framework/playwright/`
 

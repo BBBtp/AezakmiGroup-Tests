@@ -1,7 +1,11 @@
 import { type Page } from '@playwright/test';
 
 import { ApplicationShellComponent } from '../../components/common/application-shell-component';
-import { TopKeywordsOverviewComponent } from '../../components/keywords/top-keywords-overview-component';
+import {
+  TopKeywordsOverviewComponent,
+  type TopKeywordsCountry,
+  type TopKeywordsState,
+} from '../../components/keywords/top-keywords-overview-component';
 import { BasePage } from '../base-page';
 
 export class TopKeywordsPage extends BasePage {
@@ -17,5 +21,33 @@ export class TopKeywordsPage extends BasePage {
   async openFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Top-3000', '/keywords', 'Keywords');
     await this.overview.expectBusinessControls();
+  }
+
+  expectFilterControls(): Promise<void> {
+    return this.overview.expectFilterControls();
+  }
+
+  tableSnapshot(): Promise<string> {
+    return this.overview.tableSnapshot();
+  }
+
+  selectStateAndExpectUpdate(state: TopKeywordsState, previous: string): Promise<string> {
+    return this.overview.selectStateAndExpectUpdate(state, previous);
+  }
+
+  selectStateAndExpectSnapshot(state: TopKeywordsState, snapshot: string): Promise<void> {
+    return this.overview.selectStateAndExpectSnapshot(state, snapshot);
+  }
+
+  expectRegionalTabsSwitchable(countries: readonly TopKeywordsCountry[]): Promise<void> {
+    return this.overview.expectRegionalTabsSwitchable(countries);
+  }
+
+  expectTableInteractions(): Promise<void> {
+    return this.overview.expectTableInteractions();
+  }
+
+  expectTranslateAllRoundTrip(): Promise<void> {
+    return this.overview.expectTranslateAllRoundTrip();
   }
 }

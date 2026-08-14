@@ -56,7 +56,7 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 ## Nightly regression
 
 - Расписание: ежедневно в 01:00 МСК.
-- Параллельные группы: auth, KPI read-only, navigation/session.
+- Параллельные группы: auth, KPI read-only, navigation/session, Statistics, Top-3000.
 - KPI Settings запускается после них, потому что сценарии меняют общие настройки CRM.
 - Все диагностические результаты сохраняются при любом исходе.
 - После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,

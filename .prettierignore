@@ -7,6 +7,7 @@ blob-report
 dist
 node_modules
 outputs
+output
 package-lock.json
 playwright-report
 reports

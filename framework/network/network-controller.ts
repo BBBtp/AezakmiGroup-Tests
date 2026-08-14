@@ -1,4 +1,4 @@
-import type { Page, Request, Response, Route } from '@playwright/test';
+import type { Download, Page, Request, Response, Route } from '@playwright/test';
 
 import type { CleanupRegistry } from '@framework/lifecycle';
 import { UiActions } from '@framework/ui';
@@ -14,7 +14,17 @@ export type ResponseCriteria = {
 
 export type RequestCapture = {
   readonly urls: string[];
+  readonly count: number;
   stop(): void;
+};
+
+export type HeldRequest = {
+  readonly started: Promise<Request>;
+  abort(): Promise<void>;
+};
+
+export type HeldJsonRequest = HeldRequest & {
+  fulfill(body: unknown, status?: number): Promise<void>;
 };
 
 function matchesUrl(url: string, matcher: UrlMatcher): boolean {
@@ -76,6 +86,12 @@ export class NetworkController {
     });
   }
 
+  async waitForDownloadWhile<T>(action: () => Promise<T>): Promise<{ download: Download; result: T }> {
+    const downloadPromise = this.page.waitForEvent('download');
+    const [download, result] = await Promise.all([downloadPromise, action()]);
+    return { download, result };
+  }
+
   waitForFailedResponse(url: UrlMatcher, method?: string): Promise<Response> {
     return this.waitForResponse({
       url,
@@ -101,6 +117,236 @@ export class NetworkController {
     await this.page.route(url, handler, { times: 1 });
   }
 
+  async fulfillNextJson(url: string | RegExp, method: string, body: unknown, status = 200): Promise<void> {
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+
+      await route.fulfill({
+        status,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      });
+    };
+
+    await this.page.route(url, handler, { times: 1 });
+  }
+
+  async mockJson(url: string | RegExp, method: string, body: unknown, status = 200): Promise<void> {
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      });
+    };
+    await this.page.route(url, handler);
+  }
+
+  async fulfillNextMutation(url: string | RegExp, body: unknown, status = 200): Promise<void> {
+    const handler = async (route: Route) => {
+      if (route.request().method() === 'GET') {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      });
+    };
+    await this.page.route(url, handler, { times: 1 });
+  }
+
+  async fulfillJsonSequence(
+    url: string | RegExp,
+    method: string,
+    bodies: readonly unknown[],
+    status = 200,
+  ): Promise<void> {
+    if (bodies.length === 0) throw new Error('JSON response sequence must not be empty');
+    let index = 0;
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+
+      const body = bodies[index];
+      index += 1;
+      await route.fulfill({
+        status,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      });
+    };
+
+    await this.page.route(url, handler, { times: bodies.length });
+  }
+
+  async fulfillNextSse(
+    url: string | RegExp,
+    method: string,
+    event: string,
+    data: unknown,
+    status = 200,
+  ): Promise<void> {
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+
+      await route.fulfill({
+        status,
+        contentType: 'text/event-stream',
+        headers: { 'cache-control': 'no-cache' },
+        body: `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`,
+      });
+    };
+
+    await this.page.route(url, handler, { times: 1 });
+  }
+
+  async holdNext(url: string | RegExp, method: string): Promise<HeldRequest> {
+    let resolveStarted: (request: Request) => void = () => {};
+    const started = new Promise<Request>((resolve) => {
+      resolveStarted = resolve;
+    });
+    let resolveRelease: () => void = () => {};
+    const release = new Promise<void>((resolve) => {
+      resolveRelease = resolve;
+    });
+    let heldRoute: Route | undefined;
+    let active = true;
+
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+
+      heldRoute = route;
+      resolveStarted(route.request());
+      await release;
+      if (!active) return;
+      active = false;
+      await route.abort('aborted').catch(() => {});
+    };
+
+    await this.page.route(url, handler, { times: 1 });
+    const abort = async () => {
+      if (!active) return;
+      active = false;
+      resolveRelease();
+      await heldRoute?.abort('aborted').catch(() => {});
+    };
+    const cleanupHandle = this.cleanup?.register('held network request', abort);
+
+    return {
+      started,
+      abort: async () => {
+        await abort();
+        cleanupHandle?.dismiss();
+      },
+    };
+  }
+
+  async holdNextMutation(url: string | RegExp): Promise<HeldRequest> {
+    let resolveStarted: (request: Request) => void = () => {};
+    const started = new Promise<Request>((resolve) => {
+      resolveStarted = resolve;
+    });
+    let heldRoute: Route | undefined;
+    let active = true;
+    const handler = async (route: Route) => {
+      if (route.request().method() === 'GET') {
+        await route.continue();
+        return;
+      }
+      heldRoute = route;
+      resolveStarted(route.request());
+    };
+    await this.page.route(url, handler, { times: 1 });
+    const abort = async () => {
+      if (!active) return;
+      active = false;
+      await heldRoute?.abort('aborted').catch(() => {});
+    };
+    const cleanupHandle = this.cleanup?.register('held mutation request', abort);
+    return {
+      started,
+      abort: async () => {
+        await abort();
+        cleanupHandle?.dismiss();
+      },
+    };
+  }
+
+  async holdNextJson(url: string | RegExp, method: string): Promise<HeldJsonRequest> {
+    let resolveStarted: (request: Request) => void = () => {};
+    const started = new Promise<Request>((resolve) => {
+      resolveStarted = resolve;
+    });
+    let heldRoute: Route | undefined;
+    let active = true;
+    const handler = async (route: Route) => {
+      if (route.request().method() !== method) {
+        await route.continue();
+        return;
+      }
+      heldRoute = route;
+      resolveStarted(route.request());
+    };
+    await this.page.route(url, handler, { times: 1 });
+
+    const finish = async (operation: 'abort' | 'fulfill', body?: unknown, status = 200) => {
+      if (!active) return;
+      active = false;
+      if (operation === 'fulfill') {
+        await heldRoute?.fulfill({
+          status,
+          contentType: 'application/json',
+          body: JSON.stringify(body),
+        });
+      } else {
+        await heldRoute?.abort('aborted').catch(() => {});
+      }
+    };
+    const cleanupHandle = this.cleanup?.register('held JSON request', () => finish('abort'));
+
+    return {
+      started,
+      fulfill: async (body, status = 200) => {
+        await finish('fulfill', body, status);
+        cleanupHandle?.dismiss();
+      },
+      abort: async () => {
+        await finish('abort');
+        cleanupHandle?.dismiss();
+      },
+    };
+  }
+
+  async waitForRequestFailedWhile<T>(
+    criteria: Pick<ResponseCriteria, 'url' | 'method' | 'timeout'>,
+    action: () => Promise<T>,
+  ): Promise<{ request: Request; result: T }> {
+    const requestPromise = this.page.waitForEvent('requestfailed', {
+      predicate: (request) =>
+        matchesUrl(request.url(), criteria.url) && (!criteria.method || request.method() === criteria.method),
+      timeout: criteria.timeout,
+    });
+    const [request, result] = await Promise.all([requestPromise, action()]);
+    return { request, result };
+  }
+
   captureRequests(predicate: (request: Request) => boolean): RequestCapture {
     const urls: string[] = [];
     let active = true;
@@ -117,6 +363,9 @@ export class NetworkController {
 
     return {
       urls,
+      get count() {
+        return urls.length;
+      },
       stop: () => {
         if (!active) return;
         this.page.off('request', listener);

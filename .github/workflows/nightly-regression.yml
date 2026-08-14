@@ -59,6 +59,10 @@ jobs:
             script: test:regression:kpi-read
           - name: navigation
             script: test:regression:navigation
+          - name: statistics
+            script: test:regression:statistics
+          - name: top-keywords
+            script: test:regression:top-keywords
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:

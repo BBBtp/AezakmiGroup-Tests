@@ -16,6 +16,7 @@ dist/
 # Local test and research artifacts
 /.playwright-cli/
 /outputs/
+/output/
 /reports/
 /bug-drafts/
 /tmp/

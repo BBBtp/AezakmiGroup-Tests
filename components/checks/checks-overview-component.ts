@@ -35,4 +35,10 @@ export class ChecksOverviewComponent extends BusinessSectionComponent {
       ['date picker', this.datePickerButton],
     ]);
   }
+
+  async openArchive(): Promise<void> {
+    await this.actions.click('Checks: open Archive', this.archiveButton);
+    await this.expectations.url('Checks Archive', /\/checks\/archive$/);
+    await this.expectBusinessControls();
+  }
 }
