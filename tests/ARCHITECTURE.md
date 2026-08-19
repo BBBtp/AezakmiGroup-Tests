@@ -1,6 +1,8 @@
 # Test architecture
 
-- `modules/<domain>` is the public boundary for Auth, KPI and Employees. Tests and fixtures import pages or public components only from here.
+- `modules/<domain>` is the public boundary for every UI domain, including Auth, KPI, Employees,
+  Product, Administration, Push and Reviews. Tests and fixtures import pages or public components
+  only from here.
 - `fixtures/core-fixtures`, `ui-fixtures` and `domain-fixtures` own infrastructure, public UI objects
   and domain lifecycles respectively. Import the composed test only through `@fixtures`.
 - `tests/setup` creates admin storage state for authenticated projects. Auth and access-control projects do not depend on it.

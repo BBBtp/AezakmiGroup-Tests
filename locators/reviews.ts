@@ -1,0 +1,20 @@
+export const reviewsLocators = {
+  title: 'Reviews and ratings',
+  reviewsTab: 'Reviews',
+  ratingsTab: 'Ratings',
+  viewAll: 'View all',
+  today: 'Today',
+  yesterday: 'Yesterday',
+  rating: 'Rating',
+  date: 'Date',
+  searchPlaceholder: 'Search',
+  endpoint: /\/master\/api\/v1\/reviews(?:\?|$)/,
+  technicalValue: /\b(?:error-content|undefined|NaN|null)\b|\[object Object\]/i,
+  errorMessage: /Something went wrong|Something's gone wrong|Failed to load/i,
+  retry: /Repeat the request|Try again/i,
+  loading: '[aria-busy="true"], [data-loading="true"], [class*="skeleton"]',
+  // TODO(CRM): replace after pagination buttons receive accessible names/stable domain test ids.
+  nextPage: '[data-testid$="__next-btn"]:visible',
+  previousPage: '[data-testid$="__prev-btn"]:visible',
+  appTitle: '[data-testid$="__app-info__title"], [data-testid$="__title"]',
+} as const;
