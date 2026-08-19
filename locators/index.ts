@@ -1,4 +1,5 @@
 export { authSelectors, authTestIds, authText } from './auth';
+export { administrationLocators } from './administration';
 export { commonComponentSelectors } from './common';
 export { employeeCreateData, employeeCreateLocators } from './employees';
 export { kpiManagerText, kpiTestIds } from './kpi';
@@ -10,6 +11,9 @@ export {
 export { applicationShellLocators, dashboardSections, dashboardTestIds } from './navigation';
 export { checksTestIds } from './checks';
 export { subscriptionsTestIds } from './subscriptions';
+export { outKeywordsLocators, pushBotsLocators } from './push';
+export { productLocators } from './product';
+export { reviewsLocators } from './reviews';
 export {
   appListLocators,
   type AppListCalendarMonth,

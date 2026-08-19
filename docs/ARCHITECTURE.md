@@ -70,6 +70,20 @@ Top-3000 следует той же границе: `TopKeywordsOverviewComponen
 вкладками, таблицей, пагинацией, переводом и модальным окном Top Apps, а `TopKeywordsPage`
 экспортирует сценариям только бизнес-операции. Все статические и динамические `data-testid`
 раздела собраны в едином контракте `topKeywordsTestIds`.
+Push разделён на два компонента за единым `PushPage`: `PushBotsComponent` владеет списком,
+периодами, карточкой кампании и защищёнными действиями, а `OutKeywordsComponent` — периодами,
+фильтрами, настройками и состояниями списка исключённых ключей. API-контракты и безопасные
+заглушки обоих экранов находятся в `tests/support/push`.
+Reviews and ratings опубликован через `@modules/reviews`: `ReviewsOverviewComponent` владеет
+вкладками Reviews/Ratings, периодами, таблицей, пагинацией и системными состояниями, а
+`tests/support/reviews` хранит контракт списка отзывов.
+Product опубликован через единый `ProductPage`: `AppsComponent` владеет периодами, представлениями,
+архивом и карточкой приложения, а `AbTestsComponent` — фильтрами, списком A/B-тестов, пагинацией
+и безопасным входом в Create test. Контролируемые ответы Apps и A/B tests находятся в
+`tests/support/product`.
+Settings/Staff-сценарии Parameters и списка Employees проходят через `AdministrationPage` и
+`AdministrationComponent`; редактирование, удаление и добавление параметров проверяются через
+отмену диалога и отсутствие незапланированной API-мутации.
 Read-only smoke-проверки новых разделов используют `ReadOnlySectionsPage`: навигационные данные и
 устойчивые accessible controls собраны в `readOnlySectionLocators`, а общий компонент проверяет
 основной контент и технические значения без дублирования Page Objects для каждого раздела.
