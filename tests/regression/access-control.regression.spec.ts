@@ -7,7 +7,7 @@ const protectedPaths = [
   '/subscriptions',
   '/keywords',
   '/checks',
-  '/niche-list',
+  '/niches',
   '/sorted-apps',
   '/apps',
   '/ab-tests',

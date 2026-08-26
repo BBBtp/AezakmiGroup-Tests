@@ -20,6 +20,11 @@ export class StatisticsPage extends BasePage {
     this.calendar = new DateRangeCalendarComponent(page);
   }
 
+  async openRoute(): Promise<void> {
+    await this.navigateTo('/success-rate');
+    await this.overview.expectShellLoaded();
+  }
+
   async openFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Success rate', '/success-rate', 'Statistics');
     await this.overview.expectBusinessControls();

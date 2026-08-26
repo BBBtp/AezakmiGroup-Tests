@@ -25,6 +25,21 @@ export class UiActions {
     return loggedAction(this.page, 'check', target, locator, () => locator.check());
   }
 
+  hover(target: string, locator: Locator, options?: Parameters<Locator['hover']>[0]): Promise<void> {
+    return loggedAction(this.page, 'hover', target, locator, () => locator.hover(options));
+  }
+
+  dispatch(
+    target: string,
+    locator: Locator,
+    type: string,
+    eventInit?: Parameters<Locator['dispatchEvent']>[1],
+  ): Promise<void> {
+    return loggedAction(this.page, 'dispatchEvent', target, locator, () =>
+      locator.dispatchEvent(type, eventInit),
+    );
+  }
+
   press(target: string, locator: Locator, key: string): Promise<void> {
     return loggedAction(this.page, 'press', target, locator, () => locator.press(key));
   }

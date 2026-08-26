@@ -30,13 +30,13 @@ export class NichesPage extends BasePage {
   }
 
   async openFromSidebar(): Promise<void> {
-    await this.shell.openSidebarDestination('Niche list', '/niche-list', 'Niches');
+    await this.shell.openSidebarDestination('Niche list', '/niches', 'Niches');
     await this.overview.expectBusinessControls();
   }
 
   async navigateToList(): Promise<void> {
-    await this.navigateTo('/niche-list');
-    await this.expectations.url('Niches: list URL', /\/niche-list$/);
+    await this.navigateTo('/niches');
+    await this.expectations.url('Niches: list URL', /\/niches$/);
   }
 
   async expectListLoading(): Promise<void> {
@@ -75,19 +75,19 @@ export class NichesPage extends BasePage {
 
   async openArchive(): Promise<void> {
     await this.actions.click('Niches: open Archive', this.overview.archiveButton);
-    await this.expectations.url('Niches: Archive URL', /\/niche-list\/archive$/);
+    await this.expectations.url('Niches: Archive URL', /\/niches\/archive$/);
   }
 
   async navigateToArchive(): Promise<void> {
-    await this.navigateTo('/niche-list/archive');
-    await this.expectations.url('Niches: Archive URL', /\/niche-list\/archive$/);
+    await this.navigateTo('/niches/archive');
+    await this.expectations.url('Niches: Archive URL', /\/niches\/archive$/);
   }
 
   async expectArchiveBreadcrumbs(): Promise<void> {
     const breadcrumbs = this.locate.testId(nichesTestIds.breadcrumbs);
     await this.expectations.visible(
-      'Niches Archive: Niche list breadcrumb',
-      breadcrumbs.filter({ hasText: /^Niche list$/ }),
+      'Niches Archive: Niches breadcrumb',
+      breadcrumbs.filter({ hasText: /^Niches$/ }),
     );
     await this.expectations.visible(
       'Niches Archive: Archive breadcrumb',
@@ -185,7 +185,7 @@ export class NichesPage extends BasePage {
     await this.create.expectInitial();
   }
 
-  async openFirstDetail(): Promise<{ name: string; module: string }> {
+  async openFirstDetail(): Promise<{ name: string; module: string; updatedAt: string }> {
     const snapshot = await this.overview.openFirstRow();
     await this.detail.expectLoaded(snapshot.name, snapshot.module);
     return snapshot;

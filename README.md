@@ -45,6 +45,10 @@ skipped результаты с единственным числовым `ALLUR
 MCP не принимает токены в аргументах инструментов. Для публикации он читает
 `DOQA_AUTOTEST_TOKEN` из окружения и разрешает выбирать только имя файла внутри
 `DOQA_REPORT_DIR`. `doqa_improve_case` работает как dry-run, пока явно не передан `apply: true`.
+MCP также предоставляет `doqa_list_checklists`, `doqa_get_checklist`,
+`doqa_create_checklist` и `doqa_update_checklist`. Обновление чек-листа сначала читает его
+`ETag/versionUuid`, допускает только изменение метаданных и добавление новых пунктов, затем
+перечитывает результат; существующие пункты не заменяются и не удаляются.
 После failed/broken run инструмент `doqa_analyze_run_failures` выполняет read-only triage.
 `doqa_prepare_product_bug_draft` формирует готовые поля бага только после подтверждения
 классификации `product` и проверяет активные дубли `[AUTO][TC-<id>]`. Он ничего не записывает.

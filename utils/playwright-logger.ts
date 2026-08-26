@@ -1,7 +1,17 @@
 import type { Locator, Page } from '@playwright/test';
 
 type Action =
-  'click' | 'fill' | 'check' | 'uncheck' | 'press' | 'selectOption' | 'waitFor' | 'navigate' | 'evaluate';
+  | 'click'
+  | 'dispatchEvent'
+  | 'evaluate'
+  | 'fill'
+  | 'check'
+  | 'hover'
+  | 'navigate'
+  | 'press'
+  | 'selectOption'
+  | 'uncheck'
+  | 'waitFor';
 
 function safeLocator(locator: Locator): string {
   try {

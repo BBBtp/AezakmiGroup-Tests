@@ -4,8 +4,15 @@ import path from 'node:path';
 import { z } from 'zod';
 import { DoqaApiError, DoqaClient } from './doqa-client.mjs';
 
-const server = new McpServer({ name: 'crm-doqa', version: '0.3.0' });
+const server = new McpServer({ name: 'crm-doqa', version: '0.6.0' });
 const outputSchema = { result: z.unknown() };
+const checklistItemSchema = z.lazy(() =>
+  z.object({
+    id: z.number().int().positive().nullable().optional(),
+    title: z.string().min(1),
+    children: z.array(checklistItemSchema).default([]),
+  }),
+);
 
 function getClient() {
   return new DoqaClient();
@@ -98,6 +105,149 @@ server.registerTool(
   async (input) => {
     try {
       return result(await getClient().createCase(input));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_list_checklists',
+  {
+    title: 'List DoQA checklists',
+    description: 'Read DoQA checklist folders and checklists without changing them.',
+    inputSchema: {
+      limit: z.number().int().min(1).max(20).default(20),
+      folderId: z.number().int().positive().optional(),
+      search: z.string().optional(),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async (input) => {
+    try {
+      return result(await getClient().listChecklists(input));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_get_checklist',
+  {
+    title: 'Get DoQA checklist',
+    description: 'Get a complete DoQA checklist and its ETag/versionUuid.',
+    inputSchema: { checklistId: z.number().int().positive() },
+    outputSchema,
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ checklistId }) => {
+    try {
+      return result(await getClient().getChecklist(checklistId));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_create_checklist_folder',
+  {
+    title: 'Create DoQA checklist folder',
+    description:
+      'Create one checklist folder under an existing parent using the latest folder-tree ETag. Exact sibling duplicates are rejected.',
+    inputSchema: {
+      parentId: z.number().int().positive(),
+      name: z.string().min(1).max(255),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
+  async (input) => {
+    try {
+      return result(await getClient().createChecklistFolder(input));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_create_checklist',
+  {
+    title: 'Create DoQA checklist',
+    description: 'Create a fully reviewed checklist in DoQA. Existing checklists are never replaced.',
+    inputSchema: {
+      folderId: z.number().int().positive(),
+      title: z.string().min(1),
+      description: z.string().default(''),
+      preconditions: z.string().default(''),
+      expectedResult: z.string().default(''),
+      children: z.array(checklistItemSchema).min(1),
+      priority: z.enum(['high', 'medium', 'low']).default('medium'),
+      status: z.enum(['ready', 'review']).default('ready'),
+      tagIds: z.array(z.number().int().positive()).default([]),
+      responsibleId: z.number().int().positive().optional(),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
+  async (input) => {
+    try {
+      return result(await getClient().createChecklist(input));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_update_checklist',
+  {
+    title: 'Safely update DoQA checklist',
+    description:
+      'Update checklist metadata or append reviewed checks using ETag optimistic locking. Existing checks are never replaced or deleted.',
+    inputSchema: {
+      checklistId: z.number().int().positive(),
+      title: z.string().min(1).optional(),
+      description: z.string().optional(),
+      preconditions: z.string().optional(),
+      expectedResult: z.string().optional(),
+      appendChildren: z.array(checklistItemSchema).default([]),
+      priority: z.enum(['high', 'medium', 'low']).optional(),
+      status: z.enum(['ready', 'review']).optional(),
+      tagIds: z.array(z.number().int().positive()).optional(),
+      responsibleId: z.number().int().positive().optional(),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
+  async ({ checklistId, ...changes }) => {
+    try {
+      return result(await getClient().updateChecklist(checklistId, changes));
+    } catch (error) {
+      return failure(error);
+    }
+  },
+);
+
+server.registerTool(
+  'doqa_restructure_checklist',
+  {
+    title: 'Safely restructure DoQA checklist checks',
+    description:
+      'Reparent existing checklist checks under new hierarchy groups using ETag locking. Every existing check ID and title must be preserved exactly once; deletion and rewriting are rejected.',
+    inputSchema: {
+      checklistId: z.number().int().positive(),
+      children: z.array(checklistItemSchema).min(1),
+    },
+    outputSchema,
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
+  async ({ checklistId, children }) => {
+    try {
+      return result(await getClient().restructureChecklist(checklistId, children));
     } catch (error) {
       return failure(error);
     }

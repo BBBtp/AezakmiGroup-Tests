@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
@@ -42,6 +43,22 @@ test.describe('Product / Apps', () => {
     await productPage.apps.selectTab('Detailed statistics');
     await productPage.apps.selectTab('Week');
     await productPage.apps.selectTab('App list');
+  });
+
+  test('FilterPopover закрепляет Select all первым при полном и частичном выборе', async ({
+    productPage,
+  }) => {
+    await allure.allureId('991');
+    await productPage.openApps();
+    await productPage.apps.selectTab('Detailed statistics');
+    const details = await productPage.apps.openFirstSuccessRateDetails();
+    await details.openGeoFilter();
+
+    await details.selectAllGeos();
+    expect((await details.optionOrder())[0]).toBe('select_all');
+
+    await details.selectOnlyGeos(['RU', 'AZ']);
+    expect((await details.optionOrder()).slice(0, 5)).toEqual(['select_all', 'RU', 'AZ', 'divider', 'total']);
   });
 
   test('Archive открывается из списка приложений', async ({ productPage }) => {

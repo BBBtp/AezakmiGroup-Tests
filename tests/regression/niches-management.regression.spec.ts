@@ -109,6 +109,12 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.detail.expectLoaded(snapshot.name, snapshot.module);
   });
 
+  test('показывает дату последнего обновления в карточке ниши', async ({ nichesPage }) => {
+    await allure.allureId('1002');
+    const snapshot = await nichesPage.openFirstDetail();
+    await nichesPage.detail.expectLoaded(snapshot.name, undefined, snapshot.updatedAt);
+  });
+
   test('предзаполняет форму редактирования', async ({ nichesPage }) => {
     await allure.allureId('965');
     const snapshot = await nichesPage.openFirstDetail();

@@ -27,6 +27,12 @@ export class UiExpectations {
     );
   }
 
+  focused(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
+    return loggedExpectation(this.page, target, locator, 'focused', () =>
+      expect(locator).toBeFocused(options),
+    );
+  }
+
   count(target: string, locator: Locator, value: number): Promise<void> {
     return loggedExpectation(this.page, target, locator, `count=${value}`, () =>
       expect(locator).toHaveCount(value),
@@ -119,6 +125,18 @@ export class UiExpectations {
   ): Promise<void> {
     return loggedExpectation(this.page, target, locator, `poll>=${minimum}`, () =>
       expect.poll(probe, options).toBeGreaterThanOrEqual(minimum),
+    );
+  }
+
+  pollNumber(
+    target: string,
+    locator: Locator,
+    probe: () => Promise<number>,
+    expected: number,
+    options?: { timeout?: number; intervals?: number[] },
+  ): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `poll=${expected}`, () =>
+      expect.poll(probe, options).toBe(expected),
     );
   }
 

@@ -25,6 +25,31 @@ export const employeeCreateData = {
   birthDate: '01.01.1990',
 } as const;
 
+export const employeeListLocators = {
+  title: 'Employees',
+  description: 'The page contains a list of company employees',
+  archive: 'Archive',
+  settings: 'Settings',
+  create: 'Create employee',
+  filters: 'Filters',
+  search: 'Search',
+  timeZone: 'Time zone',
+  more: 'More',
+  rows: /^employees-\d+-table-row$/,
+  employeeLinks: /^employees-\d+-employee-link$/,
+  currentPage: /__cur-page$/,
+  nextPage: /__next-btn$/,
+  previousPage: /__prev-btn$/,
+  loading: '[aria-busy="true"], [data-loading="true"], [class*="skeleton"]',
+  emptyTitle: 'Nothing fits the specified filters',
+  emptyDescription: 'Try setting up your filters differently',
+  resetFilters: 'Reset filters',
+  errorTitle: 'Something went wrong',
+  errorDescription: 'Please try your request again or check back later',
+  retry: 'Repeat the request',
+  technicalValue: /\b(?:error-content|undefined|NaN|null)\b|\[object Object\]/i,
+} as const;
+
 export const employeeCityGroups = [
   {
     country: 'Russia',

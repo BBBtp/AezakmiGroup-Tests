@@ -23,3 +23,11 @@ export const commonComponentSelectors = {
     title: '.modal-title, h2, h3',
   }),
 } as const;
+
+export const systemStateLocators = {
+  loading: '[aria-busy="true"], [data-loading="true"], [class*="skeleton"]',
+  errorTitle: 'Something went wrong',
+  errorDescription: 'Please try your request again or check back later',
+  retry: 'Repeat the request',
+  technicalValue: /\b(?:error-content|undefined|NaN|null)\b|\[object Object\]/i,
+} as const;

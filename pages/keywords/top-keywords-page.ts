@@ -18,6 +18,11 @@ export class TopKeywordsPage extends BasePage {
     this.overview = new TopKeywordsOverviewComponent(page);
   }
 
+  async openRoute(): Promise<void> {
+    await this.navigateTo('/keywords');
+    await this.overview.expectShellLoaded();
+  }
+
   async openFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Top-3000', '/keywords', 'Keywords');
     await this.overview.expectBusinessControls();

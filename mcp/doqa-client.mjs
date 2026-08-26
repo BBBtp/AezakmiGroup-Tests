@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 
-dotenv.config();
+dotenv.config({ path: process.env.DOQA_ENV_FILE?.trim() || undefined });
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -26,6 +26,9 @@ export function getDoqaConfig() {
     spaceId,
     projectId: process.env.DOQA_PROJECT_ID?.trim() || undefined,
     token: required('DOQA_TOKEN'),
+    sessionToken: process.env.DOQA_SESSION_TOKEN?.trim() || undefined,
+    login: process.env.DOQA_LOGIN?.trim() || undefined,
+    password: process.env.DOQA_PASSWORD?.trim() || undefined,
   };
 }
 
@@ -46,14 +49,16 @@ export class DoqaClient {
   constructor(config = getDoqaConfig(), { fetchImpl = fetch } = {}) {
     this.config = config;
     this.fetch = fetchImpl;
+    this.folderAuthTokenPromise = null;
   }
 
   async request(path, options = {}) {
+    const { authToken, ...requestOptions } = options;
     const isMultipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const response = await this.fetch(`${this.config.endpoint}${path}`, {
-      ...options,
+      ...requestOptions,
       headers: {
-        Authorization: `Bearer ${this.config.token}`,
+        Authorization: `Bearer ${authToken ?? this.config.token}`,
         Accept: 'application/json',
         ...(options.body && !isMultipart ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
@@ -70,6 +75,46 @@ export class DoqaClient {
     if (!response.ok)
       throw new DoqaApiError(`DoQA API ${response.status} ${response.statusText}`, response.status, body);
     return { body, headers: response.headers };
+  }
+
+  async getFolderAuthToken() {
+    if (this.config.sessionToken) return this.config.sessionToken;
+    if (!this.config.login || !this.config.password) return this.config.token;
+    if (!this.folderAuthTokenPromise) {
+      this.folderAuthTokenPromise = this.loginForFolderAccess();
+    }
+    return this.folderAuthTokenPromise;
+  }
+
+  async loginForFolderAccess() {
+    const response = await this.fetch(`${this.config.endpoint}/api/auth/user-login`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: this.config.login, password: this.config.password }),
+    });
+    const text = await response.text();
+    let body;
+    try {
+      body = text ? JSON.parse(text) : null;
+    } catch {
+      body = null;
+    }
+    if (!response.ok) {
+      throw new DoqaApiError(
+        `DoQA user login failed with status ${response.status}; credentials were not logged`,
+        response.status,
+        null,
+      );
+    }
+    const token = takeAuthToken(body);
+    if (!token) {
+      throw new DoqaApiError('DoQA user login did not return an access token', 502, null);
+    }
+    return token;
+  }
+
+  async folderRequest(path, options = {}) {
+    return this.request(path, { ...options, authToken: await this.getFolderAuthToken() });
   }
 
   async listAutomationCandidates({
@@ -126,6 +171,314 @@ export class DoqaClient {
     const { body, headers } = await this.request(`/api/cases/${encodeURIComponent(caseId)}`);
     const source = body?.data ?? body;
     return { case: body, etag: headers.get('etag') ?? source?.versionUuid ?? null };
+  }
+
+  async listChecklists({ limit = 20, folderId, search } = {}) {
+    const payload = {
+      spaceId: this.config.spaceId,
+      ...(folderId ? { folderId } : {}),
+      ...(search ? { search } : {}),
+    };
+    const { body: tree } = await this.request('/api/checklists/list', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    const folders = await this.discoverItemFolders(tree, 'checklists');
+    const targetFolders = folderId
+      ? folders.filter((folder) => folder.id === folderId)
+      : folders.filter((folder) => folder.childrenCount === 0);
+    const folderResults = await Promise.all(
+      targetFolders.map(async (folder) => {
+        const checklists = [];
+        for (let offset = 0; ; offset += 1) {
+          const { body } = await this.request('/api/checklists/list/part', {
+            method: 'POST',
+            body: JSON.stringify({ ...payload, folderId: folder.id, offset }),
+          });
+          const page = takeItems(body);
+          checklists.push(...page);
+          if (page.length === 0) break;
+        }
+        return { folder, checklists };
+      }),
+    );
+    const checklists = folderResults.flatMap(({ folder, checklists: folderChecklists }) =>
+      folderChecklists.map((item) => ({ ...item, folderId: item.folderId ?? folder.id })),
+    );
+    return {
+      spaceId: this.config.spaceId,
+      limit,
+      folders,
+      checklists: dedupeItems(checklists).slice(0, limit),
+      raw: tree,
+    };
+  }
+
+  async getChecklist(checklistId) {
+    const { body, headers } = await this.request(`/api/checklists/${encodeURIComponent(checklistId)}`);
+    const source = checklistSource(body);
+    return { checklist: body, etag: headers.get('etag') ?? source?.versionUuid ?? null };
+  }
+
+  async getChecklistFolders() {
+    const { body, headers } = await this.folderRequest(
+      `/api/folders/space/${encodeURIComponent(this.config.spaceId)}/checklist`,
+    );
+    return {
+      spaceId: this.config.spaceId,
+      type: 'checklist',
+      folders: takeFolderEntries(body),
+      etag: headers.get('etag'),
+      raw: body,
+    };
+  }
+
+  async createChecklistFolder({ parentId, name }, { idempotencyKey } = {}) {
+    if (!Number.isInteger(Number(parentId)) || Number(parentId) <= 0) {
+      throw new DoqaApiError('A positive checklist parentId is required', 400, null);
+    }
+    const normalizedName = String(name ?? '').trim();
+    if (!normalizedName) throw new DoqaApiError('A checklist folder name is required', 400, null);
+    if (normalizedName.length > 255) {
+      throw new DoqaApiError('A checklist folder name cannot exceed 255 characters', 400, null);
+    }
+
+    const before = await this.getChecklistFolders();
+    if (!before.etag) {
+      throw new DoqaApiError('DoQA did not return a folder-tree ETag; refusing unsafe creation', 409, null);
+    }
+    const parent = before.folders.find((folder) => folder.id === Number(parentId));
+    if (!parent) {
+      throw new DoqaApiError(`Checklist parent folder ${parentId} was not found`, 404, null);
+    }
+    const duplicate = before.folders.find(
+      (folder) =>
+        folder.parentId === Number(parentId) &&
+        folder.name.trim().toLocaleLowerCase('ru') === normalizedName.toLocaleLowerCase('ru'),
+    );
+    if (duplicate) {
+      throw new DoqaApiError(
+        `Checklist folder already exists under parent ${parentId}: #${duplicate.id} ${duplicate.name}`,
+        409,
+        duplicate,
+      );
+    }
+
+    const payload = {
+      spaceId: this.config.spaceId,
+      type: 'checklist',
+      name: normalizedName,
+      parentId: Number(parentId),
+    };
+    const { body } = await this.folderRequest('/api/folders', {
+      method: 'POST',
+      headers: {
+        'If-Match': before.etag,
+        'Idempotency-Key': idempotencyKey ?? stableKey('create-checklist-folder', payload),
+      },
+      body: JSON.stringify(payload),
+    });
+    const created = body?.data ?? body;
+    const createdId = Number(created?.id ?? created?.data?.id);
+    const after = await this.getChecklistFolders();
+    const folder =
+      (createdId > 0 ? after.folders.find((item) => item.id === createdId) : null) ??
+      after.folders.find(
+        (item) =>
+          item.parentId === Number(parentId) &&
+          item.name.trim().toLocaleLowerCase('ru') === normalizedName.toLocaleLowerCase('ru'),
+      );
+    if (!folder) {
+      throw new DoqaApiError(
+        'DoQA created a checklist folder but it was not found during verification',
+        502,
+        body,
+      );
+    }
+    return {
+      folder,
+      parent,
+      spaceId: this.config.spaceId,
+      type: 'checklist',
+      beforeEtag: before.etag,
+      afterEtag: after.etag,
+    };
+  }
+
+  async createChecklist(
+    {
+      folderId,
+      title,
+      description = '',
+      preconditions = '',
+      expectedResult = '',
+      children = [],
+      priority = 'medium',
+      status = 'ready',
+      tagIds = [],
+      attributes = [],
+      responsibleId,
+    },
+    { idempotencyKey } = {},
+  ) {
+    if (!folderId) throw new DoqaApiError('A DoQA folderId is required to create a checklist', 400, null);
+    if (!title?.trim()) throw new DoqaApiError('A DoQA checklist title is required', 400, null);
+    const normalizedChildren = normalizeChecklistChildren(children);
+    validateChecklistTree(normalizedChildren);
+    const payload = {
+      spaceId: this.config.spaceId,
+      folderId,
+      title: title.trim(),
+      description,
+      preconditions,
+      expectedResult,
+      children: normalizedChildren,
+      priority,
+      status,
+      tagIds,
+      attributes,
+      ...(responsibleId ? { responsibleId } : {}),
+    };
+    const { body } = await this.request('/api/checklists', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': idempotencyKey ?? stableKey('create-checklist', payload) },
+      body: JSON.stringify(payload),
+    });
+    const created = body?.data ?? body;
+    const checklistId = checklistSource(created)?.id;
+    if (!checklistId)
+      throw new DoqaApiError(
+        'DoQA created a checklist but did not return its ID; refusing an unverifiable result',
+        502,
+        body,
+      );
+    const after = await this.getChecklist(checklistId);
+    return { checklist: created, checklistId, after };
+  }
+
+  async updateChecklist(checklistId, changes) {
+    const changedFields = pickDefined(changes, [
+      'title',
+      'description',
+      'preconditions',
+      'expectedResult',
+      'priority',
+      'status',
+      'tagIds',
+      'responsibleId',
+    ]);
+    if (Object.keys(changedFields).length === 0 && !(changes.appendChildren?.length > 0)) {
+      throw new DoqaApiError('At least one checklist change is required', 400, null);
+    }
+    const current = await this.getChecklist(checklistId);
+    if (!current.etag)
+      throw new DoqaApiError(
+        `DoQA did not return an ETag/versionUuid for checklist ${checklistId}; refusing unsafe update`,
+        428,
+        null,
+      );
+    const source = checklistSource(current.checklist);
+    if (source?.spaceId !== undefined && Number(source.spaceId) !== Number(this.config.spaceId)) {
+      throw new DoqaApiError(
+        `Checklist ${checklistId} belongs to space ${source.spaceId}, not ${this.config.spaceId}`,
+        409,
+        null,
+      );
+    }
+    const appendChildren = normalizeChecklistChildren(changes.appendChildren ?? []);
+    validateChecklistTree(appendChildren);
+    assertNoDuplicateChecklistPaths(source.children ?? [], appendChildren);
+    const children = [
+      ...normalizeChecklistChildren(source.children ?? [], { preserveIds: true }),
+      ...appendChildren,
+    ];
+    validateChecklistTree(children);
+    const payload = {
+      id: source.id ?? Number(checklistId),
+      spaceId: source.spaceId ?? this.config.spaceId,
+      folderId: source.folderId,
+      title: source.title ?? '',
+      description: source.description ?? '',
+      preconditions: source.preconditions ?? '',
+      expectedResult: source.expectedResult ?? '',
+      priority: source.priority ?? 'medium',
+      status: source.status ?? 'review',
+      children,
+      tagIds: source.tagIds ?? [],
+      attributes: source.attributes ?? [],
+      ...(source.responsible?.id ? { responsibleId: source.responsible.id } : {}),
+      ...changedFields,
+    };
+    const { body } = await this.request('/api/checklists', {
+      method: 'PATCH',
+      headers: { 'If-Match': current.etag },
+      body: JSON.stringify(payload),
+    });
+    const after = await this.getChecklist(checklistId);
+    return {
+      checklist: body,
+      checklistId: payload.id,
+      etag: current.etag,
+      changes,
+      after,
+    };
+  }
+
+  async restructureChecklist(checklistId, children) {
+    const current = await this.getChecklist(checklistId);
+    if (!current.etag) {
+      throw new DoqaApiError(
+        `DoQA did not return an ETag/versionUuid for checklist ${checklistId}; refusing unsafe restructure`,
+        428,
+        null,
+      );
+    }
+    const source = checklistSource(current.checklist);
+    if (source?.spaceId !== undefined && Number(source.spaceId) !== Number(this.config.spaceId)) {
+      throw new DoqaApiError(
+        `Checklist ${checklistId} belongs to space ${source.spaceId}, not ${this.config.spaceId}`,
+        409,
+        null,
+      );
+    }
+
+    const currentChildren = normalizeChecklistChildren(source.children ?? [], { preserveIds: true });
+    const desiredChildren = normalizeChecklistChildren(children, { preserveIds: true });
+    validateChecklistTree(desiredChildren);
+    assertChecklistRestructurePreservesExistingItems(currentChildren, desiredChildren);
+
+    const payload = {
+      id: source.id ?? Number(checklistId),
+      spaceId: source.spaceId ?? this.config.spaceId,
+      folderId: source.folderId,
+      title: source.title ?? '',
+      description: source.description ?? '',
+      preconditions: source.preconditions ?? '',
+      expectedResult: source.expectedResult ?? '',
+      priority: source.priority ?? 'medium',
+      status: source.status ?? 'review',
+      children: desiredChildren,
+      tagIds: source.tagIds ?? [],
+      attributes: source.attributes ?? [],
+      ...(source.responsible?.id ? { responsibleId: source.responsible.id } : {}),
+    };
+    const { body } = await this.request('/api/checklists', {
+      method: 'PATCH',
+      headers: { 'If-Match': current.etag },
+      body: JSON.stringify(payload),
+    });
+    const after = await this.getChecklist(checklistId);
+    const afterSource = checklistSource(after.checklist);
+    assertChecklistTreeMatchesDesired(desiredChildren, afterSource.children ?? []);
+    return {
+      checklist: body,
+      checklistId: payload.id,
+      beforeEtag: current.etag,
+      afterEtag: after.etag,
+      preservedItemIds: collectChecklistItems(currentChildren).map((item) => item.id),
+      groupNodesCreated: collectChecklistItems(desiredChildren).filter((item) => item.id === null).length,
+      after,
+    };
   }
 
   async createCase(
@@ -396,6 +749,24 @@ export class DoqaClient {
     return folders;
   }
 
+  async discoverItemFolders(tree, itemType) {
+    const folders = takeFolders(tree);
+    const expanded = new Set();
+    for (let index = 0; index < folders.length; index += 1) {
+      const folder = folders[index];
+      if (folder.childrenCount === 0 || expanded.has(folder.id)) continue;
+      expanded.add(folder.id);
+      const { body } = await this.request(`/api/${itemType}/list`, {
+        method: 'POST',
+        body: JSON.stringify({ spaceId: this.config.spaceId, folderId: folder.id }),
+      });
+      for (const child of takeFolders(body)) {
+        if (!folders.some((item) => item.id === child.id)) folders.push(child);
+      }
+    }
+    return folders;
+  }
+
   async claimCase(caseId, { responsibleId, tagIds } = {}) {
     const current = await this.getCase(caseId);
     if (!current.etag)
@@ -500,6 +871,135 @@ export class DoqaClient {
 
 function stableKey(operation, payload) {
   return createHash('sha256').update(operation).update(JSON.stringify(payload)).digest('hex');
+}
+
+function checklistSource(value) {
+  return value?.data ?? value?.itemView ?? value;
+}
+
+function takeAuthToken(value) {
+  if (!value || typeof value !== 'object') return null;
+  for (const key of ['token', 'accessToken', 'access_token']) {
+    if (typeof value[key] === 'string' && value[key].trim()) return value[key].trim();
+  }
+  for (const nested of Object.values(value)) {
+    const token = takeAuthToken(nested);
+    if (token) return token;
+  }
+  return null;
+}
+
+function normalizeChecklistChildren(children, { preserveIds = false } = {}) {
+  if (!Array.isArray(children)) return [];
+  return children.map((child) => ({
+    id: preserveIds && Number(child?.id) > 0 ? Number(child.id) : null,
+    title: String(child?.title ?? '').trim(),
+    children: normalizeChecklistChildren(child?.children, { preserveIds }),
+  }));
+}
+
+function validateChecklistTree(children) {
+  const paths = [];
+  const visit = (nodes, parentPath = [], depth = 1) => {
+    if (nodes.length > 0 && depth > 8)
+      throw new DoqaApiError('A DoQA checklist cannot be deeper than 8 levels', 400, null);
+    for (const node of nodes) {
+      if (!node.title) throw new DoqaApiError('Every DoQA checklist item requires a title', 400, null);
+      const path = [...parentPath, node.title.trim().toLocaleLowerCase('ru')];
+      const key = path.join(' > ');
+      if (paths.includes(key)) throw new DoqaApiError(`Duplicate checklist item path: ${key}`, 409, null);
+      paths.push(key);
+      visit(node.children ?? [], path, depth + 1);
+    }
+  };
+  visit(children);
+  if (paths.length > 300)
+    throw new DoqaApiError('A DoQA checklist cannot contain more than 300 items', 400, null);
+}
+
+function assertNoDuplicateChecklistPaths(existing, appended) {
+  const collect = (nodes, parentPath = [], result = new Set()) => {
+    for (const node of nodes) {
+      const path = [
+        ...parentPath,
+        String(node?.title ?? '')
+          .trim()
+          .toLocaleLowerCase('ru'),
+      ];
+      result.add(path.join(' > '));
+      collect(node?.children ?? [], path, result);
+    }
+    return result;
+  };
+  const existingPaths = collect(existing);
+  const appendedPaths = collect(appended);
+  for (const path of appendedPaths) {
+    if (existingPaths.has(path)) throw new DoqaApiError(`Checklist item already exists: ${path}`, 409, null);
+  }
+}
+
+function collectChecklistItems(children, result = []) {
+  for (const child of children ?? []) {
+    result.push(child);
+    collectChecklistItems(child.children, result);
+  }
+  return result;
+}
+
+function assertChecklistRestructurePreservesExistingItems(currentChildren, desiredChildren) {
+  const currentItems = collectChecklistItems(currentChildren);
+  const desiredItems = collectChecklistItems(desiredChildren);
+  const currentById = new Map(
+    currentItems.filter((item) => item.id > 0).map((item) => [item.id, item.title]),
+  );
+  const desiredExisting = desiredItems.filter((item) => item.id > 0);
+  const desiredIds = desiredExisting.map((item) => item.id);
+  if (new Set(desiredIds).size !== desiredIds.length) {
+    throw new DoqaApiError('A checklist restructure cannot duplicate an existing check ID', 409, null);
+  }
+  if (currentById.size !== desiredIds.length || desiredIds.some((id) => !currentById.has(id))) {
+    throw new DoqaApiError(
+      'A checklist restructure must preserve every existing check ID exactly once',
+      409,
+      null,
+    );
+  }
+  for (const item of desiredExisting) {
+    if (currentById.get(item.id) !== item.title) {
+      throw new DoqaApiError(
+        `A checklist restructure cannot change the title of existing check ${item.id}`,
+        409,
+        null,
+      );
+    }
+  }
+  const newGroups = desiredItems.filter((item) => item.id === null);
+  if (newGroups.some((item) => !item.children?.length)) {
+    throw new DoqaApiError('Every new hierarchy group must contain at least one check', 400, null);
+  }
+}
+
+function assertChecklistTreeMatchesDesired(desiredChildren, actualChildren) {
+  const visit = (desired, actual, path = 'root') => {
+    if (!Array.isArray(actual) || desired.length !== actual.length) {
+      throw new DoqaApiError(`Checklist restructure verification failed at ${path}`, 502, null);
+    }
+    desired.forEach((expected, index) => {
+      const received = actual[index];
+      const nodePath = `${path}/${index}`;
+      if (expected.title !== received?.title || (expected.id > 0 && expected.id !== received?.id)) {
+        throw new DoqaApiError(`Checklist restructure verification failed at ${nodePath}`, 502, null);
+      }
+      visit(expected.children ?? [], received.children ?? [], nodePath);
+    });
+  };
+  visit(desiredChildren, actualChildren);
+}
+
+function pickDefined(source, fields) {
+  return Object.fromEntries(
+    fields.filter((field) => source[field] !== undefined).map((field) => [field, source[field]]),
+  );
 }
 
 export function classifyRunFailure(element = {}) {
@@ -738,7 +1238,11 @@ function buildSafeCaseFixes(source) {
 }
 
 function takeCases(value) {
-  if (Array.isArray(value)) return value.flatMap(takeCases);
+  return takeItems(value);
+}
+
+function takeItems(value) {
+  if (Array.isArray(value)) return value.flatMap(takeItems);
   if (!value || typeof value !== 'object') return [];
   if (
     typeof value.id === 'number' &&
@@ -747,7 +1251,7 @@ function takeCases(value) {
   ) {
     return [{ ...value, title: value.title ?? value.name }];
   }
-  return Object.values(value).flatMap(takeCases);
+  return Object.values(value).flatMap(takeItems);
 }
 
 function takeFolders(value) {
@@ -765,10 +1269,40 @@ function takeFolders(value) {
   return folders.filter((folder, index, all) => all.findIndex((item) => item.id === folder.id) === index);
 }
 
+function takeFolderEntries(value, parentId = null) {
+  if (Array.isArray(value)) return value.flatMap((item) => takeFolderEntries(item, parentId));
+  if (!value || typeof value !== 'object') return [];
+
+  const wrappedFolder =
+    Array.isArray(value.children) &&
+    typeof value.data?.id === 'number' &&
+    typeof value.data?.name === 'string'
+      ? value.data
+      : null;
+  const node = value.isFolder === true ? value : value.data?.isFolder === true ? value.data : wrappedFolder;
+  if (node && typeof node.id === 'number') {
+    const entry = {
+      id: node.id,
+      name: String(node.name ?? ''),
+      parentId,
+      childrenCount: node.childrenCount ?? 0,
+      totalCount: node.totalCount ?? 0,
+    };
+    const children = Array.isArray(value.children) ? value.children : [];
+    return [entry, ...children.flatMap((child) => takeFolderEntries(child, node.id))];
+  }
+
+  return Object.values(value).flatMap((child) => takeFolderEntries(child, parentId));
+}
+
 function priorityRank(priority) {
   return { high: 0, medium: 1, low: 2 }[priority] ?? 3;
 }
 
 function dedupeCases(cases) {
-  return cases.filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index);
+  return dedupeItems(cases);
+}
+
+function dedupeItems(items) {
+  return items.filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index);
 }

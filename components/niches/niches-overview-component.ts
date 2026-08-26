@@ -47,15 +47,16 @@ export class NichesOverviewComponent extends BusinessSectionComponent {
     await this.expectations.countAtLeast('Niche list: rows', this.locate.testId(/^niche-row-\d+$/), minimum);
   }
 
-  async firstRowSnapshot(): Promise<{ name: string; module: string }> {
+  async firstRowSnapshot(): Promise<{ name: string; module: string; updatedAt: string }> {
     const row = nichesTestIds.row(0);
     return {
       name: (await this.locate.testId(row.name).textContent())?.trim() ?? '',
       module: (await this.locate.testId(row.module).textContent())?.trim() ?? '',
+      updatedAt: (await this.locate.testId(row.updatedAt).textContent())?.trim() ?? '',
     };
   }
 
-  async openFirstRow(): Promise<{ name: string; module: string }> {
+  async openFirstRow(): Promise<{ name: string; module: string; updatedAt: string }> {
     const snapshot = await this.firstRowSnapshot();
     await this.actions.click('Niche list: open first row', this.locate.testId(nichesTestIds.row(0).more));
     return snapshot;
@@ -66,7 +67,10 @@ export class NichesOverviewComponent extends BusinessSectionComponent {
     await this.actions.fill(`Niche list: search ${value}`, this.search, value);
   }
 
-  async expectRow(index: number, values: { name?: string; module?: string }): Promise<void> {
+  async expectRow(
+    index: number,
+    values: { name?: string; module?: string; updatedAt?: string },
+  ): Promise<void> {
     const row = nichesTestIds.row(index);
     if (values.name)
       await this.expectations.text(`Niche row ${index}: name`, this.locate.testId(row.name), values.name);
@@ -75,6 +79,12 @@ export class NichesOverviewComponent extends BusinessSectionComponent {
         `Niche row ${index}: module`,
         this.locate.testId(row.module),
         values.module,
+      );
+    if (values.updatedAt)
+      await this.expectations.text(
+        `Niche row ${index}: Last edited`,
+        this.locate.testId(row.updatedAt),
+        values.updatedAt,
       );
   }
 

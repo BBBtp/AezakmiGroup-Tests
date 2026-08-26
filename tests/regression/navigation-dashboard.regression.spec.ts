@@ -1,6 +1,7 @@
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
+import { dashboardApi } from '@support/navigation/contracts';
 
 const sections = [
   ['Dashboard', '/dashboard'],
@@ -9,7 +10,7 @@ const sections = [
   ['Top-3000', '/keywords', 'Keywords'],
   ['Suggests', '/suggests', 'Keywords'],
   ['Checks', '/checks', 'Keywords'],
-  ['Niche list', '/niche-list', 'Niches'],
+  ['Niche list', '/niches', 'Niches'],
   ['Sorted by apps', '/sorted-apps', 'Niches'],
   ['Push bots', '/push-bots', 'Push'],
   ['Out keywords', '/out-keywords', 'Push'],
@@ -57,6 +58,42 @@ test.describe('Навигация и Dashboard', () => {
 
     await network.reload({ waitUntil: 'commit' });
     await dashboardPage.expectLoaded();
+    await dashboardPage.expectMetricsHealthy();
+  });
+
+  test('ошибка API Dashboard отображается и устраняется повторной загрузкой', async ({
+    dashboardPage,
+    network,
+  }) => {
+    await allure.allureId('660');
+    await network.failNext(dashboardApi.chart, 'GET', { message: 'Test failure' });
+    await dashboardPage.navigate();
+    await dashboardPage.metrics.expectError();
+    await network.reload();
+    await dashboardPage.expectMetricsHealthy();
+  });
+
+  test('Dashboard показывает loading state до завершения загрузки', async ({ dashboardPage, network }) => {
+    await allure.allureId('661');
+    const held = await network.holdNext(dashboardApi.chart, 'GET');
+    const opening = dashboardPage.navigate().catch(() => undefined);
+    await held.started;
+    await dashboardPage.metrics.expectLoading();
+    await held.abort();
+    await opening;
+    await network.reload();
+    await dashboardPage.expectMetricsHealthy();
+  });
+
+  test('Dashboard корректно отображает пустые метрики и восстанавливает данные', async ({
+    dashboardPage,
+    network,
+  }) => {
+    await allure.allureId('662');
+    await network.fulfillNextJson(dashboardApi.chart, 'GET', dashboardApi.emptyChart);
+    await dashboardPage.navigate();
+    await dashboardPage.metrics.expectEmpty();
+    await network.reload();
     await dashboardPage.expectMetricsHealthy();
   });
 });
