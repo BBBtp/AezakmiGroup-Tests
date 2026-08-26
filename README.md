@@ -100,12 +100,43 @@ video и очищенным error-context. stdout/stderr и trace в пакет 
 
 GitHub Actions выполняет статический quality gate для pull request. После push в `main` дополнительно запускается smoke-набор.
 
-Каждую ночь в 01:00 МСК workflow `Nightly regression` запускает пять независимых read-only групп
-параллельно, затем отдельно выполняет сценарии с общими KPI Settings. Каждый job сохраняет
-Allure, blob, HTML, JSON, JUnit, traces, screenshots и videos на 14 дней. Тест, прошедший только
-после retry, отмечается как flaky и делает соответствующую CI job красной.
+Каждую ночь в 01:00 МСК workflow `Nightly regression` автоматически обнаруживает все сценарии
+из `tests/regression` и распределяет read-only/auth часть по трём shard jobs на self-hosted
+runner'ах с labels `Linux`, `X64`, `crm`, `playwright`. После них один runner последовательно
+выполняет сценарии с общими KPI Settings. Тест, прошедший только после retry, отмечается как flaky
+и делает соответствующую CI job красной.
+
+Каждый shard сохраняет raw Allure results. Отдельный job объединяет результаты всех трёх shards
+и KPI Settings, генерирует HTML и сохраняет artifact `allure-report-<run-id>` на 14 дней. При
+ошибке дополнительно сохраняются blob report, traces, screenshots и videos соответствующего job.
 После завершения regression отдельный read-only job сохраняет artifact `bug-drafts-<run-id>`:
 для каждого failed/broken теста в нём находятся готовые поля формы и диагностические вложения.
+
+### Запуск из DoQA через GitLab bridge
+
+DoQA нативно запускает GitLab pipeline, поэтому `.gitlab-ci.yml` используется как relay: он
+вызывает `workflow_dispatch` для GitHub Actions, ждёт завершения трёх runner'ов, скачивает единый
+artifact `allure-results-<run-id>` и загружает его в исходный DoQA pipeline через `doqa-cli`.
+GitLab сам тесты не выполняет.
+
+1. Импортируйте или зеркалируйте этот репозиторий в отдельный GitLab project и подключите project
+   в DoQA как CI/CD integration.
+2. В GitLab добавьте masked/protected variables `GITHUB_ACTIONS_TOKEN`, `DOQA_ENDPOINT`,
+   `DOQA_SPACE_ID`, `DOQA_AUTOTEST_TOKEN`. Fine-grained GitHub token должен иметь repository
+   permission `Actions: read and write` только для `BBBtp/AezakmiGroup-Tests`.
+3. Запустите автотесты из DoQA: bridge передаст выбранную ветку в GitHub, а после завершения
+   вернёт raw Allure results. Переменные `CI_PIPELINE_ID`, `CI_PROJECT_ID` и
+   `CI_COMMIT_REF_NAME` предоставляет GitLab.
+
+Собственный runner разворачивается из `infra/gitlab-runner/compose.yaml`, регистрируется как
+Project Runner с shell executor и tag `doqa-bridge`. Контейнер не получает Docker socket и не
+может управлять тремя GitHub runner'ами на том же сервере.
+
+Полный HTML остаётся artifact `allure-report-<run-id>`. Для постоянной страницы выберите в
+GitHub Settings → Pages источник `GitHub Actions`, затем создайте repository variable
+`ALLURE_PAGES_ENABLED=true`. Адрес отчёта:
+`https://bbbtp.github.io/AezakmiGroup-Tests/`. Репозиторий публичный, поэтому Pages-отчёт тоже
+будет публичным; без явного флага CI его не публикует.
 
 Nightly-прогон сам по себе ничего не публикует в DoQA. Для публикации запустите workflow вручную
 с параметром `publish_to_doqa=true`. Job публикации использует GitHub Environment
@@ -117,6 +148,9 @@ repository secrets `DOQA_ENDPOINT`, `DOQA_SPACE_ID`, опционально `DOQ
 
 Публикация начинается после завершения всех regression-групп, включая завершённые failed jobs,
 объединяет их Allure results и повторно выполняет preflight и post-upload verification.
+
+Прогон, инициированный из DoQA, публикуется обратно bridge job в GitLab и не использует ручной
+GitHub job `publish-doqa`, поэтому дублирующий DoQA run не создаётся.
 
 Для smoke job настройте repository secrets:
 

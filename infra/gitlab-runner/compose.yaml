@@ -1,0 +1,13 @@
+services:
+  runner:
+    build:
+      context: .
+    container_name: doqa-gitlab-runner
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+    volumes:
+      - runner-config:/etc/gitlab-runner
+
+volumes:
+  runner-config:

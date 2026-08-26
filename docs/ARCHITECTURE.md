@@ -24,6 +24,13 @@ flowchart TD
   UI --> CRM[CRM web application]
   Fixtures --> Lifecycle[Cleanup registry, sessions and browser diagnostics]
   Tests --> Allure[Allure raw results]
+  DoQA --> GitLabBridge[GitLab CI bridge]
+  GitLabBridge --> GitHub[GitHub Actions]
+  GitHub --> Runners[3 self-hosted runners]
+  Runners --> Tests
+  Allure --> Html[Allure HTML artifact]
+  Html -->|explicit public flag| Pages[GitHub Pages]
+  Allure --> GitLabBridge
   Allure --> Upload[POST /api/autotests/report]
   Upload --> DoQA
   DoQA --> Triage[Failed run triage]

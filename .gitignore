@@ -6,6 +6,8 @@ node_modules/
 /allure-results/
 /allure-report/
 /allure-results*.zip
+/bridge-result.json
+/doqa-cli
 /results.xml
 /test-results.json
 /playwright/.cache/

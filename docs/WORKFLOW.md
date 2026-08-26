@@ -56,9 +56,19 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 ## Nightly regression
 
 - Расписание: ежедневно в 01:00 МСК.
-- Параллельные группы: auth, KPI read-only, navigation/session, Statistics, Top-3000.
-- KPI Settings запускается после них, потому что сценарии меняют общие настройки CRM.
-- Все диагностические результаты сохраняются при любом исходе.
+- Конфиг: `playwright.regression.config.ts`; команда `npm run test:regression` локально запускает
+  весь regression-набор.
+- Все auth/read-only файлы автоматически делятся на три shards и выполняются на self-hosted
+  runner'ах с labels `Linux`, `X64`, `crm`, `playwright`.
+- KPI Settings запускается отдельным serial job после shards, потому что сценарии меняют общие
+  настройки CRM.
+- Raw Allure results всех jobs объединяются, после чего CI сохраняет единый HTML artifact
+  `allure-report-<run-id>` и bridge artifact `allure-results-<run-id>` на 14 дней.
+- `.gitlab-ci.yml` не запускает браузерные тесты: он передаёт DoQA/GitLab pipeline в GitHub
+  Actions, ждёт workflow и возвращает объединённый raw Allure archive через `doqa-cli report`.
+- GitHub Pages deployment включается только repository variable `ALLURE_PAGES_ENABLED=true`.
+  Поскольку репозиторий публичный, опубликованный отчёт также публичный.
+- При падении job отдельно сохраняются blob report, traces, screenshots и videos.
 - После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,
   screenshot/video и очищенным error-context для каждого failed/broken результата.
 - При наличии retry в черновик попадает только последняя попытка каждого Allure ID; успешная
@@ -74,6 +84,8 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - Публикация в DoQA доступна только при ручном запуске с `publish_to_doqa=true` и approval в
   GitHub Environment `doqa-production`. Завершённые красные regression jobs также публикуются,
   чтобы failed/broken элементы были видны в DoQA.
+- При запуске из DoQA отчёт возвращает GitLab bridge; GitHub `publish-doqa` для такого запуска
+  отключён, чтобы не создавать второй прогон.
 
 ## Правила безопасности
 

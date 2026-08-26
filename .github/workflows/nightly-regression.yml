@@ -11,6 +11,21 @@ on:
         required: false
         type: boolean
         default: false
+      bridge_pipeline_id:
+        description: GitLab pipeline ID supplied by the DoQA bridge
+        required: false
+        type: string
+        default: ''
+      bridge_project_id:
+        description: GitLab project ID supplied by the DoQA bridge
+        required: false
+        type: string
+        default: ''
+      bridge_branch:
+        description: Branch selected in DoQA
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -43,29 +58,20 @@ jobs:
       - name: Run quality gate
         run: npm run quality
 
-      - name: Verify Playwright discovery
-        run: npx playwright test --list
+      - name: Verify regression discovery
+        run: npx playwright test --config=playwright.regression.config.ts --list
 
-  regression-core:
-    name: Regression · ${{ matrix.name }}
+  regression-shards:
+    name: Regression · shard ${{ matrix.shard }}/3
     needs: static
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: auth
-            script: test:regression:auth
-          - name: kpi-read
-            script: test:regression:kpi-read
-          - name: navigation
-            script: test:regression:navigation
-          - name: statistics
-            script: test:regression:statistics
-          - name: top-keywords
-            script: test:regression:top-keywords
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
+        shard: [1, 2, 3]
+    runs-on: [self-hosted, Linux, X64, crm, playwright]
+    timeout-minutes: 90
     env:
+      ALLURE_RESULTS_DIR: allure-results/shard-${{ matrix.shard }}
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -88,39 +94,47 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
-      - name: Run regression group
-        run: npm run "${{ matrix.script }}"
+      - name: Run regression shard
+        run: npm run test:regression:shard -- --shard=${{ matrix.shard }}/3
 
       - name: Detect flaky retries and write summary
         if: always()
-        run: npm run check:flaky -- --label="Regression · ${{ matrix.name }}"
+        run: npm run check:flaky -- --label="Regression · shard ${{ matrix.shard }}/3"
 
-      - name: Upload diagnostics
+      - name: Upload raw Allure results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: regression-results-${{ matrix.name }}-${{ github.run_id }}
+          name: regression-allure-shard-${{ matrix.shard }}-${{ github.run_id }}
+          path: allure-results/shard-${{ matrix.shard }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: regression-diagnostics-shard-${{ matrix.shard }}-${{ github.run_id }}
           path: |
-            allure-results
             blob-report
-            playwright-report
             test-results
-            results.xml
             test-results.json
           if-no-files-found: warn
           retention-days: 14
 
   regression-settings:
-    name: Regression · kpi-settings
-    if: ${{ always() && needs.static.result == 'success' }}
-    needs:
-      - static
-      - regression-core
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
+    name: Regression · shared KPI settings
+    if: >-
+      ${{ always() &&
+          (needs['regression-shards'].result == 'success' ||
+           needs['regression-shards'].result == 'failure') }}
+    needs: regression-shards
+    runs-on: [self-hosted, Linux, X64, crm, playwright]
+    timeout-minutes: 60
     env:
+      ALLURE_RESULTS_DIR: allure-results/settings
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -143,40 +157,142 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run shared-settings regression
-        run: npm run test:regression:kpi-settings
+        run: npm run test:regression:settings
 
       - name: Detect flaky retries and write summary
         if: always()
-        run: npm run check:flaky -- --label="Regression · kpi-settings"
+        run: npm run check:flaky -- --label="Regression · shared KPI settings"
 
-      - name: Upload diagnostics
+      - name: Upload raw Allure results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: regression-results-kpi-settings-${{ github.run_id }}
+          name: regression-allure-settings-${{ github.run_id }}
+          path: allure-results/settings
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: regression-diagnostics-settings-${{ github.run_id }}
           path: |
-            allure-results
             blob-report
-            playwright-report
             test-results
-            results.xml
             test-results.json
           if-no-files-found: warn
           retention-days: 14
+
+  allure-report:
+    name: Build Allure report
+    if: >-
+      ${{ always() &&
+          (needs['regression-shards'].result == 'success' ||
+           needs['regression-shards'].result == 'failure') &&
+          (needs['regression-settings'].result == 'success' ||
+           needs['regression-settings'].result == 'failure') }}
+    needs:
+      - regression-shards
+      - regression-settings
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ALLURE_RESULTS_DIR: collected-results/allure-results
+      ALLURE_PAGES_ENABLED: ${{ vars.ALLURE_PAGES_ENABLED }}
+      ALLURE_PAGES_URL: https://bbbtp.github.io/AezakmiGroup-Tests/
+      DOQA_BRIDGE_PIPELINE_ID: ${{ inputs.bridge_pipeline_id }}
+      GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download raw Allure results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: regression-allure-*-${{ github.run_id }}
+          path: collected-results/allure-results
+          merge-multiple: true
+
+      - name: Add report and bridge metadata
+        run: npm run allure:metadata
+
+      - name: Generate Allure HTML report
+        run: npx allure generate collected-results/allure-results --clean -o allure-report
+
+      - name: Upload combined raw Allure results for the bridge
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results-${{ github.run_id }}
+          path: collected-results
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report-${{ github.run_id }}
+          path: allure-report
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Configure GitHub Pages
+        if: vars.ALLURE_PAGES_ENABLED == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: vars.ALLURE_PAGES_ENABLED == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: allure-report
+
+  deploy-allure:
+    name: Publish Allure website
+    if: vars.ALLURE_PAGES_ENABLED == 'true'
+    needs: allure-report
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy Allure report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   bug-drafts:
     name: Prepare bug drafts
     if: >-
       ${{ always() &&
-          (needs['regression-core'].result == 'success' ||
-           needs['regression-core'].result == 'failure') &&
+          (needs['regression-shards'].result == 'success' ||
+           needs['regression-shards'].result == 'failure') &&
           (needs['regression-settings'].result == 'success' ||
            needs['regression-settings'].result == 'failure') }}
     needs:
-      - regression-core
+      - regression-shards
       - regression-settings
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -201,11 +317,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download regression artifacts
+      - name: Download raw Allure results
         uses: actions/download-artifact@v8
         with:
-          pattern: regression-results-*-${{ github.run_id }}
-          path: collected-results
+          pattern: regression-allure-*-${{ github.run_id }}
+          path: collected-results/allure-results
           merge-multiple: true
 
       - name: Prepare read-only bug drafts
@@ -226,12 +342,12 @@ jobs:
       ${{ always() &&
           github.event_name == 'workflow_dispatch' &&
           inputs.publish_to_doqa &&
-          (needs['regression-core'].result == 'success' ||
-           needs['regression-core'].result == 'failure') &&
+          (needs['regression-shards'].result == 'success' ||
+           needs['regression-shards'].result == 'failure') &&
           (needs['regression-settings'].result == 'success' ||
            needs['regression-settings'].result == 'failure') }}
     needs:
-      - regression-core
+      - regression-shards
       - regression-settings
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -245,7 +361,11 @@ jobs:
       DOQA_PROJECT_ID: ${{ secrets.DOQA_PROJECT_ID }}
       DOQA_TOKEN: ${{ secrets.DOQA_TOKEN }}
       DOQA_AUTOTEST_TOKEN: ${{ secrets.DOQA_AUTOTEST_TOKEN }}
-      DOQA_RUN_TITLE: 'Nightly regression #${{ github.run_number }} (${{ github.sha }})'
+      DOQA_RUN_TITLE: 'Regression #${{ github.run_number }} (${{ github.sha }})'
+      ALLURE_PAGES_ENABLED: ${{ vars.ALLURE_PAGES_ENABLED }}
+      ALLURE_PAGES_URL: https://bbbtp.github.io/AezakmiGroup-Tests/
+      DOQA_BRIDGE_PIPELINE_ID: ${{ inputs.bridge_pipeline_id }}
+      GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
       - name: Checkout
@@ -260,12 +380,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download regression artifacts
+      - name: Download raw Allure results
         uses: actions/download-artifact@v8
         with:
-          pattern: regression-results-*-${{ github.run_id }}
-          path: collected-results
+          pattern: regression-allure-*-${{ github.run_id }}
+          path: collected-results/allure-results
           merge-multiple: true
+
+      - name: Add report and bridge metadata
+        run: npm run allure:metadata
 
       - name: Publish and verify DoQA run
         run: npm run doqa:publish
