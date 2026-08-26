@@ -7,7 +7,9 @@ const ids = nichesTestIds.detail;
 
 export class NicheDetailComponent extends UiObject {
   readonly root: Locator;
+  readonly nameBlock: Locator;
   readonly title: Locator;
+  readonly lastEdited: Locator;
   readonly module: Locator;
   readonly actionsButton: Locator;
   readonly editButton: Locator;
@@ -29,7 +31,9 @@ export class NicheDetailComponent extends UiObject {
   constructor(page: Page) {
     super(page);
     this.root = this.locate.testId(ids.page);
+    this.nameBlock = this.locate.testId(ids.nameBlock);
     this.title = this.locate.testId(ids.title);
+    this.lastEdited = this.locate.within(this.root).text(ids.lastEdited);
     this.module = this.locate.testId(ids.module);
     this.actionsButton = this.locate.testId(ids.actions);
     this.editButton = this.locate.testId(ids.edit);
@@ -49,11 +53,17 @@ export class NicheDetailComponent extends UiObject {
     this.addKeywordsSubmit = this.locate.testId(ids.addKeywords.submit);
   }
 
-  async expectLoaded(name?: string, module?: string): Promise<void> {
+  async expectLoaded(name?: string, module?: string, updatedAt?: string): Promise<void> {
     await this.expectations.visible('Niche detail', this.root);
     await this.expectations.visible('Niche detail: keyword table', this.table);
     if (name) await this.expectations.text('Niche detail: title', this.title, name);
     if (module) await this.expectations.text('Niche detail: module', this.module, module);
+    if (updatedAt)
+      await this.expectations.containsText(
+        'Niche detail: Last edited under title',
+        this.lastEdited,
+        updatedAt,
+      );
   }
 
   async expectTranslationControls(): Promise<void> {

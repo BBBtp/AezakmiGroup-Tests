@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
 import { topKeywordsTestIds } from '@locators/master-sections';
+import { systemStateLocators } from '@locators/common';
 import { BusinessSectionComponent } from '../common/business-section-component';
 
 export type TopKeywordsCountry = keyof typeof topKeywordsTestIds.countryTabs;
@@ -23,6 +24,7 @@ export class TopKeywordsOverviewComponent extends BusinessSectionComponent {
   readonly topAppsModal: Locator;
   readonly topAppsModalTitle: Locator;
   readonly topAppsModalCloseButton: Locator;
+  readonly emptyTable: Locator;
 
   constructor(page: Page) {
     super(page, 'Top-3000');
@@ -44,6 +46,12 @@ export class TopKeywordsOverviewComponent extends BusinessSectionComponent {
     const modal = this.locate.within(this.topAppsModal);
     this.topAppsModalTitle = modal.testId(topKeywordsTestIds.topAppsModal.title);
     this.topAppsModalCloseButton = modal.testId(topKeywordsTestIds.topAppsModal.closeButton);
+    this.emptyTable = section.testId(topKeywordsTestIds.emptyTable);
+  }
+
+  async expectShellLoaded(): Promise<void> {
+    await this.expectations.visible('Top-3000: root', this.root);
+    await this.expectations.visible('Top-3000: title', this.title);
   }
 
   async expectBusinessControls(): Promise<void> {
@@ -56,6 +64,48 @@ export class TopKeywordsOverviewComponent extends BusinessSectionComponent {
       ['date picker', this.datePickerButton],
       ['translate all toggle', this.translateAllToggle],
     ]);
+  }
+
+  async expectError(): Promise<void> {
+    const within = this.locate.within(this.root);
+    await this.expectations.visible(
+      'Top-3000: error title',
+      within.text(systemStateLocators.errorTitle, { exact: true }),
+    );
+    await this.expectations.visible(
+      'Top-3000: error description',
+      within.text(systemStateLocators.errorDescription, { exact: true }),
+    );
+    await this.expectations.visible(
+      'Top-3000: retry action',
+      within.role('button', { name: systemStateLocators.retry, exact: true }),
+    );
+    await this.expectations.visible('Top-3000: error table container', this.table);
+  }
+
+  async expectLoading(): Promise<void> {
+    await this.expectations.visible(
+      'Top-3000: loading state',
+      this.locate.within(this.root).css(systemStateLocators.loading).first(),
+    );
+  }
+
+  async expectEmpty(): Promise<void> {
+    const within = this.locate.within(this.emptyTable);
+    await this.expectations.visible('Top-3000: empty state', this.emptyTable);
+    await this.expectations.visible(
+      'Top-3000: empty title',
+      within.text(topKeywordsTestIds.emptyTitle, { exact: true }),
+    );
+    await this.expectations.visible(
+      'Top-3000: empty description',
+      within.text(topKeywordsTestIds.emptyDescription, { exact: true }),
+    );
+    await this.expectations.notContainsText(
+      'Top-3000 empty: no technical values',
+      this.root,
+      systemStateLocators.technicalValue,
+    );
   }
 
   async expectFilterControls(): Promise<void> {

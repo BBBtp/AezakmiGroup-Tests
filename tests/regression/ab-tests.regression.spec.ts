@@ -13,6 +13,79 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.openFilter('Test type');
   });
 
+  test('все multi-select фильтры фокусируют Search и закрепляют Select all первым', async ({
+    productPage,
+  }) => {
+    await allure.allureId('1006');
+    await productPage.openAbTests();
+    await productPage.abTests.expectFilterAutofocusAndSelectAllOrder();
+  });
+
+  test('применение фильтра с поздней страницы сбрасывает пагинацию на первую', async ({ productPage }) => {
+    await allure.allureId('1004');
+    await productPage.openAbTests();
+    await productPage.abTests.goToPage(7);
+    await productPage.abTests.applySingleAppFilterAndExpectFirstPage();
+  });
+
+  test('изменение Show сохраняет раскрытый A/B test', async ({ productPage }) => {
+    await allure.allureId('1005');
+    await productPage.openAbTests();
+    await productPage.abTests.expectExpandedRowPreservedWhenShowChanges(30);
+  });
+
+  test('длинные Comment и Technical task прокручиваются внутри модалки', async ({ productPage }) => {
+    await allure.allureId('1003');
+    await productPage.openAbTests();
+    await productPage.abTests.expectLongCommentAndTechnicalTaskModals();
+  });
+
+  test('повторное открытие A/B tests использует cache списка', async ({ network, productPage }) => {
+    await allure.allureId('1007');
+    const listRequests = network.captureRequests(
+      (request) => request.method() === 'GET' && abTestsApi.list.test(request.url()),
+    );
+    await productPage.openAbTests();
+    await productPage.abTests.expectRowsAndPagination();
+    await productPage.leaveAndReturnToAbTestsViaSidebar();
+    await productPage.abTests.expectRowsAndPagination();
+    expect(listRequests.count).toBe(1);
+    listRequests.stop();
+  });
+
+  test('initial file upload подсвечивается при hover и drag-hover', async ({ productPage }) => {
+    await allure.allureId('1008');
+    await productPage.openAbTests();
+    await productPage.abTests.openCreate();
+    const states = await productPage.abTestCreate.expectInitialUploadVisualStates();
+    expect(states.hover).not.toBe(states.resting);
+    expect(states.dragHover).not.toBe(states.resting);
+  });
+
+  test('ручная загрузка отключает Figma, но сохраняет импорт Apphud', async ({ network, productPage }) => {
+    await allure.allureId('1047');
+    const links = {
+      figma: 'https://www.figma.com/file/codex-front-32/ab-test',
+      apphud: 'https://app.apphud.com/projects/codex-front-32/ab-tests/42',
+    };
+    await network.fulfillNextSse(abTestsApi.prepareTask, 'POST', 'result', {
+      units: [],
+      tech_spec: '',
+    });
+    await productPage.openAbTests();
+    await productPage.abTests.openCreate();
+
+    const { request } = await network.waitForRequestWhile(
+      { url: abTestsApi.prepareTask, method: 'POST' },
+      () => productPage.abTestCreate.requestManualImportPreparation(links),
+    );
+
+    expect(request.postDataJSON()).toEqual({
+      test_type: 'onboardings',
+      apphud_url: links.apphud,
+    });
+  });
+
   test('список тестов показывает приложения и пагинацию', async ({ productPage }) => {
     await allure.allureId('622');
     await productPage.openAbTests();

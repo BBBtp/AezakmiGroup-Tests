@@ -1,0 +1,42 @@
+export const netProfitPredictLocators = {
+  title: 'Net profit predict',
+  route: '/net-profit-predict',
+  sidebarGroup: 'ASA',
+  chartTitle: 'Dynamics of indicators',
+  tableTitle: 'Apps statistics',
+  chartAxisLabels: 'svg foreignObject',
+  chartBars: '.recharts-bar-rectangle path',
+  tableRows: 'tbody tr',
+  filtersButton: /^Filters:/,
+  appliedFilters: 'undefined-applied-filters',
+  addFilterTrigger: 'undefined-filter-popover__trigger',
+  addFilterApply: 'undefined-filter-popover__apply-button',
+  addFilterOption: (name: string) => `undefined-filter-popover__option-${name}`,
+  addFilterCheckbox: (name: string) => `undefined-filter-popover__option-${name}__checkbox-checkbox`,
+  filterTrigger: (name: string) => `undefined-visible-filter-${name}__trigger`,
+  filterClose: (name: string) => `undefined-visible-filter-${name}__active-filter__close-btn`,
+  filterApply: (name: string) => `undefined-visible-filter-${name}__apply-button`,
+  filterSearch: (name: string) => `undefined-visible-filter-${name}__search-input`,
+  filterSelectAll: (name: string) => `undefined-visible-filter-${name}__option-all__checkbox-checkbox`,
+  filterOptions: (name: string) =>
+    `[data-testid^="undefined-visible-filter-${name}__option-"]:not([data-testid$="__option-all"]):not([data-testid$="__checkbox"]):not([data-testid$="__checkbox-checkbox"])`,
+  filterOptionCheckbox: '[data-testid$="__checkbox-checkbox"]',
+  // The calendar trigger currently has neither an accessible name nor a test ID.
+  // The calendar icon path is the only stable DOM contract exposed by the control.
+  calendarTrigger:
+    'button:has(svg path[d="M21 10H3m13-8v4M8 2v4m-.2 16h8.4c1.68 0 2.52 0 3.162-.327a3 3 0 0 0 1.311-1.311C21 19.72 21 18.88 21 17.2V8.8c0-1.68 0-2.52-.327-3.162a3 3 0 0 0-1.311-1.311C18.72 4 17.88 4 16.2 4H7.8c-1.68 0-2.52 0-3.162.327a3 3 0 0 0-1.311 1.311C3 6.28 3 7.12 3 8.8v8.4c0 1.68 0 2.52.327 3.162a3 3 0 0 0 1.311 1.311C5.28 22 6.12 22 7.8 22"] )',
+  calendarHeader: 'undefined__date-picker__header',
+  calendarStart: 'undefined__date-picker__header__start-input',
+  calendarEnd: 'undefined__date-picker__header__end-input',
+  calendarReset: 'undefined__date-picker__header__reset-btn',
+  calendarApply: 'undefined__date-picker__header__apply-btn',
+  emptyTitle: 'No apps found',
+  emptyDescription: 'Try another search',
+  resetAllFilters: 'undefined-filter-button__reset-all',
+  appFilterTrigger: 'undefined-visible-filter-App__trigger',
+  appFilterOptions:
+    '[data-testid^="undefined-visible-filter-App__option-"]:not([data-testid$="__option-all"]):not([data-testid$="__checkbox"]):not([data-testid$="__checkbox-checkbox"])',
+  appFilterOptionCheckbox: '[data-testid$="__checkbox-checkbox"]',
+  appFilterApply: 'undefined-visible-filter-App__apply-button',
+  monthLabel: (year: number, month: number) => `${String(month).padStart(2, '0')}.${String(year).slice(-2)}`,
+} as const;

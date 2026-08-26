@@ -9,6 +9,7 @@ export const statisticsTestIds = {
   },
   calendarButton: 'success-rate-chart__header__calendar-btn',
   filtersButton: 'success-rate-chart-filters-button',
+  totalCard: 'statictics-cards-0',
 } as const;
 
 export const topKeywordsTestIds = {
@@ -44,6 +45,9 @@ export const topKeywordsTestIds = {
     nextButton: 'keywords-pagination__next-btn',
     previousButton: 'keywords-pagination__prev-btn',
   },
+  emptyTable: 'keywords-empty-table',
+  emptyTitle: 'Nothing was found for your request',
+  emptyDescription: 'Check if the data entered is correct and try again',
   row: (index: number) => ({
     root: `keywords-row-${index}`,
     keyword: `keywords-row-${index}-keyword`,
@@ -68,6 +72,8 @@ export const suggestsTestIds = {
     yesterday: 'suggests-date-tabs__1',
   },
   datePickerButton: 'suggests-date-picker-btn',
+  noData: 'suggests-no-data',
+  emptyTitle: 'Data not found',
 } as const;
 
 export const nichesTestIds = {
@@ -89,6 +95,7 @@ export const nichesTestIds = {
     module: `niche-cell-${index}-module-attribute__title`,
     countries: `niche-cell-${index}-countries`,
     keywords: `niche-cell-${index}-keywords`,
+    updatedAt: `niche-cell-${index}-updated-at`,
     more: `niche-cell-${index}-more-btn`,
   }),
   pagination: {
@@ -115,7 +122,9 @@ export const nichesTestIds = {
   },
   detail: {
     page: 'niche-page',
+    nameBlock: 'niche-title-name-block',
     title: 'niche-title-niche-name',
+    lastEdited: /^Last edited:/,
     module: 'niche-title-module__title',
     actions: 'niche-title__dots-button',
     edit: 'niche-title__rename-button',

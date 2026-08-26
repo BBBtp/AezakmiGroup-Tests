@@ -2,13 +2,16 @@ import type { Locator, Page } from '@playwright/test';
 
 import { UiObject } from '@framework/ui';
 import { productLocators } from '@locators/product';
+import { AppMetricDetailsModalComponent } from './app-metric-details-modal-component';
 
 export class AppsComponent extends UiObject {
   readonly root: Locator;
+  readonly metricDetails: AppMetricDetailsModalComponent;
 
   constructor(page: Page) {
     super(page);
     this.root = this.locate.role('main');
+    this.metricDetails = new AppMetricDetailsModalComponent(page);
   }
 
   async expectLoaded(): Promise<void> {
@@ -47,6 +50,20 @@ export class AppsComponent extends UiObject {
 
   async expectRows(): Promise<void> {
     await this.expectations.nonEmpty('Apps: application rows', this.appLinks);
+  }
+
+  async openFirstSuccessRateDetails(): Promise<AppMetricDetailsModalComponent> {
+    const rows = this.locate.within(this.root).css(productLocators.apps.detailedRows);
+    await this.expectations.nonEmpty('Apps: detailed statistic rows', rows);
+    // Frontend metric cells have no accessible name or test id. The table contract fixes
+    // Success rate as the third column until the UI exposes a stable semantic locator.
+    const successRateCell = this.locate
+      .within(rows.first())
+      .role('cell')
+      .nth(productLocators.apps.successRateColumnIndex);
+    await this.actions.click('Apps: open first Success rate details', successRateCell);
+    await this.metricDetails.expectSuccessRateOpen();
+    return this.metricDetails;
   }
 
   async openFirstApp(): Promise<string> {

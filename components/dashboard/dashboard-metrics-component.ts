@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 
 import { UiObject } from '@framework/ui';
 import { dashboardTestIds } from '@locators/navigation';
+import { systemStateLocators } from '@locators/common';
 import { CardComponent } from '../common/card-component';
 
 export class DashboardMetricsComponent extends UiObject {
@@ -31,6 +32,42 @@ export class DashboardMetricsComponent extends UiObject {
       'Dashboard business values',
       this.root,
       /\b(?:NaN|undefined|null)\b/i,
+    );
+  }
+
+  async expectError(): Promise<void> {
+    const within = this.locate.within(this.root);
+    await this.expectations.visible(
+      'Dashboard: error title',
+      within.text(systemStateLocators.errorTitle, { exact: true }),
+    );
+    await this.expectations.visible(
+      'Dashboard: error description',
+      within.text(systemStateLocators.errorDescription, { exact: true }),
+    );
+    await this.expectations.visible(
+      'Dashboard: retry action',
+      within.role('button', { name: systemStateLocators.retry, exact: true }),
+    );
+    await this.expectations.hidden('Dashboard: stale chart hidden', this.chart);
+  }
+
+  async expectLoading(): Promise<void> {
+    await this.expectations.visible(
+      'Dashboard: loading state',
+      this.locate.css(systemStateLocators.loading).first(),
+    );
+  }
+
+  async expectEmpty(): Promise<void> {
+    await this.totalMrr.assertVisible('Total MRR');
+    await this.expectations.text('Dashboard: empty Total MRR', this.totalMrr.mainValue, '$0');
+    await this.expectations.text('Dashboard: empty absolute change', this.totalMrr.absValue, '0');
+    await this.expectations.containsText('Dashboard: empty period', this.totalMrr.period, 'last 0 days');
+    await this.expectations.notContainsText(
+      'Dashboard empty: no technical values',
+      this.root,
+      systemStateLocators.technicalValue,
     );
   }
 

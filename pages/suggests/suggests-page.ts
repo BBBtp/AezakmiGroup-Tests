@@ -14,6 +14,11 @@ export class SuggestsPage extends BasePage {
     this.overview = new SuggestsOverviewComponent(page);
   }
 
+  async openRoute(): Promise<void> {
+    await this.navigateTo('/suggests');
+    await this.overview.expectShellLoaded();
+  }
+
   async openFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Suggests', '/suggests', 'Keywords');
     await this.overview.expectBusinessControls();

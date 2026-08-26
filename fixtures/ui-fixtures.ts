@@ -2,9 +2,9 @@ import { NetworkController } from '@framework/network';
 import { BrowserDiagnostics } from '@framework/playwright';
 import { LoginPage } from '@modules/auth';
 import { AdministrationPage } from '@modules/administration';
-import { AppListPage } from '@modules/asa';
+import { AppListPage, NetProfitPredictPage } from '@modules/asa';
 import { ChecksPage } from '@modules/checks';
-import { EmployeeCreatePage } from '@modules/employees';
+import { EmployeeCreatePage, EmployeesPage } from '@modules/employees';
 import { TopKeywordsPage } from '@modules/keywords';
 import { KpiPage, KpiSettingsPage } from '@modules/kpi';
 import { ApplicationShellComponent, DashboardPage, ReadOnlySectionsPage } from '@modules/navigation';
@@ -21,9 +21,11 @@ import { coreTest, type CoreFixtures } from './core-fixtures';
 export type UiFixtures = {
   administrationPage: AdministrationPage;
   appListPage: AppListPage;
+  netProfitPredictPage: NetProfitPredictPage;
   loginPage: LoginPage;
   checksPage: ChecksPage;
   employeeCreatePage: EmployeeCreatePage;
+  employeesPage: EmployeesPage;
   topKeywordsPage: TopKeywordsPage;
   kpiPage: KpiPage;
   kpiSettingsPage: KpiSettingsPage;
@@ -50,6 +52,10 @@ export const uiTest = coreTest.extend<UiFixtures>({
     await use(new AppListPage(page));
   },
 
+  netProfitPredictPage: async ({ page }, use) => {
+    await use(new NetProfitPredictPage(page));
+  },
+
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
   },
@@ -60,6 +66,10 @@ export const uiTest = coreTest.extend<UiFixtures>({
 
   employeeCreatePage: async ({ page }, use) => {
     await use(new EmployeeCreatePage(page));
+  },
+
+  employeesPage: async ({ page }, use) => {
+    await use(new EmployeesPage(page));
   },
 
   topKeywordsPage: async ({ page }, use) => {

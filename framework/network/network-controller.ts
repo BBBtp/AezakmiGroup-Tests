@@ -69,6 +69,23 @@ export class NetworkController {
     );
   }
 
+  waitForRequest(criteria: Pick<ResponseCriteria, 'url' | 'method' | 'timeout'>): Promise<Request> {
+    return this.page.waitForRequest(
+      (request) =>
+        matchesUrl(request.url(), criteria.url) && (!criteria.method || request.method() === criteria.method),
+      { timeout: criteria.timeout },
+    );
+  }
+
+  async waitForRequestWhile<T>(
+    criteria: Pick<ResponseCriteria, 'url' | 'method' | 'timeout'>,
+    action: () => Promise<T>,
+  ): Promise<{ request: Request; result: T }> {
+    const requestPromise = this.waitForRequest(criteria);
+    const [request, result] = await Promise.all([requestPromise, action()]);
+    return { request, result };
+  }
+
   async waitForResponseWhile<T>(
     criteria: ResponseCriteria,
     action: () => Promise<T>,

@@ -1,7 +1,7 @@
 export { authSelectors, authTestIds, authText } from './auth';
 export { administrationLocators } from './administration';
 export { commonComponentSelectors } from './common';
-export { employeeCreateData, employeeCreateLocators } from './employees';
+export { employeeCreateData, employeeCreateLocators, employeeListLocators } from './employees';
 export { kpiManagerText, kpiTestIds } from './kpi';
 export {
   kpiSettingsTestIds,

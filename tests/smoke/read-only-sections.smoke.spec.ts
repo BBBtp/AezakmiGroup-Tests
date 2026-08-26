@@ -21,12 +21,12 @@ test.describe('Read-only разделы CRM', () => {
 
   test('Employees открывается и показывает список сотрудников', async ({
     browserDiagnostics,
-    readOnlySectionsPage,
+    employeesPage,
   }) => {
     await allure.allureId('637');
     const consoleErrors = browserDiagnostics.captureConsoleErrors('open Employees');
 
-    await readOnlySectionsPage.openFromSidebar('employees');
+    await employeesPage.openFromSidebar();
 
     consoleErrors.expectNoErrors();
   });
