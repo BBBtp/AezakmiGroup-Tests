@@ -97,6 +97,13 @@ export const productLocators = {
       lowerAction: 'Edit',
       descendants: '*',
     },
+    gallery: {
+      title: 'Images',
+      // Content thumbnails expose neither a test id nor an accessible name; exclude the stable app-logo alt.
+      thumbnail: 'img:not([alt="app logo"])',
+      firstPosition: /1\s*\/\s*3/,
+      secondPosition: /2\s*\/\s*3/,
+    },
     createForm: {
       uploadPrompt: 'Click to upload',
       // Initial upload has no test id; it is the first upload control in the create form.

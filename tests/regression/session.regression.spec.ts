@@ -7,7 +7,11 @@ import { test } from '@fixtures';
 const AUTH_FILE = path.resolve('.auth/admin.json');
 
 test.describe('Сессия', () => {
-  test('Logout полностью закрывает сессию', async ({ dashboardPage, applicationShell, authSessions }) => {
+  test('[TC-569] Logout полностью закрывает сессию', async ({
+    dashboardPage,
+    applicationShell,
+    authSessions,
+  }) => {
     await allure.allureId('569');
 
     await dashboardPage.navigate();
@@ -15,7 +19,7 @@ test.describe('Сессия', () => {
     await authSessions.expectStoredSessionAccess(AUTH_FILE, ['/dashboard', '/kpi']);
   });
 
-  test('Истекшая сессия блокирует чтение разделов CRM', async ({ authSessions }) => {
+  test('[TC-570] Истекшая сессия блокирует чтение разделов CRM', async ({ authSessions }) => {
     await allure.allureId('570');
 
     await authSessions.expectExpiredSessionBlocked(AUTH_FILE, ['/dashboard', '/kpi/settings']);

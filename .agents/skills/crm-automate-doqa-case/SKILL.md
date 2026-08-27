@@ -62,6 +62,10 @@ support flow -> framework/network|data|lifecycle|playwright
 - Добавлять UI-поведение в page/component и экспортировать только через `@modules/*`.
 - Хранить статические и динамические селекторы в `locators/<domain>`.
 - Использовать `UiActions` и `UiExpectations`; не вызывать raw locator API из теста.
+- Именовать Allure-шаги по-русски с префиксами `ПОДГОТОВКА`, `ДЕЙСТВИЕ`, `ПРОВЕРКА`.
+  Передавать в `UiActions`, `UiExpectations` и `scenarioCheck` человекочитаемые русские цели;
+  не переводить только устойчивые названия продукта, URL, HTTP-методы и технические ID.
+- Не добавлять в Allure-описание отдельный раздел `Диагностика`.
 - Использовать `NetworkController` для navigation, response waits, mocks и request capture.
 - Использовать `TestDataFactory` и domain lifecycle для уникальных мутаций.
 - Регистрировать компенсацию до создания или изменения данных.
@@ -80,7 +84,8 @@ support flow -> framework/network|data|lifecycle|playwright
 5. Добавить fixture или `tests/support/<domain>` только для повторяемого lifecycle/integration flow.
 6. Написать тонкий сценарий в `tests/smoke` или `tests/regression`.
 7. Добавить ровно один уникальный числовой Allure ID.
-8. Обновить архитектурную документацию, если изменились команды или границы.
+8. Проверить, что описание и шаги Allure соответствуют русскому формату проекта.
+9. Обновить архитектурную документацию, если изменились команды или границы.
 
 Не создавать speculative helpers. Сначала найти минимум два реальных потребителя либо оставить
 поведение в доменном объекте.

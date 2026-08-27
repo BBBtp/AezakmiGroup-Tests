@@ -57,8 +57,8 @@ export class LoginFormComponent extends UiObject {
    * @param password пароль пользователя
    */
   async fillCredentials(email: string, password: string): Promise<void> {
-    await this.actions.fill('login email', this.emailInput, email);
-    await this.actions.fill('login password', this.passwordInput, password);
+    await this.actions.fill('поле электронной почты', this.emailInput, email);
+    await this.actions.fill('поле пароля', this.passwordInput, password);
   }
 
   /**
@@ -67,7 +67,7 @@ export class LoginFormComponent extends UiObject {
    */
   async assertErrorVisible(text: string): Promise<void> {
     const error = this.locate.text(text, { exact: true });
-    await this.expectations.visible(`login error: ${text}`, error, {
+    await this.expectations.visible(`ошибка входа: ${text}`, error, {
       timeout: TestData.timeouts.action,
     });
   }
@@ -78,7 +78,7 @@ export class LoginFormComponent extends UiObject {
    */
   async assertErrorHidden(text: string): Promise<void> {
     const error = this.locate.text(text, { exact: true });
-    await this.expectations.hidden(`login error: ${text}`, error);
+    await this.expectations.hidden(`ошибка входа: ${text}`, error);
   }
 
   /** Проверяет отображение ошибки «Неверный email» */
@@ -112,17 +112,17 @@ export class LoginFormComponent extends UiObject {
   }
 
   async submit(): Promise<void> {
-    await this.actions.click('login: submit credentials', this.submitButton);
+    await this.actions.click('форма входа: отправить учётные данные', this.submitButton);
   }
 
   /** Переключает видимость пароля */
   async togglePasswordVisibility(): Promise<void> {
-    await this.actions.click('login: toggle password visibility', this.toggleButtonPasswordVisibility);
+    await this.actions.click('форма входа: изменить видимость пароля', this.toggleButtonPasswordVisibility);
   }
 
   /** Переключает чекбокс «Запомнить меня» */
   async toggleRememberMe(): Promise<void> {
-    await this.actions.click('login: toggle remember me', this.rememberMeCheckbox);
+    await this.actions.click('форма входа: переключить «Запомнить меня»', this.rememberMeCheckbox);
   }
 
   /** Проверяет, отмечен ли чекбокс «Запомнить меня» */
@@ -133,24 +133,24 @@ export class LoginFormComponent extends UiObject {
 
   /** Ожидает готовность формы к взаимодействию */
   async waitForFormReady(): Promise<void> {
-    await this.expectations.visible('login form', this.form);
-    await this.expectations.visible('login email input', this.emailInput);
-    await this.expectations.visible('login submit action', this.submitButton);
+    await this.expectations.visible('форма входа', this.form);
+    await this.expectations.visible('поле электронной почты', this.emailInput);
+    await this.expectations.visible('кнопка отправки формы входа', this.submitButton);
   }
 
   async expectPrimaryControlsVisible(): Promise<void> {
     await this.waitForFormReady();
-    await this.expectations.visible('login password input', this.passwordInput);
-    await this.expectations.visible('login forgot password action', this.forgotPasswordButton);
+    await this.expectations.visible('поле пароля', this.passwordInput);
+    await this.expectations.visible('кнопка восстановления пароля', this.forgotPasswordButton);
   }
 
   async expectPasswordType(type: 'password' | 'text'): Promise<void> {
-    await this.expectations.attribute('login password input type', this.passwordInput, 'type', type);
+    await this.expectations.attribute('тип поля пароля', this.passwordInput, 'type', type);
   }
 
   async expectRememberMeChecked(checked: boolean): Promise<void> {
     await this.expectations.attribute(
-      'login remember me state',
+      'состояние флажка «Запомнить меня»',
       this.rememberMeCheckbox,
       'aria-checked',
       String(checked),
@@ -158,7 +158,7 @@ export class LoginFormComponent extends UiObject {
   }
 
   async expectCredentialValues(email: string, password: string): Promise<void> {
-    await this.expectations.value('login email value', this.emailInput, email);
-    await this.expectations.value('login password value', this.passwordInput, password);
+    await this.expectations.value('значение поля электронной почты', this.emailInput, email);
+    await this.expectations.value('значение поля пароля', this.passwordInput, password);
   }
 }

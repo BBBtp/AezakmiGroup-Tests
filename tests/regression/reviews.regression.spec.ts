@@ -4,11 +4,11 @@ import { test } from '@fixtures';
 import { reviewsApi } from '@support/reviews/contracts';
 
 test.describe('Reviews and ratings', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('фильтры периода и вкладок обновляют данные раздела', async ({ reviewsPage }) => {
+  test('[TC-633] фильтры периода и вкладок обновляют данные раздела', async ({ reviewsPage }) => {
     await allure.allureId('633');
     await reviewsPage.openFromSidebar();
     await reviewsPage.overview.switchTab('Ratings');
@@ -17,7 +17,7 @@ test.describe('Reviews and ratings', () => {
     await reviewsPage.overview.selectPeriod('View all');
   });
 
-  test('список показывает строки и пагинация запрашивает следующую страницу', async ({
+  test('[TC-634] список показывает строки и пагинация запрашивает следующую страницу', async ({
     network,
     reviewsPage,
   }) => {
@@ -32,28 +32,28 @@ test.describe('Reviews and ratings', () => {
     await held.abort();
   });
 
-  test('выбранная строка открывает соответствующее приложение', async ({ reviewsPage }) => {
+  test('[TC-635] выбранная строка открывает соответствующее приложение', async ({ reviewsPage }) => {
     await allure.allureId('635');
     await reviewsPage.openFromSidebar();
     await reviewsPage.overview.expectRows();
     await reviewsPage.overview.openFirstApplication();
   });
 
-  test('See more раскрывает длинный отзыв и Ratings остаётся доступным', async ({ reviewsPage }) => {
+  test('[TC-636] See more раскрывает длинный отзыв и Ratings остаётся доступным', async ({ reviewsPage }) => {
     await allure.allureId('636');
     await reviewsPage.openFromSidebar();
     await reviewsPage.overview.expandFirstLongReview();
     await reviewsPage.overview.switchTab('Ratings');
   });
 
-  test('ошибка API отображается без устаревших строк', async ({ network, reviewsPage }) => {
+  test('[TC-745] ошибка API отображается без устаревших строк', async ({ network, reviewsPage }) => {
     await allure.allureId('745');
     await network.failNext(reviewsApi.list, 'POST', { message: 'Test failure' });
     await reviewsPage.openRouteFromSidebar();
     await reviewsPage.overview.expectError();
   });
 
-  test('loading state завершается после ответа API', async ({ network, reviewsPage }) => {
+  test('[TC-746] loading state завершается после ответа API', async ({ network, reviewsPage }) => {
     await allure.allureId('746');
     const held = await network.holdNext(reviewsApi.list, 'POST');
     const opening = reviewsPage.openRouteFromSidebar();

@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 
+import { scenarioCheck } from '@framework/assertions';
 import { UiObject } from '@framework/ui';
 import { productLocators } from '@locators/product';
 
@@ -95,6 +96,15 @@ export class AppMetricDetailsModalComponent extends UiObject {
           })
           .filter(Boolean);
       }),
+    );
+  }
+
+  async expectGeoOptionOrder(expected: readonly GeoOptionToken[]): Promise<void> {
+    const actual = await this.optionOrder();
+    await scenarioCheck.deepEqual(
+      `Порядок GEO-опций: ${expected.join(' → ')}`,
+      actual.slice(0, expected.length),
+      expected,
     );
   }
 

@@ -28,6 +28,8 @@ const forbiddenPlaywrightRuntimeImports = new Set([
   'webkit',
 ]);
 const violations = [];
+const russianAllureStepPrefix = /^(?:ПОДГОТОВКА|ДЕЙСТВИЕ|ПРОВЕРКА) · /u;
+const forbiddenEnglishAllurePrefix = /\b(?:ARRANGE|ACT|ASSERT) ·/u;
 function usesCentralizedLocatorContract(file) {
   const relative = path.relative(root, file);
   return relative.startsWith(`pages${path.sep}`) || relative.startsWith(`components${path.sep}`);
@@ -44,6 +46,53 @@ async function collectTypeScriptFiles(directory) {
   }
 
   return files;
+}
+
+function staticStepTitle(node) {
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) return node.head.text;
+  return undefined;
+}
+
+for (const policyRoot of ['tests', 'framework', 'utils']) {
+  const files = await collectTypeScriptFiles(path.join(root, policyRoot));
+  for (const file of files) {
+    const contents = await fs.readFile(file, 'utf8');
+    const source = ts.createSourceFile(file, contents, ts.ScriptTarget.Latest, true);
+
+    if (forbiddenEnglishAllurePrefix.test(contents)) {
+      violations.push(
+        `${path.relative(root, file)}: Allure steps must use Russian prefixes ПОДГОТОВКА/ДЕЙСТВИЕ/ПРОВЕРКА`,
+      );
+    }
+    if (/##\s+Диагностика/u.test(contents)) {
+      violations.push(
+        `${path.relative(root, file)}: Allure description must not contain a separate Диагностика section`,
+      );
+    }
+
+    const visit = (node) => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.expression.getText(source) === 'test' &&
+        ['step', 'beforeEach', 'beforeAll'].includes(node.expression.name.text) &&
+        node.arguments[0]
+      ) {
+        const title = staticStepTitle(node.arguments[0]);
+        if (title !== undefined && !russianAllureStepPrefix.test(title)) {
+          const { line, character } = source.getLineAndCharacterOfPosition(
+            node.arguments[0].getStart(source),
+          );
+          violations.push(
+            `${path.relative(root, file)}:${line + 1}:${character + 1}: Allure step must start with ПОДГОТОВКА, ДЕЙСТВИЕ or ПРОВЕРКА`,
+          );
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+  }
 }
 
 function isForbiddenImport(importer, specifier) {
@@ -141,6 +190,12 @@ for (const testRoot of [path.join('tests', 'smoke'), path.join('tests', 'regress
         return;
       }
       const namedImports = node.importClause?.namedBindings;
+      if (node.moduleSpecifier.text === '@playwright/test') {
+        const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
+        violations.push(
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must not import @playwright/test; move UI assertions to modules and data assertions to @framework/assertions`,
+        );
+      }
       if (!namedImports || !ts.isNamedImports(namedImports)) return;
       for (const element of namedImports.elements) {
         const importedName = element.propertyName?.text ?? element.name.text;
@@ -152,6 +207,16 @@ for (const testRoot of [path.join('tests', 'smoke'), path.join('tests', 'regress
       }
     });
     const visit = (node) => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === 'expect'
+      ) {
+        const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
+        violations.push(
+          `${path.relative(root, file)}:${line + 1}:${character + 1}: business tests must not call raw expect(); use a domain expect method or @framework/assertions`,
+        );
+      }
       if (ts.isPropertyAccessExpression(node) && node.name.text === 'page') {
         const { line, character } = source.getLineAndCharacterOfPosition(node.getStart(source));
         violations.push(

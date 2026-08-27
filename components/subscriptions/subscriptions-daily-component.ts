@@ -223,6 +223,23 @@ export class SubscriptionsDailyComponent extends UiObject {
     );
   }
 
+  async expectPartialMetrics(values: readonly string[]): Promise<void> {
+    await this.expectations.visible('Subscriptions Daily: карточки частичных данных', this.cardsList);
+    await this.expectations.count('Subscriptions Daily: все карточки частичных данных', this.cards, 7);
+    for (const value of values) {
+      await this.expectations.containsText(
+        `Subscriptions Daily: частичная метрика ${value}`,
+        this.cardsList,
+        value,
+      );
+    }
+    await this.expectations.notContainsText(
+      'Subscriptions Daily: частичные данные без технических значений',
+      this.cardsList,
+      /NaN|undefined|null|\[object Object\]/i,
+    );
+  }
+
   async expectCardsHorizontalScroll(): Promise<void> {
     await this.expectations.count('Subscriptions Daily: all metric cards', this.cards, 7);
     await this.expectations.pollNumberAtLeast(

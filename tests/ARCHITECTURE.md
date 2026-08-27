@@ -30,3 +30,10 @@ Business tests must not call `locator`, `getBy*`, raw `page.goto/route/waitFor*`
 action helpers directly. They also must not subscribe to browser events, mutate storage or create
 BrowserContext themselves. Add UI behavior to the domain module, reusable session flows to
 `tests/support/<domain>` and browser mechanics to managed fixtures instead.
+
+Business tests also must not import `@playwright/test` or call raw `expect()`. Every title starts
+with `[TC-<DoQA ID>]` and matches its single `allure.allureId`. UI actions and checks go through
+domain methods so `UiActions`/`UiExpectations` produce Russian `ДЕЙСТВИЕ`/`ПРОВЕРКА` Allure
+steps. Controlled network setup produces `ПОДГОТОВКА` steps; pure data contracts use
+`@framework/assertions` or a
+domain support assertion.

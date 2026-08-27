@@ -35,20 +35,24 @@ async function openArchive(
 }
 
 test.describe('Niches → Archive', () => {
-  test('открывает архив и показывает хлебные крошки', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-941] открывает архив и показывает хлебные крошки', async ({
+    dashboardPage,
+    network,
+    nichesPage,
+  }) => {
     await allure.allureId('941');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     await nichesPage.expectArchiveBreadcrumbs();
   });
 
-  test('показывает структуру списка и счётчик', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-942] показывает структуру списка и счётчик', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('942');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     await nichesPage.overview.expectArchiveControls();
     await nichesPage.overview.expectRow(0, { name: 'Archived automation 1', module: 'ASO' });
   });
 
-  test('показывает пустое состояние', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-939] показывает пустое состояние', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('939');
     await dashboardPage.navigate();
     await network.mockJson(archiveEndpoint, 'GET', archiveNiches(0));
@@ -56,7 +60,7 @@ test.describe('Niches → Archive', () => {
     await nichesPage.overview.expectEmpty(/No niches transferred to the archive yet/i);
   });
 
-  test('завершает состояние загрузки', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-940] завершает состояние загрузки', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('940');
     await dashboardPage.navigate();
     await nichesPage.openFromSidebar();
@@ -69,7 +73,7 @@ test.describe('Niches → Archive', () => {
     await nichesPage.expectArchiveError();
   });
 
-  test('повторяет запрос после ошибки загрузки', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-943] повторяет запрос после ошибки загрузки', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('943');
     await dashboardPage.navigate();
     await nichesPage.openFromSidebar();
@@ -81,34 +85,42 @@ test.describe('Niches → Archive', () => {
     await nichesPage.overview.expectListRows(2);
   });
 
-  test('ищет существующую архивную нишу', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-944] ищет существующую архивную нишу', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('944');
     await openArchive({ dashboardPage, network, nichesPage }, 3);
     await nichesPage.overview.searchFor('Archived automation 1');
     await nichesPage.overview.expectOnlyMatchingRows('Archived automation 1');
   });
 
-  test('показывает пустой поиск', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-945] показывает пустой поиск', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('945');
     await openArchive({ dashboardPage, network, nichesPage }, 3);
     await nichesPage.overview.searchFor('missing-archive-automation');
     await nichesPage.overview.expectEmpty(/No niches|Nothing was found/i);
   });
 
-  test('не показывает лишнюю пагинацию до 10 строк', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-979] не показывает лишнюю пагинацию до 10 строк', async ({
+    dashboardPage,
+    network,
+    nichesPage,
+  }) => {
     await allure.allureId('979');
     await openArchive({ dashboardPage, network, nichesPage }, 3);
     await nichesPage.overview.expectSinglePage(3);
   });
 
-  test('переключает страницы списка более 10 строк', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-946] переключает страницы списка более 10 строк', async ({
+    dashboardPage,
+    network,
+    nichesPage,
+  }) => {
     await allure.allureId('946');
     await openArchive({ dashboardPage, network, nichesPage }, 12);
     await nichesPage.overview.expectPagination(2);
     await nichesPage.overview.goNextAndBack();
   });
 
-  test('открывает карточку архивной ниши', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-947] открывает карточку архивной ниши', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('947');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     const snapshot = await nichesPage.overview.openFirstRow();
@@ -116,7 +128,7 @@ test.describe('Niches → Archive', () => {
     await nichesPage.expectArchiveDetailActions();
   });
 
-  test('возвращает нишу в активный список', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-951] возвращает нишу в активный список', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('951');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     const snapshot = await nichesPage.overview.openFirstRow();
@@ -126,7 +138,7 @@ test.describe('Niches → Archive', () => {
     await nichesPage.expectNotice('Niche has been successfully moved to niche list');
   });
 
-  test('показывает ошибку возврата ниши', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-948] показывает ошибку возврата ниши', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('948');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     const snapshot = await nichesPage.overview.openFirstRow();
@@ -136,7 +148,7 @@ test.describe('Niches → Archive', () => {
     await nichesPage.expectNotice('Failed to move to niche list');
   });
 
-  test('отменяет удаление архивной ниши', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-949] отменяет удаление архивной ниши', async ({ dashboardPage, network, nichesPage }) => {
     await allure.allureId('949');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     const snapshot = await nichesPage.overview.openFirstRow();
@@ -145,7 +157,11 @@ test.describe('Niches → Archive', () => {
     await nichesPage.expectArchiveDetail(snapshot.name, snapshot.module);
   });
 
-  test('обрабатывает успешное и ошибочное удаление', async ({ dashboardPage, network, nichesPage }) => {
+  test('[TC-950] обрабатывает успешное и ошибочное удаление', async ({
+    dashboardPage,
+    network,
+    nichesPage,
+  }) => {
     await allure.allureId('950');
     await openArchive({ dashboardPage, network, nichesPage }, 2);
     const deletedNiche = await nichesPage.overview.openFirstRow();

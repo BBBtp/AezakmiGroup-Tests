@@ -6,12 +6,12 @@ import { apiError } from '@support/niches';
 const mutationEndpoint = /\/master\/api\/v1\/.*/;
 
 test.describe('Niches → create, module and edit', () => {
-  test.beforeEach(async ({ dashboardPage, nichesPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage, nichesPage }) => {
     await dashboardPage.navigate();
     await nichesPage.openFromSidebar();
   });
 
-  test('отменяет и подтверждает создание ниши', async ({ dataFactory, network, nichesPage }) => {
+  test('[TC-595] отменяет и подтверждает создание ниши', async ({ dataFactory, network, nichesPage }) => {
     await allure.allureId('595');
     const name = dataFactory.uniqueLabel('niche');
     await nichesPage.openCreate();
@@ -26,13 +26,13 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.expectNotice('Niche has been successfully added');
   });
 
-  test('открывает карточку той же ниши', async ({ nichesPage }) => {
+  test('[TC-597] открывает карточку той же ниши', async ({ nichesPage }) => {
     await allure.allureId('597');
     const snapshot = await nichesPage.openFirstDetail();
     await nichesPage.detail.expectLoaded(snapshot.name, snapshot.module);
   });
 
-  test('валидирует обязательные и невалидные поля', async ({ nichesPage }) => {
+  test('[TC-694] валидирует обязательные и невалидные поля', async ({ nichesPage }) => {
     await allure.allureId('694');
     await nichesPage.openCreate();
     await nichesPage.create.expectSubmitDisabled();
@@ -41,7 +41,7 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.create.expectSubmitDisabled();
   });
 
-  test('не сохраняет отменённый черновик', async ({ dataFactory, nichesPage }) => {
+  test('[TC-695] не сохраняет отменённый черновик', async ({ dataFactory, nichesPage }) => {
     await allure.allureId('695');
     const draft = dataFactory.uniqueLabel('draft');
     await nichesPage.openCreate();
@@ -52,7 +52,7 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.create.expectName('');
   });
 
-  test('проверяет полный UI lifecycle управления нишей', async ({ nichesPage }) => {
+  test('[TC-912] проверяет полный UI lifecycle управления нишей', async ({ nichesPage }) => {
     await allure.allureId('912');
     await nichesPage.overview.expectBusinessControls();
     await nichesPage.openFirstDetail();
@@ -60,7 +60,7 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.detail.expectLoaded();
   });
 
-  test('переносит активную нишу в архив', async ({ network, nichesPage }) => {
+  test('[TC-981] переносит активную нишу в архив', async ({ network, nichesPage }) => {
     await allure.allureId('981');
     const snapshot = await nichesPage.openFirstDetail();
     await network.fulfillNextMutation(mutationEndpoint, { ...snapshot, archive: true });
@@ -68,7 +68,7 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.expectNotice('Niche has been successfully moved to archive');
   });
 
-  test('показывает ошибку переноса активной ниши в архив', async ({ network, nichesPage }) => {
+  test('[TC-982] показывает ошибку переноса активной ниши в архив', async ({ network, nichesPage }) => {
     await allure.allureId('982');
     await nichesPage.openFirstDetail();
     await network.fulfillNextMutation(mutationEndpoint, apiError, 500);
@@ -76,53 +76,53 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.expectNotice('Failed to move to archive');
   });
 
-  test('показывает только ASO и Web View в Module', async ({ nichesPage }) => {
+  test('[TC-964] показывает только ASO и Web View в Module', async ({ nichesPage }) => {
     await allure.allureId('964');
     await nichesPage.openCreate();
     await nichesPage.create.expectModuleOptions();
   });
 
-  test('выбирает ASO и приложение', async ({ nichesPage }) => {
+  test('[TC-959] выбирает ASO и приложение', async ({ nichesPage }) => {
     await allure.allureId('959');
     await nichesPage.openCreate();
     await nichesPage.create.selectModule('ASO');
     await nichesPage.create.selectFirstApp();
   });
 
-  test('выбирает Web View и приложение', async ({ nichesPage }) => {
+  test('[TC-961] выбирает Web View и приложение', async ({ nichesPage }) => {
     await allure.allureId('961');
     await nichesPage.openCreate();
     await nichesPage.create.selectModule('Web View');
     await nichesPage.create.selectFirstApp();
   });
 
-  test('показывает Module в списке ниш', async ({ nichesPage }) => {
+  test('[TC-963] показывает Module в списке ниш', async ({ nichesPage }) => {
     await allure.allureId('963');
     await nichesPage.overview.expectListRows();
     const snapshot = await nichesPage.overview.firstRowSnapshot();
     await nichesPage.overview.expectRow(0, snapshot);
   });
 
-  test('показывает Module в карточке ниши', async ({ nichesPage }) => {
+  test('[TC-958] показывает Module в карточке ниши', async ({ nichesPage }) => {
     await allure.allureId('958');
     const snapshot = await nichesPage.openFirstDetail();
     await nichesPage.detail.expectLoaded(snapshot.name, snapshot.module);
   });
 
-  test('показывает дату последнего обновления в карточке ниши', async ({ nichesPage }) => {
+  test('[TC-1002] показывает дату последнего обновления в карточке ниши', async ({ nichesPage }) => {
     await allure.allureId('1002');
     const snapshot = await nichesPage.openFirstDetail();
     await nichesPage.detail.expectLoaded(snapshot.name, undefined, snapshot.updatedAt);
   });
 
-  test('предзаполняет форму редактирования', async ({ nichesPage }) => {
+  test('[TC-965] предзаполняет форму редактирования', async ({ nichesPage }) => {
     await allure.allureId('965');
     const snapshot = await nichesPage.openFirstDetail();
     await nichesPage.detail.openEdit();
     await nichesPage.edit.expectInitial(snapshot.name, snapshot.module as 'ASO' | 'Web View');
   });
 
-  test('изменяет Module тестовой ниши через mock API', async ({ network, nichesPage }) => {
+  test('[TC-966] изменяет Module тестовой ниши через mock API', async ({ network, nichesPage }) => {
     await allure.allureId('966');
     const snapshot = await nichesPage.openFirstDetail();
     await nichesPage.detail.openEdit();
@@ -134,7 +134,11 @@ test.describe('Niches → create, module and edit', () => {
     await nichesPage.expectNotice('Niche has been successfully changed');
   });
 
-  test('показывает конфликт имени и ошибку сохранения', async ({ dataFactory, network, nichesPage }) => {
+  test('[TC-967] показывает конфликт имени и ошибку сохранения', async ({
+    dataFactory,
+    network,
+    nichesPage,
+  }) => {
     await allure.allureId('967');
     await nichesPage.openFirstDetail();
     await nichesPage.detail.openEdit();

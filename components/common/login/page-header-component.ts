@@ -77,10 +77,10 @@ export class PageHeaderComponent extends UiObject {
    * проверка подзаголовка не выполняется.
    */
   async verifyContent(expectedTitle: string, expectedSubtitle?: string): Promise<void> {
-    await this.expectations.text('page title', this.title, expectedTitle);
+    await this.expectations.text('заголовок страницы', this.title, expectedTitle);
 
     if (expectedSubtitle) {
-      await this.expectations.text('page subtitle', this.subtitle, expectedSubtitle);
+      await this.expectations.text('подзаголовок страницы', this.subtitle, expectedSubtitle);
     }
   }
 }

@@ -212,6 +212,55 @@ export class AbTestsComponent extends UiObject {
     await this.expectations.containsText('A/B tests: page counter', this.root, /\d+\s*of\s*\d+/);
   }
 
+  async expectGalleryKeyboardNavigation(): Promise<void> {
+    const row = this.firstRow;
+    const rowButtons = this.locate.within(row).role('button');
+    await this.expectations.countAtLeast('Галерея A/B-теста: действия строки', rowButtons, 3);
+    await this.actions.click(
+      'A/B-тест: раскрыть строку с вариантами',
+      rowButtons.nth(productLocators.abTests.row.expandActionIndex),
+    );
+    const thumbnails = this.locate.within(row).css(productLocators.abTests.gallery.thumbnail);
+    await this.expectations.countAtLeast('Галерея A/B-теста: изображения варианта', thumbnails, 3);
+    await this.actions.click('Галерея A/B-теста: открыть первое изображение', thumbnails.first());
+
+    const dialog = this.locate.role('dialog', { name: productLocators.abTests.gallery.title });
+    await this.expectations.visible('Галерея A/B-теста: модальное окно', dialog);
+    await this.expectations.containsText(
+      'Галерея A/B-теста: выбрано первое изображение',
+      dialog,
+      productLocators.abTests.gallery.firstPosition,
+    );
+    await this.actions.press('Галерея A/B-теста: перейти вправо клавиатурой', dialog, 'ArrowRight');
+    await this.expectations.containsText(
+      'Галерея A/B-теста: выбрано второе изображение',
+      dialog,
+      productLocators.abTests.gallery.secondPosition,
+    );
+    await this.actions.press('Галерея A/B-теста: вернуться влево клавиатурой', dialog, 'ArrowLeft');
+    await this.expectations.containsText(
+      'Галерея A/B-теста: снова выбрано первое изображение',
+      dialog,
+      productLocators.abTests.gallery.firstPosition,
+    );
+  }
+
+  async expectMissingPValuesRenderedWithoutTechnicalValues(): Promise<void> {
+    const row = this.firstRow;
+    const rowButtons = this.locate.within(row).role('button');
+    await this.expectations.countAtLeast('A/B-тест: действия строки старого теста', rowButtons, 3);
+    await this.actions.click(
+      'A/B-тест: раскрыть старый внутренний тест',
+      rowButtons.nth(productLocators.abTests.row.expandActionIndex),
+    );
+    await this.expectations.containsText('A/B-тест: отображается колонка P-value', row, 'P-value');
+    await this.expectations.notContainsText(
+      'A/B-тест: отсутствующие P-value не показывают null',
+      row,
+      productLocators.technicalValue,
+    );
+  }
+
   async openFirstApplication(): Promise<void> {
     await this.actions.click('A/B tests: open first application', this.appLinks.first());
     await this.expectations.url('A/B tests: linked application URL', productLocators.apps.detailUrl);

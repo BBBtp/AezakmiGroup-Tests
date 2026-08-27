@@ -1,11 +1,11 @@
 import { test } from '@fixtures';
 import { allure } from 'allure-playwright';
 test.describe('Функциональность авторизации', () => {
-  test.beforeEach(async ({ loginPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ loginPage }) => {
     await loginPage.navigate();
   });
 
-  test('Работа модального окна восстановления пароля', async ({ loginPage }) => {
+  test('[TC-795] Работа модального окна восстановления пароля', async ({ loginPage }) => {
     await allure.allureId('795');
     await loginPage.openForgotPasswordModal();
     await loginPage.forgotPasswordModal.expectContentVisible();
@@ -13,7 +13,7 @@ test.describe('Функциональность авторизации', () => {
     await loginPage.forgotPasswordModal.expectHidden();
   });
 
-  test('Закрытие модалки через оверлей', async ({ loginPage }) => {
+  test('[TC-796] Закрытие модалки через оверлей', async ({ loginPage }) => {
     await allure.allureId('796');
     await loginPage.openForgotPasswordModal();
     await loginPage.forgotPasswordModal.expectContentVisible();
@@ -21,7 +21,7 @@ test.describe('Функциональность авторизации', () => {
     await loginPage.forgotPasswordModal.expectHidden();
   });
 
-  test('Кнопка "Remember me" работает (UI)', async ({ loginPage }) => {
+  test('[TC-797] Кнопка "Remember me" работает (UI)', async ({ loginPage }) => {
     await allure.allureId('797');
     await loginPage.loginForm.expectRememberMeChecked(false);
     await loginPage.loginForm.toggleRememberMe();
@@ -30,7 +30,7 @@ test.describe('Функциональность авторизации', () => {
     await loginPage.loginForm.expectRememberMeChecked(false);
   });
 
-  test('Кнопка "Remember me" сохраняет сессию между перезапусками браузерного контекста', async ({
+  test('[TC-798] Кнопка "Remember me" сохраняет сессию между перезапусками браузерного контекста', async ({
     adminUser,
     authSessions,
   }) => {
@@ -38,7 +38,7 @@ test.describe('Функциональность авторизации', () => {
     await authSessions.expectRememberMePersists(adminUser);
   });
 
-  test('Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {
+  test('[TC-799] Кнопка показа/скрытия пароля работает корректно', async ({ loginPage }) => {
     await allure.allureId('799');
     await loginPage.loginForm.expectPasswordType('password');
     await loginPage.loginForm.togglePasswordVisibility();
@@ -47,13 +47,13 @@ test.describe('Функциональность авторизации', () => {
     await loginPage.loginForm.expectPasswordType('password');
   });
 
-  test('Переход по Telegram ссылке', async ({ loginPage }) => {
+  test('[TC-800] Переход по Telegram ссылке', async ({ loginPage }) => {
     await allure.allureId('800');
     await loginPage.openForgotPasswordModal();
     await loginPage.forgotPasswordModal.expectTelegramLink();
   });
 
-  test('Поля сохраняют значения после неуспешной попытки', async ({ loginPage, adminUser }) => {
+  test('[TC-801] Поля сохраняют значения после неуспешной попытки', async ({ loginPage, adminUser }) => {
     await allure.allureId('801');
     await loginPage.login(adminUser.email, 'wrongpassword');
     await loginPage.loginForm.expectCredentialValues(adminUser.email, 'wrongpassword');

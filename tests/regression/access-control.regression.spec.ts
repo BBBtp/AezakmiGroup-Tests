@@ -19,15 +19,15 @@ const protectedPaths = [
 ];
 
 test.describe('Контроль доступа', () => {
-  test('Неавторизованный доступ к основным разделам заблокирован', async ({ authSessions }) => {
+  test('[TC-567] Неавторизованный доступ к основным разделам заблокирован', async ({ authSessions }) => {
     await allure.allureId('567');
 
-    await test.step('Проверить доступ к закрытым URL без сессии', async () => {
+    await test.step('ПРОВЕРКА · Закрытые URL недоступны без сессии', async () => {
       await authSessions.expectAnonymousAccessBlocked(protectedPaths);
     });
   });
 
-  test('Обычный пользователь не получает административные действия', async ({
+  test('[TC-568] Обычный пользователь не получает административные действия', async ({
     applicationShell,
     dashboardPage,
     loginPage,

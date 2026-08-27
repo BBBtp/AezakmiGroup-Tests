@@ -1,6 +1,6 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
+import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
 import { subscriptionTableResponse } from '@support/subscriptions/contracts';
 
@@ -26,29 +26,36 @@ test.describe('Statistics → Subscriptions', () => {
   });
 
   test.describe('FRONT-130 filter label', () => {
-    test.beforeEach(async ({ dashboardPage, network, subscriptionsPage }) => {
-      await network.fulfillNextJson('**/api/v1/subscriptions/filters*', 'GET', filtersResponse);
-      await network.fulfillJsonSequence(
-        '**/api/v1/subscriptions/table*',
-        'GET',
-        Array.from({ length: 4 }, () => alphaStatistics),
-      );
-      await dashboardPage.navigate();
-      await subscriptionsPage.openFromStatisticsGroup();
-    });
+    test.beforeEach(
+      'ПОДГОТОВКА · Подготовить предусловия сценария',
+      async ({ dashboardPage, network, subscriptionsPage }) => {
+        await network.fulfillNextJson('**/api/v1/subscriptions/filters*', 'GET', filtersResponse);
+        await network.fulfillJsonSequence(
+          '**/api/v1/subscriptions/table*',
+          'GET',
+          Array.from({ length: 4 }, () => alphaStatistics),
+        );
+        await dashboardPage.navigate();
+        await subscriptionsPage.openFromStatisticsGroup();
+      },
+    );
 
-    test('Select All отображается как All', async ({ subscriptionsPage }) => {
+    test('[TC-918] Select All отображается как All', async ({ subscriptionsPage }) => {
       await allure.allureId('918');
       await subscriptionsPage.selectAllAppsAndExpectAllLabel();
     });
 
-    test('Частичный выбор не отображается как All', async ({ subscriptionsPage }) => {
+    test('[TC-919] Частичный выбор не отображается как All', async ({ subscriptionsPage }) => {
       await allure.allureId('919');
       await subscriptionsPage.selectAllThenDeselectOneAppAndExpectPartialLabel();
     });
   });
 
-  test('метрики подписок соответствуют ответу API', async ({ dashboardPage, network, subscriptionsPage }) => {
+  test('[TC-916] метрики подписок соответствуют ответу API', async ({
+    dashboardPage,
+    network,
+    subscriptionsPage,
+  }) => {
     await allure.allureId('916');
     await network.fulfillNextJson('**/api/v1/subscriptions/filters*', 'GET', filtersResponse);
     await network.fulfillNextJson('**/api/v1/subscriptions/table*', 'GET', alphaStatistics);
@@ -62,7 +69,7 @@ test.describe('Statistics → Subscriptions', () => {
     );
   });
 
-  test('App-фильтр обновляет и сбрасывает статистику подписок', async ({
+  test('[TC-917] App-фильтр обновляет и сбрасывает статистику подписок', async ({
     dashboardPage,
     network,
     subscriptionsPage,
@@ -82,7 +89,11 @@ test.describe('Statistics → Subscriptions', () => {
       { url: '/api/v1/subscriptions/table', method: 'GET', status: 200 },
       () => subscriptionsPage.selectApp('Beta'),
     );
-    expect(decodeURIComponent(filtered.response.request().url())).toContain('apphud_app_ids=front-130-beta');
+    await scenarioCheck.contains(
+      'Запрос таблицы содержит выбранное приложение Beta',
+      decodeURIComponent(filtered.response.request().url()),
+      'apphud_app_ids=front-130-beta',
+    );
     await subscriptionsPage.expectFilteredApp('Beta', 'Alpha');
 
     await subscriptionsPage.resetAppFilter();

@@ -3,11 +3,11 @@ import { allure } from 'allure-playwright';
 import { test } from '@fixtures';
 
 test.describe('Read-only разделы CRM', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('A/B tests открывается и показывает ключевые контролы', async ({
+  test('[TC-620] A/B tests открывается и показывает ключевые контролы', async ({
     browserDiagnostics,
     readOnlySectionsPage,
   }) => {
@@ -19,7 +19,7 @@ test.describe('Read-only разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Employees открывается и показывает список сотрудников', async ({
+  test('[TC-637] Employees открывается и показывает список сотрудников', async ({
     browserDiagnostics,
     employeesPage,
   }) => {
@@ -31,7 +31,7 @@ test.describe('Read-only разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Vacation schedule открывается и показывает календарные контролы', async ({
+  test('[TC-642] Vacation schedule открывается и показывает календарные контролы', async ({
     browserDiagnostics,
     readOnlySectionsPage,
   }) => {
@@ -43,7 +43,7 @@ test.describe('Read-only разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Users открывается и показывает административные действия', async ({
+  test('[TC-646] Users открывается и показывает административные действия', async ({
     browserDiagnostics,
     readOnlySectionsPage,
   }) => {
