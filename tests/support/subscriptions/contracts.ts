@@ -78,6 +78,14 @@ export function subscriptionTableForApps(apps: readonly SubscriptionAppOptions[]
   };
 }
 
+export function subscriptionPartialTableResponse(totals: SubscriptionAppOptions['totals']) {
+  return {
+    total_count: 0,
+    summary: metricsFrom(totals),
+    data: [],
+  };
+}
+
 export function subscriptionChartResponse(dates = ['2026-08-05', '2026-08-06', '2026-08-07']) {
   return {
     series: Object.fromEntries(

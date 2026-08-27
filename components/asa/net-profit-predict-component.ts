@@ -1,5 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
+import { scenarioCheck } from '@framework/assertions';
+
 import { UiObject } from '@framework/ui';
 import { netProfitPredictLocators } from '@locators/net-profit-predict';
 
@@ -310,6 +312,14 @@ export class NetProfitPredictComponent extends UiObject {
   async searchParams(): Promise<Record<string, string>> {
     return this.actions.run('evaluate', 'Net profit predict: current searchParams', this.root, async () =>
       Object.fromEntries(new URL(this.page.url()).searchParams.entries()),
+    );
+  }
+
+  async expectSearchParams(expected: Record<string, string>): Promise<void> {
+    await scenarioCheck.matchObject(
+      'Net profit predict: searchParams сохраняют выбранные фильтры',
+      await this.searchParams(),
+      expected,
     );
   }
 

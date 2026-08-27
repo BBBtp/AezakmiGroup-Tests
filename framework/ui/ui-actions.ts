@@ -59,7 +59,7 @@ export class UiActions {
     );
   }
 
-  goBack(target = 'browser history: back') {
+  goBack(target = 'история браузера: вернуться назад') {
     return loggedAction(this.page, 'navigate', target, this.page.locator('body'), () => this.page.goBack());
   }
 }

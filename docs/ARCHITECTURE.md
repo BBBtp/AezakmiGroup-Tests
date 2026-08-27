@@ -48,7 +48,11 @@ flowchart TD
 raw `Page`, BrowserContext, browser events или local storage напрямую. UI доступен только через
 публичный API `@modules/*`, а технические сессии и диагностика — через fixtures. Каждый
 автоматизированный тест содержит ровно один уникальный числовой
-`allure.allureId('<DoQA case id>')`.
+`allure.allureId('<DoQA case id>')`, а его отображаемое название начинается с того же
+`[TC-<DoQA case id>]`. Метаданные Allure добавляют расширенное Markdown-описание, CRM/E2E,
+suite/project теги и иерархию epic/feature/story. Все действия и наблюдаемые проверки проходят
+через доменные методы и отображаются шагами `ДЕЙСТВИЕ`/`ПРОВЕРКА`; сетевые предусловия — шагами
+`ПОДГОТОВКА`.
 
 ### `modules/`
 

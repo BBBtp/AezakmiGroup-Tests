@@ -1,14 +1,13 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
 
 test.describe('ASA Performance → calendar', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('применяет предустановленный и произвольный период', async ({ performancePage }) => {
+  test('[TC-838] применяет предустановленный и произвольный период', async ({ performancePage }) => {
     await allure.allureId('838');
     await performancePage.openFromSidebar();
     for (const period of ['3 months', '6 months', 'All time', '1 month'] as const) {
@@ -20,14 +19,14 @@ test.describe('ASA Performance → calendar', () => {
     await performancePage.content.expectBusinessBlocks();
   });
 
-  test('показывает поля Start, End, Reset и Apply', async ({ performancePage }) => {
+  test('[TC-972] показывает поля Start, End, Reset и Apply', async ({ performancePage }) => {
     await allure.allureId('972');
     await performancePage.openFromSidebar();
     await performancePage.content.openCalendar();
     await performancePage.content.calendar.expectOpen();
   });
 
-  test('не применяет диапазон с End раньше Start', async ({ performancePage }) => {
+  test('[TC-973] не применяет диапазон с End раньше Start', async ({ performancePage }) => {
     await allure.allureId('973');
     await performancePage.openFromSidebar();
     await performancePage.content.openCalendar();
@@ -35,16 +34,16 @@ test.describe('ASA Performance → calendar', () => {
     await performancePage.content.calendar.expectApplyDisabled();
   });
 
-  test('поддерживает диапазон в один день без сдвига даты', async ({ page, performancePage }) => {
+  test('[TC-976] поддерживает диапазон в один день без сдвига даты', async ({ performancePage }) => {
     await allure.allureId('976');
     await performancePage.openFromSidebar();
     await performancePage.content.openCalendar();
     await performancePage.content.calendar.fill('02.08.2026', '02.08.2026');
     await performancePage.content.calendar.apply();
-    await expect(page).toHaveURL(/\/performance\?from=2026-08-02&to=2026-08-02$/);
+    await performancePage.expectPeriodInUrl('2026-08-02', '2026-08-02');
   });
 
-  test('обновляет все бизнес-блоки одним диапазоном', async ({ performancePage }) => {
+  test('[TC-975] обновляет все бизнес-блоки одним диапазоном', async ({ performancePage }) => {
     await allure.allureId('975');
     await performancePage.openFromSidebar();
     await performancePage.content.openCalendar();
@@ -55,7 +54,7 @@ test.describe('ASA Performance → calendar', () => {
 });
 
 test.describe('Common date range calendar', () => {
-  test('использует Start и End во всех разделах', async ({
+  test('[TC-974] использует Start и End во всех разделах', async ({
     dashboardPage,
     performancePage,
     statisticsPage,
@@ -69,7 +68,7 @@ test.describe('Common date range calendar', () => {
     await performancePage.content.calendar.expectOpen();
   });
 
-  test('одинаково применяет и сбрасывает диапазон', async ({
+  test('[TC-977] одинаково применяет и сбрасывает диапазон', async ({
     dashboardPage,
     performancePage,
     statisticsPage,

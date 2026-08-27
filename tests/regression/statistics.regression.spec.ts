@@ -4,7 +4,7 @@ import { test } from '@fixtures';
 import { statisticsApi } from '@support/statistics/contracts';
 
 test.describe('Statistics', () => {
-  test('Фильтры обновляют данные раздела и возвращаются к исходному состоянию', async ({
+  test('[TC-576] Фильтры обновляют данные раздела и возвращаются к исходному состоянию', async ({
     dashboardPage,
     statisticsPage,
   }) => {
@@ -19,7 +19,10 @@ test.describe('Statistics', () => {
     await statisticsPage.selectPeriodAndExpectSnapshot('week', initialChart);
   });
 
-  test('График статистики обновляется при выборе периода', async ({ dashboardPage, statisticsPage }) => {
+  test('[TC-577] График статистики обновляется при выборе периода', async ({
+    dashboardPage,
+    statisticsPage,
+  }) => {
     await allure.allureId('577');
     await dashboardPage.navigate();
     await statisticsPage.openFromSidebar();
@@ -31,7 +34,7 @@ test.describe('Statistics', () => {
     await statisticsPage.selectPeriodAndExpectUpdate('week', threeMonthsChart);
   });
 
-  test('ошибка API Statistics отображается и устраняется повторной загрузкой', async ({
+  test('[TC-664] ошибка API Statistics отображается и устраняется повторной загрузкой', async ({
     statisticsPage,
     network,
   }) => {
@@ -43,7 +46,10 @@ test.describe('Statistics', () => {
     await statisticsPage.overview.expectBusinessControls();
   });
 
-  test('Statistics показывает loading state до завершения загрузки', async ({ statisticsPage, network }) => {
+  test('[TC-665] Statistics показывает loading state до завершения загрузки', async ({
+    statisticsPage,
+    network,
+  }) => {
     await allure.allureId('665');
     const held = await network.holdNext(statisticsApi.chart, 'GET');
     const opening = statisticsPage.openRoute().catch(() => undefined);
@@ -55,7 +61,7 @@ test.describe('Statistics', () => {
     await statisticsPage.overview.expectBusinessControls();
   });
 
-  test('Statistics корректно отображает пустые метрики и восстанавливает данные', async ({
+  test('[TC-666] Statistics корректно отображает пустые метрики и восстанавливает данные', async ({
     statisticsPage,
     network,
   }) => {

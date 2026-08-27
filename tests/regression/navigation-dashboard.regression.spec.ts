@@ -29,7 +29,10 @@ const sections = [
 ] as const;
 
 test.describe('Навигация и Dashboard', () => {
-  test('Боковое меню содержит доступные разделы CRM', async ({ applicationShell, dashboardPage }) => {
+  test('[TC-571] Боковое меню содержит доступные разделы CRM', async ({
+    applicationShell,
+    dashboardPage,
+  }) => {
     await allure.allureId('571');
 
     await dashboardPage.navigate();
@@ -39,7 +42,10 @@ test.describe('Навигация и Dashboard', () => {
     }
   });
 
-  test('Dashboard открывается из меню и содержит основные элементы', async ({ kpiPage, dashboardPage }) => {
+  test('[TC-572] Dashboard открывается из меню и содержит основные элементы', async ({
+    kpiPage,
+    dashboardPage,
+  }) => {
     await allure.allureId('572');
 
     await kpiPage.navigate();
@@ -47,7 +53,7 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.expectBusinessControls();
   });
 
-  test('Dashboard отображает метрики без технических значений после перезагрузки', async ({
+  test('[TC-574] Dashboard отображает метрики без технических значений после перезагрузки', async ({
     dashboardPage,
     network,
   }) => {
@@ -61,7 +67,7 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.expectMetricsHealthy();
   });
 
-  test('ошибка API Dashboard отображается и устраняется повторной загрузкой', async ({
+  test('[TC-660] ошибка API Dashboard отображается и устраняется повторной загрузкой', async ({
     dashboardPage,
     network,
   }) => {
@@ -73,7 +79,10 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.expectMetricsHealthy();
   });
 
-  test('Dashboard показывает loading state до завершения загрузки', async ({ dashboardPage, network }) => {
+  test('[TC-661] Dashboard показывает loading state до завершения загрузки', async ({
+    dashboardPage,
+    network,
+  }) => {
     await allure.allureId('661');
     const held = await network.holdNext(dashboardApi.chart, 'GET');
     const opening = dashboardPage.navigate().catch(() => undefined);
@@ -85,7 +94,7 @@ test.describe('Навигация и Dashboard', () => {
     await dashboardPage.expectMetricsHealthy();
   });
 
-  test('Dashboard корректно отображает пустые метрики и восстанавливает данные', async ({
+  test('[TC-662] Dashboard корректно отображает пустые метрики и восстанавливает данные', async ({
     dashboardPage,
     network,
   }) => {

@@ -1,11 +1,11 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
+import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
-import { abTestsApi } from '@support/product/contracts';
+import { abTestListResponse, abTestsApi } from '@support/product/contracts';
 
 test.describe('Product / A/B tests', () => {
-  test('фильтры Team, App и Test type доступны', async ({ productPage }) => {
+  test('[TC-621] фильтры Team, App и Test type доступны', async ({ productPage }) => {
     await allure.allureId('621');
     await productPage.openAbTests();
     await productPage.abTests.openFilter('Team');
@@ -13,7 +13,7 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.openFilter('Test type');
   });
 
-  test('все multi-select фильтры фокусируют Search и закрепляют Select all первым', async ({
+  test('[TC-1006] все multi-select фильтры фокусируют Search и закрепляют Select all первым', async ({
     productPage,
   }) => {
     await allure.allureId('1006');
@@ -21,26 +21,30 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.expectFilterAutofocusAndSelectAllOrder();
   });
 
-  test('применение фильтра с поздней страницы сбрасывает пагинацию на первую', async ({ productPage }) => {
+  test('[TC-1004] применение фильтра с поздней страницы сбрасывает пагинацию на первую', async ({
+    productPage,
+  }) => {
     await allure.allureId('1004');
     await productPage.openAbTests();
     await productPage.abTests.goToPage(7);
     await productPage.abTests.applySingleAppFilterAndExpectFirstPage();
   });
 
-  test('изменение Show сохраняет раскрытый A/B test', async ({ productPage }) => {
+  test('[TC-1005] изменение Show сохраняет раскрытый A/B test', async ({ productPage }) => {
     await allure.allureId('1005');
     await productPage.openAbTests();
     await productPage.abTests.expectExpandedRowPreservedWhenShowChanges(30);
   });
 
-  test('длинные Comment и Technical task прокручиваются внутри модалки', async ({ productPage }) => {
+  test('[TC-1003] длинные Comment и Technical task прокручиваются внутри модалки', async ({
+    productPage,
+  }) => {
     await allure.allureId('1003');
     await productPage.openAbTests();
     await productPage.abTests.expectLongCommentAndTechnicalTaskModals();
   });
 
-  test('повторное открытие A/B tests использует cache списка', async ({ network, productPage }) => {
+  test('[TC-1007] повторное открытие A/B tests использует cache списка', async ({ network, productPage }) => {
     await allure.allureId('1007');
     const listRequests = network.captureRequests(
       (request) => request.method() === 'GET' && abTestsApi.list.test(request.url()),
@@ -49,20 +53,21 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.expectRowsAndPagination();
     await productPage.leaveAndReturnToAbTestsViaSidebar();
     await productPage.abTests.expectRowsAndPagination();
-    expect(listRequests.count).toBe(1);
+    await listRequests.expectCount(1, 'Повторное открытие использует один запрос списка');
     listRequests.stop();
   });
 
-  test('initial file upload подсвечивается при hover и drag-hover', async ({ productPage }) => {
+  test('[TC-1008] initial file upload подсвечивается при hover и drag-hover', async ({ productPage }) => {
     await allure.allureId('1008');
     await productPage.openAbTests();
     await productPage.abTests.openCreate();
-    const states = await productPage.abTestCreate.expectInitialUploadVisualStates();
-    expect(states.hover).not.toBe(states.resting);
-    expect(states.dragHover).not.toBe(states.resting);
+    await productPage.abTestCreate.expectInitialUploadVisualStates();
   });
 
-  test('ручная загрузка отключает Figma, но сохраняет импорт Apphud', async ({ network, productPage }) => {
+  test('[TC-1047] ручная загрузка отключает Figma, но сохраняет импорт Apphud', async ({
+    network,
+    productPage,
+  }) => {
     await allure.allureId('1047');
     const links = {
       figma: 'https://www.figma.com/file/codex-front-32/ab-test',
@@ -80,36 +85,67 @@ test.describe('Product / A/B tests', () => {
       () => productPage.abTestCreate.requestManualImportPreparation(links),
     );
 
-    expect(request.postDataJSON()).toEqual({
+    await scenarioCheck.deepEqual('Manual import отправляет только Apphud URL', request.postDataJSON(), {
       test_type: 'onboardings',
       apphud_url: links.apphud,
     });
   });
 
-  test('список тестов показывает приложения и пагинацию', async ({ productPage }) => {
+  test('[TC-1048] галерея A/B-теста переключает изображения стрелками клавиатуры', async ({
+    network,
+    productPage,
+  }) => {
+    await allure.allureId('1048');
+    await network.mockJson(
+      abTestsApi.list,
+      'GET',
+      abTestListResponse({ name: 'FRONTINC-4 keyboard gallery', screenshotCount: 3 }),
+    );
+    await productPage.openAbTests();
+    await productPage.abTests.expectGalleryKeyboardNavigation();
+  });
+
+  test('[TC-1049] отсутствующие P-value старого внутреннего теста не отображаются как null', async ({
+    network,
+    productPage,
+  }) => {
+    await allure.allureId('1049');
+    await network.mockJson(
+      abTestsApi.list,
+      'GET',
+      abTestListResponse({ name: '9 from 30.06.25', nicheId: null, pValues: null }),
+    );
+    await productPage.openAbTests();
+    await productPage.abTests.expectMissingPValuesRenderedWithoutTechnicalValues();
+  });
+
+  test('[TC-622] список тестов показывает приложения и пагинацию', async ({ productPage }) => {
     await allure.allureId('622');
     await productPage.openAbTests();
     await productPage.abTests.expectRowsAndPagination();
   });
 
-  test('Create test открывает форму без преждевременной мутации', async ({ network, productPage }) => {
+  test('[TC-623] Create test открывает форму без преждевременной мутации', async ({
+    network,
+    productPage,
+  }) => {
     await allure.allureId('623');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && request.url().includes('/ab-tests'),
     );
     await productPage.openAbTests();
     await productPage.abTests.openCreate();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Открытие Create test не отправляет мутацию');
     mutations.stop();
   });
 
-  test('ссылка приложения из A/B test открывает соответствующий detail', async ({ productPage }) => {
+  test('[TC-624] ссылка приложения из A/B test открывает соответствующий detail', async ({ productPage }) => {
     await allure.allureId('624');
     await productPage.openAbTests();
     await productPage.abTests.openFirstApplication();
   });
 
-  test('фильтр Team: Our tests сохраняется после возврата', async ({ productPage }) => {
+  test('[TC-625] фильтр Team: Our tests сохраняется после возврата', async ({ productPage }) => {
     await allure.allureId('625');
     await productPage.openAbTests();
     await productPage.abTests.expectTeamFilter();
@@ -118,14 +154,14 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.expectTeamFilter();
   });
 
-  test('ошибка API отображается без устаревших строк', async ({ network, productPage }) => {
+  test('[TC-727] ошибка API отображается без устаревших строк', async ({ network, productPage }) => {
     await allure.allureId('727');
     await network.failNext(abTestsApi.list, 'GET', { message: 'Test failure' });
     await productPage.openAbTestsRoute();
     await productPage.abTests.expectError();
   });
 
-  test('загрузочный state виден до ответа API', async ({ network, productPage }) => {
+  test('[TC-728] загрузочный state виден до ответа API', async ({ network, productPage }) => {
     await allure.allureId('728');
     const held = await network.holdNext(abTestsApi.list, 'GET');
     const opening = productPage.openAbTestsRoute();
@@ -135,32 +171,35 @@ test.describe('Product / A/B tests', () => {
     await opening;
   });
 
-  test('пустой ответ API скрывает строки без технических значений', async ({ network, productPage }) => {
+  test('[TC-729] пустой ответ API скрывает строки без технических значений', async ({
+    network,
+    productPage,
+  }) => {
     await allure.allureId('729');
     await network.mockJson(abTestsApi.list, 'GET', abTestsApi.emptyList);
     await productPage.openAbTestsRoute();
     await productPage.abTests.expectEmpty();
   });
 
-  test('пагинация сохраняет выбранный Team-контекст', async ({ productPage }) => {
+  test('[TC-730] пагинация сохраняет выбранный Team-контекст', async ({ productPage }) => {
     await allure.allureId('730');
     await productPage.openAbTests();
     await productPage.abTests.expectRowsAndPagination();
     await productPage.abTests.expectTeamFilter();
   });
 
-  test('Create test не сохраняет пустой черновик', async ({ network, productPage }) => {
+  test('[TC-731] Create test не сохраняет пустой черновик', async ({ network, productPage }) => {
     await allure.allureId('731');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && request.url().includes('/ab-tests'),
     );
     await productPage.openAbTests();
     await productPage.abTests.openCreate();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Пустой черновик Create test не отправляет мутацию');
     mutations.stop();
   });
 
-  test('отмена Create test возвращает список без сохранения', async ({ network, productPage }) => {
+  test('[TC-732] отмена Create test возвращает список без сохранения', async ({ network, productPage }) => {
     await allure.allureId('732');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && request.url().includes('/ab-tests'),
@@ -168,7 +207,7 @@ test.describe('Product / A/B tests', () => {
     await productPage.openAbTests();
     await productPage.abTests.openCreate();
     await productPage.backToAbTests();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Отмена Create test не отправляет мутацию');
     mutations.stop();
   });
 });

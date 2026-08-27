@@ -95,6 +95,22 @@ export class NicheDetailComponent extends UiObject {
     return this.row(index).keywords.innerText();
   }
 
+  async expectRowKeywordsChanged(previousValue: string, index = 0): Promise<void> {
+    await this.expectations.textChanged(
+      `Niche translation: row ${index} keywords changed`,
+      this.row(index).keywords,
+      previousValue,
+    );
+  }
+
+  async expectRowKeywords(previousValue: string, index = 0): Promise<void> {
+    await this.expectations.text(
+      `Niche translation: row ${index} keywords`,
+      this.row(index).keywords,
+      previousValue,
+    );
+  }
+
   async expectTranslationPending(index = 0): Promise<void> {
     await this.expectations.visible(
       `Niche translation: row ${index} loading`,

@@ -35,6 +35,12 @@ Run each changed Playwright scenario directly. Run smoke or regression in propor
 ## Playwright rules
 
 - Every test has exactly one unique numeric `allure.allureId`.
+- All Allure step names are written in Russian and use only the prefixes `ПОДГОТОВКА`,
+  `ДЕЙСТВИЕ` and `ПРОВЕРКА`. Targets passed to `UiActions`, `UiExpectations` and
+  `scenarioCheck` must be human-readable Russian descriptions; stable product names, URLs,
+  HTTP methods and technical identifiers may remain unchanged.
+- Allure descriptions contain goal, context, preconditions, scenario and expected result. Do not
+  add a separate `Диагностика` section.
 - Prefer `data-testid`, then accessible role/label. Do not target generated CSS-module classes.
 - Do not add fixed sleeps, `networkidle`, `force: true` or positional locators unless the reason is documented.
 - Wait for observable state: response, URL, loader, visible business result or stable DOM state.

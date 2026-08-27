@@ -1,20 +1,19 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
 import { outKeywordsApi } from '@support/push/contracts';
 
 test.describe('Out keywords', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('открывается из бокового меню и показывает основные контролы', async ({ pushPage }) => {
+  test('[TC-606] открывается из бокового меню и показывает основные контролы', async ({ pushPage }) => {
     await allure.allureId('606');
     await pushPage.openOutKeywordsFromSidebar();
   });
 
-  test('фильтры Today и Yesterday обновляют период', async ({ pushPage }) => {
+  test('[TC-607] фильтры Today и Yesterday обновляют период', async ({ pushPage }) => {
     await allure.allureId('607');
     await pushPage.openOutKeywordsFromSidebar();
     await pushPage.outKeywords.openFilters();
@@ -22,7 +21,7 @@ test.describe('Out keywords', () => {
     await pushPage.outKeywords.selectPeriod('Today');
   });
 
-  test('Delete all installs не выполняется без доступных данных и подтверждения', async ({
+  test('[TC-608] Delete all installs не выполняется без доступных данных и подтверждения', async ({
     network,
     pushPage,
   }) => {
@@ -33,11 +32,11 @@ test.describe('Out keywords', () => {
     await network.fulfillNextJson(outKeywordsApi.apps, 'GET', outKeywordsApi.emptyApps);
     await pushPage.openOutKeywordsRoute();
     await pushPage.outKeywords.expectDeleteAvailability('disabled');
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Недоступное Delete all installs не отправляет мутацию');
     mutations.stop();
   });
 
-  test('Settings открывает настройки раздела без сохранения', async ({ pushPage }) => {
+  test('[TC-609] Settings открывает настройки раздела без сохранения', async ({ pushPage }) => {
     await allure.allureId('609');
     test.info().annotations.push({
       type: 'feature-gap',
@@ -48,14 +47,14 @@ test.describe('Out keywords', () => {
     await pushPage.outKeywords.expectSettingsForm();
   });
 
-  test('ошибка API отображается без поломанной страницы', async ({ network, pushPage }) => {
+  test('[TC-707] ошибка API отображается без поломанной страницы', async ({ network, pushPage }) => {
     await allure.allureId('707');
     await network.failNext(outKeywordsApi.apps, 'GET', { message: 'Test failure' });
     await pushPage.openOutKeywordsRoute();
     await pushPage.outKeywords.expectError();
   });
 
-  test('loading state завершается после восстановления API', async ({ network, pushPage }) => {
+  test('[TC-708] loading state завершается после восстановления API', async ({ network, pushPage }) => {
     await allure.allureId('708');
     const held = await network.holdNext(outKeywordsApi.apps, 'GET');
     const opening = pushPage.openOutKeywordsRoute();
@@ -68,21 +67,24 @@ test.describe('Out keywords', () => {
     await pushPage.outKeywords.expectEmpty();
   });
 
-  test('пустой результат отображается корректно', async ({ network, pushPage }) => {
+  test('[TC-709] пустой результат отображается корректно', async ({ network, pushPage }) => {
     await allure.allureId('709');
     await network.fulfillNextJson(outKeywordsApi.apps, 'GET', outKeywordsApi.emptyApps);
     await pushPage.openOutKeywordsRoute();
     await pushPage.outKeywords.expectEmpty();
   });
 
-  test('граничные даты Today и Yesterday можно сбросить к дефолту', async ({ pushPage }) => {
+  test('[TC-710] граничные даты Today и Yesterday можно сбросить к дефолту', async ({ pushPage }) => {
     await allure.allureId('710');
     await pushPage.openOutKeywordsFromSidebar();
     await pushPage.outKeywords.selectPeriod('Yesterday');
     await pushPage.outKeywords.selectPeriod('Today');
   });
 
-  test('Delete all installs защищён отсутствием доступного действия', async ({ network, pushPage }) => {
+  test('[TC-711] Delete all installs защищён отсутствием доступного действия', async ({
+    network,
+    pushPage,
+  }) => {
     await allure.allureId('711');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && outKeywordsApi.mutation.test(request.url()),
@@ -90,11 +92,11 @@ test.describe('Out keywords', () => {
     await network.fulfillNextJson(outKeywordsApi.apps, 'GET', outKeywordsApi.emptyApps);
     await pushPage.openOutKeywordsRoute();
     await pushPage.outKeywords.expectDeleteAvailability('disabled');
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Защищённое Delete all installs не отправляет мутацию');
     mutations.stop();
   });
 
-  test('Settings валидирует обязательные значения', async ({ pushPage }) => {
+  test('[TC-712] Settings валидирует обязательные значения', async ({ pushPage }) => {
     await allure.allureId('712');
     test.info().annotations.push({
       type: 'feature-gap',

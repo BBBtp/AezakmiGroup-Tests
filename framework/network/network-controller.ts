@@ -1,6 +1,7 @@
-import type { Download, Page, Request, Response, Route } from '@playwright/test';
+import { test, type Download, type Page, type Request, type Response, type Route } from '@playwright/test';
 
 import type { CleanupRegistry } from '@framework/lifecycle';
+import { scenarioCheck } from '@framework/assertions';
 import { UiActions } from '@framework/ui';
 
 export type UrlMatcher = string | RegExp | ((url: string) => boolean);
@@ -15,6 +16,7 @@ export type ResponseCriteria = {
 export type RequestCapture = {
   readonly urls: string[];
   readonly count: number;
+  expectCount(expected: number, description?: string): Promise<void>;
   stop(): void;
 };
 
@@ -131,7 +133,8 @@ export class NetworkController {
       });
     };
 
-    await this.page.route(url, handler, { times: 1 });
+    await test.step(`ПОДГОТОВКА · Следующий ${method} запрос получает ошибку ${status}`, () =>
+      this.page.route(url, handler, { times: 1 }));
   }
 
   async fulfillNextJson(url: string | RegExp, method: string, body: unknown, status = 200): Promise<void> {
@@ -148,7 +151,8 @@ export class NetworkController {
       });
     };
 
-    await this.page.route(url, handler, { times: 1 });
+    await test.step(`ПОДГОТОВКА · Следующий ${method} запрос получает JSON ${status}`, () =>
+      this.page.route(url, handler, { times: 1 }));
   }
 
   async mockJson(url: string | RegExp, method: string, body: unknown, status = 200): Promise<void> {
@@ -163,7 +167,8 @@ export class NetworkController {
         body: JSON.stringify(body),
       });
     };
-    await this.page.route(url, handler);
+    await test.step(`ПОДГОТОВКА · Все ${method} запросы получают контролируемый JSON ${status}`, () =>
+      this.page.route(url, handler));
   }
 
   async fulfillNextMutation(url: string | RegExp, body: unknown, status = 200): Promise<void> {
@@ -178,7 +183,8 @@ export class NetworkController {
         body: JSON.stringify(body),
       });
     };
-    await this.page.route(url, handler, { times: 1 });
+    await test.step(`ПОДГОТОВКА · Следующая мутация получает JSON ${status}`, () =>
+      this.page.route(url, handler, { times: 1 }));
   }
 
   async fulfillJsonSequence(
@@ -204,7 +210,8 @@ export class NetworkController {
       });
     };
 
-    await this.page.route(url, handler, { times: bodies.length });
+    await test.step(`ПОДГОТОВКА · ${method} запросы получают последовательность из ${bodies.length} ответов`, () =>
+      this.page.route(url, handler, { times: bodies.length }));
   }
 
   async fulfillNextSse(
@@ -228,7 +235,8 @@ export class NetworkController {
       });
     };
 
-    await this.page.route(url, handler, { times: 1 });
+    await test.step(`ПОДГОТОВКА · Следующий ${method} запрос получает SSE-событие ${event}`, () =>
+      this.page.route(url, handler, { times: 1 }));
   }
 
   async holdNext(url: string | RegExp, method: string): Promise<HeldRequest> {
@@ -383,6 +391,8 @@ export class NetworkController {
       get count() {
         return urls.length;
       },
+      expectCount: (expected, description = `Количество перехваченных запросов равно ${expected}`) =>
+        scenarioCheck.equal(description, urls.length, expected),
       stop: () => {
         if (!active) return;
         this.page.off('request', listener);

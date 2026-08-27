@@ -1,6 +1,6 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
+import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
 import {
   assessKpiDataset,
@@ -15,35 +15,47 @@ import {
 } from '@support/kpi';
 
 test.describe('KPI staff service', () => {
-  test('Основная статистика KPI возвращает стартовые баллы', async ({ kpiPage, network }) => {
+  test('[TC-902] Основная статистика KPI возвращает стартовые баллы', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.statistics);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const dataset = assessKpiDataset(statistics);
 
-    await test.step('Проверяем контракт statistics', async () => {
-      expect(Array.isArray(statistics.full_stats)).toBe(true);
-      expect(statistics.full_stats.length, kpiDataUnavailableMessage(dataset, 'manager')).toBeGreaterThan(0);
-      expect(statistics.score).toBeDefined();
-      expect(statistics.mrr).toBeDefined();
+    await test.step('ПРОВЕРКА · Контракт statistics содержит обязательные KPI-поля', async () => {
+      await scenarioCheck.isTrue(
+        'statistics.full_stats является массивом',
+        Array.isArray(statistics.full_stats),
+      );
+      await scenarioCheck.greaterThan(
+        kpiDataUnavailableMessage(dataset, 'manager'),
+        statistics.full_stats.length,
+        0,
+      );
+      await scenarioCheck.defined('statistics содержит score', statistics.score);
+      await scenarioCheck.defined('statistics содержит mrr', statistics.mrr);
 
       for (const manager of statistics.full_stats) {
-        expect(manager.employee_id).toMatch(/^[\da-f-]{36}$/i);
-        expect(manager).toHaveProperty('start_score');
-        expect(manager.start_score === null || Number.isFinite(manager.start_score)).toBe(true);
+        await scenarioCheck.matches('employee_id соответствует UUID', manager.employee_id, /^[\da-f-]{36}$/i);
+        await scenarioCheck.hasProperty('Статистика менеджера содержит start_score', manager, 'start_score');
+        await scenarioCheck.isTrue(
+          'start_score равен null или конечному числу',
+          manager.start_score === null || Number.isFinite(manager.start_score),
+        );
       }
     });
   });
 
-  test('Карточка ASO manager загружает все KPI endpoint', async ({ kpiPage, network }) => {
+  test('[TC-903] Карточка ASO manager загружает все KPI endpoint', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.managerCard);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const dataset = assessKpiDataset(statistics);
     test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
-    const manager = statistics.full_stats.find((item) => item.employee_id);
-    expect(manager, 'A KPI manager is required for this test').toBeDefined();
-    const employeeId = manager!.employee_id;
+    const manager = await scenarioCheck.requireDefined(
+      'Для проверки доступен KPI manager',
+      statistics.full_stats.find((item) => item.employee_id),
+    );
+    const employeeId = manager.employee_id;
     const managerPage = kpiPage.manager(employeeId);
 
     const expectedEndpoints = managerKpiEndpoints(employeeId);
@@ -63,7 +75,7 @@ test.describe('KPI staff service', () => {
     await managerPage.expectSettingsContent();
   });
 
-  test('Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage, network }) => {
+  test('[TC-904] Settings отображает стартовый балл текущего месяца из API', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.startingScore);
 
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
@@ -72,7 +84,7 @@ test.describe('KPI staff service', () => {
     const candidates = statistics.full_stats
       .filter((item) => item.start_score !== null)
       .sort((left, right) => Number(right.start_score !== 0) - Number(left.start_score !== 0));
-    expect(candidates.length, 'A manager with start_score is required for this test').toBeGreaterThan(0);
+    await scenarioCheck.greaterThan('Доступен manager со start_score', candidates.length, 0);
 
     let verified = false;
     for (const candidate of candidates) {
@@ -85,15 +97,19 @@ test.describe('KPI staff service', () => {
 
       const displayedScore = await managerPage.readStartingScore();
       if (displayedScore === null) continue;
-      expect(displayedScore).toBe(candidate.start_score);
+      await scenarioCheck.equal(
+        'Settings отображает start_score manager',
+        displayedScore,
+        candidate.start_score,
+      );
       verified = true;
       break;
     }
 
-    expect(verified, 'No KPI settings row was available for managers returned by statistics').toBe(true);
+    await scenarioCheck.isTrue('Для manager из statistics найдена строка KPI Settings', verified);
   });
 
-  test('ASO manager доступен через Employees → Create employee', async ({ employeeCreatePage }) => {
+  test('[TC-899] ASO manager доступен через Employees → Create employee', async ({ employeeCreatePage }) => {
     await allure.allureId(kpiAllureIds.asoManagerCreation);
 
     await employeeCreatePage.navigate();
@@ -103,7 +119,7 @@ test.describe('KPI staff service', () => {
     await employeeCreatePage.expectAsoManagerOptionVisible();
   });
 
-  test('Все KPI API-запросы UI идут через staff service', async ({ kpiPage, network }) => {
+  test('[TC-911] Все KPI API-запросы UI идут через staff service', async ({ kpiPage, network }) => {
     await allure.allureId(kpiAllureIds.staffServiceMigration);
 
     const apiRequests = network.captureRequests((request) => isKpiApiRequest(request.url()));
@@ -111,21 +127,23 @@ test.describe('KPI staff service', () => {
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const dataset = assessKpiDataset(statistics);
     test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
-    const manager = statistics.full_stats.find((item) => item.employee_id);
-    expect(manager, 'A KPI manager is required for this test').toBeDefined();
+    const manager = await scenarioCheck.requireDefined(
+      'Для проверки доступен KPI manager',
+      statistics.full_stats.find((item) => item.employee_id),
+    );
 
-    const managerPage = kpiPage.manager(manager!.employee_id);
+    const managerPage = kpiPage.manager(manager.employee_id);
     await managerPage.navigate();
     await managerPage.navigateSettings();
     await kpiPage.navigateSettings();
 
     apiRequests.stop();
-    expect(apiRequests.urls.length, 'The KPI flow must make API requests').toBeGreaterThan(0);
+    await scenarioCheck.greaterThan('KPI flow отправляет API-запросы', apiRequests.urls.length, 0);
     const legacyKpiRequests = apiRequests.urls.filter((url) => !url.includes('/staff/api/'));
-    expect(legacyKpiRequests, 'KPI API requests must not use the legacy service').toEqual([]);
+    await scenarioCheck.deepEqual('KPI API-запросы используют только staff service', legacyKpiRequests, []);
   });
 
-  test('Ошибка vacations history показывает error-state страницы Settings сотрудника', async ({
+  test('[TC-908] Ошибка vacations history показывает error-state страницы Settings сотрудника', async ({
     kpiPage,
     network,
   }) => {
@@ -134,14 +152,16 @@ test.describe('KPI staff service', () => {
     const statistics = await openKpiAndGetStatistics(kpiPage, network);
     const dataset = assessKpiDataset(statistics);
     test.skip(!hasKpiData(dataset, 'manager'), kpiDataUnavailableMessage(dataset, 'manager'));
-    const manager = statistics.full_stats.find((item) => item.employee_id);
-    expect(manager, 'A KPI manager is required for this test').toBeDefined();
+    const manager = await scenarioCheck.requireDefined(
+      'Для проверки доступен KPI manager',
+      statistics.full_stats.find((item) => item.employee_id),
+    );
 
     const vacationPath = '**/vacations/history**';
     await network.failNext(vacationPath, 'GET', { message: 'Mocked vacations history error' }, 500);
     const failedVacation = network.waitForFailedResponse('/vacations/history', 'GET');
 
-    const managerPage = kpiPage.manager(manager!.employee_id);
+    const managerPage = kpiPage.manager(manager.employee_id);
     await managerPage.navigateSettings();
 
     await failedVacation;

@@ -114,6 +114,12 @@ for (const sourceFile of specFiles) {
         if (!id || !/^\d+$/.test(id)) {
           errors.push(`${location(sourceFile, allureCalls[0])}: Allure ID must resolve to a numeric string`);
         } else {
+          const titleId = title?.match(/^\[TC-(\d+)\]\s+/u)?.[1];
+          if (!titleId) {
+            errors.push(`${testLocation}: title must start with [TC-${id}]`);
+          } else if (titleId !== id) {
+            errors.push(`${testLocation}: title TC-${titleId} does not match Allure ID ${id}`);
+          }
           const previous = ids.get(id);
           if (previous) {
             errors.push(`${testLocation}: duplicate Allure ID ${id}; first used at ${previous}`);

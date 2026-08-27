@@ -9,13 +9,16 @@ import {
 } from '@support/kpi';
 
 test.describe('KPI UI', () => {
-  test('Подзаголовок отображается корректно', async ({ kpiPage }) => {
+  test('[TC-802] Подзаголовок отображается корректно', async ({ kpiPage }) => {
     await allure.allureId('802');
     await kpiPage.navigate();
     await kpiPage.expectSubtitle(testData.texts.kpi.basePage.title);
   });
 
-  test('При ошибке загрузки отображается error-content, main-content скрыт', async ({ kpiPage, network }) => {
+  test('[TC-805] При ошибке загрузки отображается error-content, main-content скрыт', async ({
+    kpiPage,
+    network,
+  }) => {
     await allure.allureId('805');
     await network.failNext('**/staff/api/v1/kpi/managers/statistics*', 'GET', {
       message: 'Mocked server error',
@@ -30,7 +33,7 @@ test.describe('KPI UI', () => {
     );
   });
 
-  test('Проверка отображения карточек KPI', async ({ kpiPage }) => {
+  test('[TC-806] Проверка отображения карточек KPI', async ({ kpiPage }) => {
     await allure.allureId('806');
     await kpiPage.navigate();
     const { mrrCard, scoreCard, appsCard } = kpiPage.cards;
@@ -40,7 +43,7 @@ test.describe('KPI UI', () => {
     await appsCard.assertVisible(testData.texts.kpi.basePage.cardAppsTitle);
   });
 
-  test('Фильтры по месяцам видимы и работают', async ({ kpiPage }) => {
+  test('[TC-807] Фильтры по месяцам видимы и работают', async ({ kpiPage }) => {
     await allure.allureId('807');
     await kpiPage.navigate();
     const filters = kpiPage.filters;
@@ -49,7 +52,7 @@ test.describe('KPI UI', () => {
     await filters.verifyActiveTab();
   });
 
-  test('График производительности отображается и табы переключаются', async ({
+  test('[TC-808] График производительности отображается и табы переключаются', async ({
     kpiPage,
     browserDiagnostics,
   }) => {
@@ -66,7 +69,7 @@ test.describe('KPI UI', () => {
     consoleErrors.stop();
   });
 
-  test('Top Employees отображается', async ({ kpiPage, network }) => {
+  test('[TC-809] Top Employees отображается', async ({ kpiPage, network }) => {
     await allure.allureId('809');
     const dataset = assessKpiDataset(await openKpiAndGetStatistics(kpiPage, network));
     test.skip(!hasKpiData(dataset, 'contenders'), kpiDataUnavailableMessage(dataset, 'contenders'));

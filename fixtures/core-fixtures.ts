@@ -3,6 +3,7 @@ import { test as baseTest } from '@playwright/test';
 import { TestDataFactory } from '@framework/data';
 import { CleanupRegistry } from '@framework/lifecycle';
 import { TestSessionFactory } from '@framework/playwright';
+import { configureAllureTestMetadata } from '@utils/allure-test-metadata';
 import { testUsers } from './users';
 
 export type CoreFixtures = {
@@ -11,9 +12,18 @@ export type CoreFixtures = {
   cleanup: CleanupRegistry;
   dataFactory: TestDataFactory;
   sessions: TestSessionFactory;
+  reportMetadata: void;
 };
 
 export const coreTest = baseTest.extend<CoreFixtures>({
+  reportMetadata: [
+    async ({}, use, testInfo) => {
+      await configureAllureTestMetadata(testInfo);
+      await use();
+    },
+    { auto: true },
+  ],
+
   adminUser: async ({}, use) => {
     await use(testUsers.admin);
   },

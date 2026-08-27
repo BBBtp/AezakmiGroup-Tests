@@ -1,13 +1,8 @@
 import type { Locator, Page } from '@playwright/test';
 
+import { scenarioCheck } from '@framework/assertions';
 import { UiObject } from '@framework/ui';
 import { productLocators } from '@locators/product';
-
-export type UploadVisualStates = {
-  resting: string;
-  hover: string;
-  dragHover: string;
-};
 
 export type ManualImportLinks = {
   figma: string;
@@ -22,7 +17,7 @@ export class AbTestCreateComponent extends UiObject {
     this.root = this.locate.role('main').first();
   }
 
-  async expectInitialUploadVisualStates(): Promise<UploadVisualStates> {
+  async expectInitialUploadVisualStates(): Promise<void> {
     await this.completeGeneralStep();
     await this.advanceToStep('Links');
     await this.completeLinksStep();
@@ -56,7 +51,8 @@ export class AbTestCreateComponent extends UiObject {
     const dragHover = await this.styleToken(zone, 'drag hover');
     await this.actions.dispatch('A/B tests create: drag leave initial upload', zone, 'dragleave');
 
-    return { resting, hover, dragHover };
+    await scenarioCheck.isTrue('Hover изменяет оформление initial upload', hover !== resting);
+    await scenarioCheck.isTrue('Drag-hover изменяет оформление initial upload', dragHover !== resting);
   }
 
   async requestManualImportPreparation(links: ManualImportLinks): Promise<void> {

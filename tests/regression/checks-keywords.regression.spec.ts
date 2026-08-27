@@ -3,7 +3,7 @@ import { allure } from 'allure-playwright';
 import { test } from '@fixtures';
 
 test.describe('Checks: ключевые слова', () => {
-  test('Edit keywords отменяет и подтверждает добавление с гарантированным откатом', async ({
+  test('[TC-589] Edit keywords отменяет и подтверждает добавление с гарантированным откатом', async ({
     checksKeywords,
   }) => {
     await allure.allureId('589');

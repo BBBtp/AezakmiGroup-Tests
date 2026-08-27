@@ -6,41 +6,41 @@ export class UiExpectations {
   constructor(private readonly page: Page) {}
 
   visible(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'visible', () =>
+    return loggedExpectation(this.page, target, locator, 'отображается', () =>
       expect(locator).toBeVisible(options),
     );
   }
 
   hidden(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'hidden', () => expect(locator).toBeHidden(options));
+    return loggedExpectation(this.page, target, locator, 'скрыт', () => expect(locator).toBeHidden(options));
   }
 
   enabled(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'enabled', () =>
+    return loggedExpectation(this.page, target, locator, 'доступен', () =>
       expect(locator).toBeEnabled(options),
     );
   }
 
   disabled(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'disabled', () =>
+    return loggedExpectation(this.page, target, locator, 'недоступен', () =>
       expect(locator).toBeDisabled(options),
     );
   }
 
   focused(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'focused', () =>
+    return loggedExpectation(this.page, target, locator, 'находится в фокусе', () =>
       expect(locator).toBeFocused(options),
     );
   }
 
   count(target: string, locator: Locator, value: number): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `count=${value}`, () =>
+    return loggedExpectation(this.page, target, locator, `количество = ${value}`, () =>
       expect(locator).toHaveCount(value),
     );
   }
 
   nonEmpty(target: string, locator: Locator, options?: { timeout?: number }): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'count>0', () =>
+    return loggedExpectation(this.page, target, locator, 'содержит элементы', () =>
       expect.poll(() => locator.count(), options).toBeGreaterThan(0),
     );
   }
@@ -51,7 +51,7 @@ export class UiExpectations {
     minimum: number,
     options?: { timeout?: number },
   ): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `count>=${minimum}`, () =>
+    return loggedExpectation(this.page, target, locator, `количество не меньше ${minimum}`, () =>
       expect.poll(() => locator.count(), options).toBeGreaterThanOrEqual(minimum),
     );
   }
@@ -63,44 +63,44 @@ export class UiExpectations {
     value: string | RegExp,
     options?: { timeout?: number },
   ): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `${name}=${String(value)}`, () =>
+    return loggedExpectation(this.page, target, locator, `атрибут ${name} = ${String(value)}`, () =>
       expect(locator).toHaveAttribute(name, value, options),
     );
   }
 
   value(target: string, locator: Locator, expected: string | RegExp): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `value=${String(expected)}`, () =>
+    return loggedExpectation(this.page, target, locator, `значение = ${String(expected)}`, () =>
       expect(locator).toHaveValue(expected),
     );
   }
 
   text(target: string, locator: Locator, value: string | RegExp): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `text=${String(value)}`, () =>
+    return loggedExpectation(this.page, target, locator, `текст = ${String(value)}`, () =>
       expect(locator).toHaveText(value),
     );
   }
 
   containsText(target: string, locator: Locator, value: string | RegExp): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `containsText=${String(value)}`, () =>
+    return loggedExpectation(this.page, target, locator, `содержит текст ${String(value)}`, () =>
       expect(locator).toContainText(value),
     );
   }
 
   notContainsText(target: string, locator: Locator, value: string | RegExp): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `notContainsText=${String(value)}`, () =>
+    return loggedExpectation(this.page, target, locator, `не содержит текст ${String(value)}`, () =>
       expect(locator).not.toContainText(value),
     );
   }
 
   nonEmptyText(target: string, locator: Locator): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'text is not empty', () =>
+    return loggedExpectation(this.page, target, locator, 'текст не пуст', () =>
       expect(locator).toHaveText(/\S/),
     );
   }
 
   url(target: string, value: string | RegExp, options?: { timeout?: number }): Promise<void> {
     const body = this.page.locator('body');
-    return loggedExpectation(this.page, target, body, `url=${String(value)}`, () =>
+    return loggedExpectation(this.page, target, body, `URL соответствует ${String(value)}`, () =>
       expect(this.page).toHaveURL(value, options),
     );
   }
@@ -111,7 +111,7 @@ export class UiExpectations {
     previousValue: string | null,
     options?: { timeout?: number; intervals?: number[] },
   ): Promise<void> {
-    return loggedExpectation(this.page, target, locator, 'text changed', () =>
+    return loggedExpectation(this.page, target, locator, 'текст изменился', () =>
       expect.poll(() => locator.textContent(), options).not.toBe(previousValue),
     );
   }
@@ -123,7 +123,7 @@ export class UiExpectations {
     minimum: number,
     options?: { timeout?: number; intervals?: number[] },
   ): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `poll>=${minimum}`, () =>
+    return loggedExpectation(this.page, target, locator, `значение не меньше ${minimum}`, () =>
       expect.poll(probe, options).toBeGreaterThanOrEqual(minimum),
     );
   }
@@ -135,13 +135,13 @@ export class UiExpectations {
     expected: number,
     options?: { timeout?: number; intervals?: number[] },
   ): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `poll=${expected}`, () =>
+    return loggedExpectation(this.page, target, locator, `значение равно ${expected}`, () =>
       expect.poll(probe, options).toBe(expected),
     );
   }
 
   screenshot(target: string, locator: Locator, name: string): Promise<void> {
-    return loggedExpectation(this.page, target, locator, `screenshot=${name}`, () =>
+    return loggedExpectation(this.page, target, locator, `снимок соответствует ${name}`, () =>
       expect(locator).toHaveScreenshot(name, {
         animations: 'disabled',
         caret: 'hide',

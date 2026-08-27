@@ -3,11 +3,14 @@ import { allure } from 'allure-playwright';
 import { test } from '@fixtures';
 
 test.describe('ASA → App list', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('открывает страницу и корректно показывает пустой список', async ({ appListPage, network }) => {
+  test('[TC-868] открывает страницу и корректно показывает пустой список', async ({
+    appListPage,
+    network,
+  }) => {
     await allure.allureId('868');
     await appListPage.openFromSidebar();
     await network.mockJson('**/master/api/v1/asa/apps?*', 'GET', {
@@ -19,7 +22,7 @@ test.describe('ASA → App list', () => {
     await appListPage.content.expectEmptyState();
   });
 
-  test('фильтрует приложения по статусу и команде', async ({ appListPage }) => {
+  test('[TC-869] фильтрует приложения по статусу и команде', async ({ appListPage }) => {
     await allure.allureId('869');
     await appListPage.openFromSidebar();
     await appListPage.content.selectStatus('In progress');
@@ -27,7 +30,7 @@ test.describe('ASA → App list', () => {
     await appListPage.content.selectTeam('AppEmpire');
   });
 
-  test('переключает период и открывает календарь диапазона', async ({ appListPage }) => {
+  test('[TC-870] переключает период и открывает календарь диапазона', async ({ appListPage }) => {
     await allure.allureId('870');
     await appListPage.openFromSidebar();
     await appListPage.content.selectPeriod('3 months');
@@ -37,20 +40,20 @@ test.describe('ASA → App list', () => {
     await appListPage.content.selectCalendarMonthRange('February', 'August');
   });
 
-  test('ищет приложение и сохраняет контракт таблицы', async ({ appListPage }) => {
+  test('[TC-871] ищет приложение и сохраняет контракт таблицы', async ({ appListPage }) => {
     await allure.allureId('871');
     await appListPage.openFromSidebar();
     await appListPage.content.searchFirstVisibleApp();
   });
 
-  test('поддерживает пагинацию и горизонтальную навигацию таблицы', async ({ appListPage }) => {
+  test('[TC-872] поддерживает пагинацию и горизонтальную навигацию таблицы', async ({ appListPage }) => {
     await allure.allureId('872');
     await appListPage.openFromSidebar();
     await appListPage.content.goToNextPage();
     await appListPage.content.expectHorizontalTableNavigation();
   });
 
-  test('показывает загрузку и валидацию формы добавления приложения', async ({ appListPage }) => {
+  test('[TC-873] показывает загрузку и валидацию формы добавления приложения', async ({ appListPage }) => {
     await allure.allureId('873');
     await appListPage.openFromSidebar();
     await appListPage.content.openAddApp();

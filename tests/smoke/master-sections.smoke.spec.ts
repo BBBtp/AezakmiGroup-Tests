@@ -3,11 +3,11 @@ import { allure } from 'allure-playwright';
 import { test } from '@fixtures';
 
 test.describe('Основные разделы CRM', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('Statistics открывается из бокового меню и показывает основные контролы', async ({
+  test('[TC-575] Statistics открывается из бокового меню и показывает основные контролы', async ({
     browserDiagnostics,
     statisticsPage,
   }) => {
@@ -19,7 +19,7 @@ test.describe('Основные разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Top-3000 открывается из бокового меню и показывает основные контролы', async ({
+  test('[TC-578] Top-3000 открывается из бокового меню и показывает основные контролы', async ({
     browserDiagnostics,
     topKeywordsPage,
   }) => {
@@ -31,7 +31,7 @@ test.describe('Основные разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Suggests открывается из бокового меню и показывает основные контролы', async ({
+  test('[TC-583] Suggests открывается из бокового меню и показывает основные контролы', async ({
     browserDiagnostics,
     suggestsPage,
   }) => {
@@ -43,7 +43,7 @@ test.describe('Основные разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Checks открывается из бокового меню и показывает основные контролы', async ({
+  test('[TC-586] Checks открывается из бокового меню и показывает основные контролы', async ({
     browserDiagnostics,
     checksPage,
   }) => {
@@ -56,7 +56,7 @@ test.describe('Основные разделы CRM', () => {
     consoleErrors.expectNoErrors();
   });
 
-  test('Niches открывается из бокового меню и показывает основные контролы', async ({
+  test('[TC-592] Niches открывается из бокового меню и показывает основные контролы', async ({
     browserDiagnostics,
     nichesPage,
   }) => {

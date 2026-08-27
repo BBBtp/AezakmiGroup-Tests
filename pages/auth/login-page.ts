@@ -51,7 +51,7 @@ export class LoginPage extends BasePage {
   async waitForPageLoad(): Promise<void> {
     await this.waitForLoad();
     await this.loginForm.waitForFormReady();
-    await this.expectations.visible('login page', this.loginContainer);
+    await this.expectations.visible('страница входа', this.loginContainer);
   }
 
   /**
@@ -76,7 +76,7 @@ export class LoginPage extends BasePage {
 
   /** Открыть модальное окно "Забыли пароль" */
   async openForgotPasswordModal(): Promise<void> {
-    await this.actions.click('login: forgot password', this.loginForm.forgotPasswordButton);
+    await this.actions.click('страница входа: восстановление пароля', this.loginForm.forgotPasswordButton);
     await this.forgotPasswordModal.waitForOpen();
   }
 
@@ -101,8 +101,8 @@ export class LoginPage extends BasePage {
   }
 
   async expectPageVisible(): Promise<void> {
-    await this.expectations.url('login URL', /login/);
-    await this.expectations.visible('login page', this.loginContainer);
+    await this.expectations.url('URL страницы входа', /login/);
+    await this.expectations.visible('страница входа', this.loginContainer);
   }
 
   async expectPrimaryControlsVisible(): Promise<void> {
@@ -111,10 +111,14 @@ export class LoginPage extends BasePage {
   }
 
   async expectErrorVisible(): Promise<void> {
-    await this.expectations.visible('login error message', this.errorMessage);
+    await this.expectations.visible('сообщение об ошибке входа', this.errorMessage);
+  }
+
+  async expectErrorMessage(expected: string | RegExp): Promise<void> {
+    await this.expectations.text('сообщение об ошибке входа', this.errorMessage, expected);
   }
 
   async expectAuthenticated(): Promise<void> {
-    await this.expectations.url('authenticated dashboard URL', /dashboard/);
+    await this.expectations.url('URL панели управления после входа', /dashboard/);
   }
 }

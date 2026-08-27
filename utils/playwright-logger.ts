@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
 
 type Action =
   | 'click'
@@ -36,23 +36,25 @@ export async function loggedAction<T>(
   locator: Locator,
   operation: () => Promise<T>,
 ): Promise<T> {
-  const locatorText = safeLocator(locator);
-  write('ACTION', `${context(page)} action="${action}" target="${target}" locator="${locatorText}"`);
-  try {
-    const result = await operation();
-    write('ACTION', `${context(page)} action="${action}" target="${target}" result="ok"`);
-    return result;
-  } catch (error) {
-    const actual = await locator
-      .count()
-      .then((count) => `count=${count}`)
-      .catch(() => 'count=<unavailable>');
-    write(
-      'FAIL',
-      `${context(page)} action="${action}" target="${target}" locator="${locatorText}" ${actual} error="${error instanceof Error ? error.message : String(error)}"`,
-    );
-    throw error;
-  }
+  return test.step(`ДЕЙСТВИЕ · ${actionLabel(action)} · ${target}`, async () => {
+    const locatorText = safeLocator(locator);
+    write('ACTION', `${context(page)} action="${action}" target="${target}" locator="${locatorText}"`);
+    try {
+      const result = await operation();
+      write('ACTION', `${context(page)} action="${action}" target="${target}" result="ok"`);
+      return result;
+    } catch (error) {
+      const actual = await locator
+        .count()
+        .then((count) => `count=${count}`)
+        .catch(() => 'count=<unavailable>');
+      write(
+        'FAIL',
+        `${context(page)} action="${action}" target="${target}" locator="${locatorText}" ${actual} error="${error instanceof Error ? error.message : String(error)}"`,
+      );
+      throw error;
+    }
+  });
 }
 
 export async function loggedExpectation(
@@ -62,32 +64,51 @@ export async function loggedExpectation(
   expectation: string,
   operation: () => Promise<void>,
 ): Promise<void> {
-  write(
-    'EXPECT',
-    `${context(page)} target="${target}" locator="${safeLocator(locator)}" expected="${expectation}"`,
-  );
-  try {
-    await operation();
-  } catch (error) {
-    const state = await locator
-      .count()
-      .then(async (count) => {
-        const visible =
-          count > 0
-            ? await locator
-                .first()
-                .isVisible()
-                .catch(() => false)
-            : false;
-        return `count=${count} visible=${visible}`;
-      })
-      .catch(() => 'state=<unavailable>');
+  await test.step(`ПРОВЕРКА · ${target} · ${expectation}`, async () => {
     write(
-      'FAIL',
-      `${context(page)} target="${target}" locator="${safeLocator(locator)}" ${state} error="${error instanceof Error ? error.message : String(error)}"`,
+      'EXPECT',
+      `${context(page)} target="${target}" locator="${safeLocator(locator)}" expected="${expectation}"`,
     );
-    throw error;
-  }
+    try {
+      await operation();
+    } catch (error) {
+      const state = await locator
+        .count()
+        .then(async (count) => {
+          const visible =
+            count > 0
+              ? await locator
+                  .first()
+                  .isVisible()
+                  .catch(() => false)
+              : false;
+          return `count=${count} visible=${visible}`;
+        })
+        .catch(() => 'state=<unavailable>');
+      write(
+        'FAIL',
+        `${context(page)} target="${target}" locator="${safeLocator(locator)}" ${state} error="${error instanceof Error ? error.message : String(error)}"`,
+      );
+      throw error;
+    }
+  });
+}
+
+function actionLabel(action: Action): string {
+  const labels: Record<Action, string> = {
+    click: 'Нажать',
+    dispatchEvent: 'Отправить событие',
+    evaluate: 'Выполнить в браузере',
+    fill: 'Заполнить',
+    check: 'Выбрать',
+    hover: 'Навести курсор',
+    navigate: 'Открыть страницу',
+    press: 'Нажать клавишу',
+    selectOption: 'Выбрать значение',
+    uncheck: 'Снять выбор',
+    waitFor: 'Дождаться состояния',
+  };
+  return labels[action];
 }
 
 export function loggedClick(

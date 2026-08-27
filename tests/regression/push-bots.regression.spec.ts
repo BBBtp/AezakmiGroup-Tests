@@ -1,21 +1,20 @@
-import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 
 import { test } from '@fixtures';
 import { pushBotsApi } from '@support/push/contracts';
 
 test.describe('Push bots', () => {
-  test.beforeEach(async ({ dashboardPage }) => {
+  test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
     await dashboardPage.navigate();
   });
 
-  test('открывается из бокового меню и показывает основные контролы', async ({ pushPage }) => {
+  test('[TC-600] открывается из бокового меню и показывает основные контролы', async ({ pushPage }) => {
     await allure.allureId('600');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.expectPeriodControls();
   });
 
-  test('фильтры периода обновляют раздел и сбрасываются в All', async ({ pushPage }) => {
+  test('[TC-601] фильтры периода обновляют раздел и сбрасываются в All', async ({ pushPage }) => {
     await allure.allureId('601');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.openFilters();
@@ -23,7 +22,7 @@ test.describe('Push bots', () => {
     await pushPage.bots.selectAllPeriod();
   });
 
-  test('список открывает выбранную кампанию и возвращает контекст', async ({ pushPage }) => {
+  test('[TC-602] список открывает выбранную кампанию и возвращает контекст', async ({ pushPage }) => {
     await allure.allureId('602');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.expectBusinessRows();
@@ -32,7 +31,7 @@ test.describe('Push bots', () => {
     await pushPage.goBackToBots();
   });
 
-  test('Create push открывает форму подтверждаемого действия', async ({ pushPage }) => {
+  test('[TC-603] Create push открывает форму подтверждаемого действия', async ({ pushPage }) => {
     await allure.allureId('603');
     test.info().annotations.push({
       type: 'feature-gap',
@@ -43,14 +42,14 @@ test.describe('Push bots', () => {
     await pushPage.bots.expectCreateEntryState();
   });
 
-  test('detail page соответствует выбранной кампании', async ({ pushPage }) => {
+  test('[TC-604] detail page соответствует выбранной кампании', async ({ pushPage }) => {
     await allure.allureId('604');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.openFirstDetails();
     await pushPage.bots.expectDetailLoaded();
   });
 
-  test('Stop push требует подтверждения и допускает отмену', async ({ network, pushPage }) => {
+  test('[TC-605] Stop push требует подтверждения и допускает отмену', async ({ network, pushPage }) => {
     await allure.allureId('605');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && pushBotsApi.mutation.test(request.url()),
@@ -59,18 +58,18 @@ test.describe('Push bots', () => {
     await pushPage.bots.openFirstDetails();
     await pushPage.bots.openStopConfirmation();
     await pushPage.bots.cancelStop();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Отмена Stop push не отправляет мутацию');
     mutations.stop();
   });
 
-  test('ошибка API отображается без устаревших данных', async ({ network, pushPage }) => {
+  test('[TC-699] ошибка API отображается без устаревших данных', async ({ network, pushPage }) => {
     await allure.allureId('699');
     await network.failNext(pushBotsApi.campaigns, 'GET', { message: 'Test failure' });
     await pushPage.openBotsRoute();
     await pushPage.bots.expectError();
   });
 
-  test('загрузочное состояние завершается после ответа API', async ({ network, pushPage }) => {
+  test('[TC-700] загрузочное состояние завершается после ответа API', async ({ network, pushPage }) => {
     await allure.allureId('700');
     const held = await network.holdNext(pushBotsApi.campaigns, 'GET');
     const opening = pushPage.openBotsRoute();
@@ -83,14 +82,14 @@ test.describe('Push bots', () => {
     await pushPage.bots.expectLoaded();
   });
 
-  test('пустой ответ API отображается без технических значений', async ({ network, pushPage }) => {
+  test('[TC-701] пустой ответ API отображается без технических значений', async ({ network, pushPage }) => {
     await allure.allureId('701');
     await network.fulfillNextJson(pushBotsApi.campaigns, 'GET', pushBotsApi.emptyCampaigns);
     await pushPage.openBotsRoute();
     await pushPage.bots.expectEmpty();
   });
 
-  test('контекст периода сохраняется при открытии detail и возврате', async ({ pushPage }) => {
+  test('[TC-702] контекст периода сохраняется при открытии detail и возврате', async ({ pushPage }) => {
     await allure.allureId('702');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.selectPeriod(0);
@@ -99,7 +98,7 @@ test.describe('Push bots', () => {
     await pushPage.bots.expectPeriodControls();
   });
 
-  test('Create push не выполняет мутацию до появления формы', async ({ network, pushPage }) => {
+  test('[TC-703] Create push не выполняет мутацию до появления формы', async ({ network, pushPage }) => {
     await allure.allureId('703');
     test.info().annotations.push({
       type: 'feature-gap',
@@ -111,11 +110,11 @@ test.describe('Push bots', () => {
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.openCreate();
     await pushPage.bots.expectCreateEntryState();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Открытие Create push не отправляет мутацию');
     mutations.stop();
   });
 
-  test('отмена Create push возвращает в список без сохранения', async ({ network, pushPage }) => {
+  test('[TC-704] отмена Create push возвращает в список без сохранения', async ({ network, pushPage }) => {
     await allure.allureId('704');
     test.info().annotations.push({
       type: 'feature-gap',
@@ -127,11 +126,11 @@ test.describe('Push bots', () => {
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.openCreate();
     await pushPage.cancelCreate();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Отмена Create push не отправляет мутацию');
     mutations.stop();
   });
 
-  test('опасное действие Stop push недоступно без подтверждения', async ({ network, pushPage }) => {
+  test('[TC-705] опасное действие Stop push недоступно без подтверждения', async ({ network, pushPage }) => {
     await allure.allureId('705');
     const mutations = network.captureRequests(
       (request) => request.method() !== 'GET' && pushBotsApi.mutation.test(request.url()),
@@ -140,11 +139,11 @@ test.describe('Push bots', () => {
     await pushPage.bots.openFirstDetails();
     await pushPage.bots.openStopConfirmation();
     await pushPage.bots.cancelStop();
-    expect(mutations.count).toBe(0);
+    await mutations.expectCount(0, 'Отмена подтверждения Stop push не отправляет мутацию');
     mutations.stop();
   });
 
-  test('валидный прямой URL detail повторно загружает кампанию', async ({ network, pushPage }) => {
+  test('[TC-706] валидный прямой URL detail повторно загружает кампанию', async ({ network, pushPage }) => {
     await allure.allureId('706');
     await pushPage.openBotsFromSidebar();
     await pushPage.bots.openFirstDetails();
