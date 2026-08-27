@@ -41,8 +41,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   await writeAllureMetadata({
     resultsDir: process.env.ALLURE_RESULTS_DIR,
     runUrl: process.env.GITHUB_RUN_URL,
-    reportUrl:
-      process.env.ALLURE_PAGES_ENABLED === 'true' ? process.env.ALLURE_PAGES_URL : process.env.GITHUB_RUN_URL,
+    reportUrl: process.env.ALLURE_REPORT_URL?.trim() || process.env.GITHUB_RUN_URL,
     runId: process.env.GITHUB_RUN_ID,
     runNumber: process.env.GITHUB_RUN_NUMBER,
     bridgePipelineId: process.env.DOQA_BRIDGE_PIPELINE_ID,

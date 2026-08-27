@@ -66,8 +66,9 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
   `allure-report-<run-id>` и bridge artifact `allure-results-<run-id>` на 14 дней.
 - `.gitlab-ci.yml` не запускает браузерные тесты: он передаёт DoQA/GitLab pipeline в GitHub
   Actions, ждёт workflow и возвращает объединённый raw Allure archive через `doqa-cli report`.
-- GitHub Pages deployment включается только repository variable `ALLURE_PAGES_ENABLED=true`.
-  Поскольку репозиторий публичный, опубликованный отчёт также публичный.
+- Netlify deployment включается только repository variable `NETLIFY_ENABLED=true`. Для него нужны
+  secrets `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` и variable `NETLIFY_REPORT_URL`. Готовый HTML
+  отправляется через ZIP Deploy API, поэтому Netlify не получает доступ к repository.
 - При падении job отдельно сохраняются blob report, traces, screenshots и videos.
 - После regression read-only job формирует artifact `bug-drafts-<run-id>` с текстом,
   screenshot/video и очищенным error-context для каждого failed/broken результата.

@@ -132,11 +132,15 @@ GitLab сам тесты не выполняет.
 Project Runner с shell executor и tag `doqa-bridge`. Контейнер не получает Docker socket и не
 может управлять тремя GitHub runner'ами на том же сервере.
 
-Полный HTML остаётся artifact `allure-report-<run-id>`. Для постоянной страницы выберите в
-GitHub Settings → Pages источник `GitHub Actions`, затем создайте repository variable
-`ALLURE_PAGES_ENABLED=true`. Адрес отчёта:
-`https://bbbtp.github.io/AezakmiGroup-Tests/`. Репозиторий публичный, поэтому Pages-отчёт тоже
-будет публичным; без явного флага CI его не публикует.
+Полный HTML остаётся artifact `allure-report-<run-id>`. Для постоянной страницы создайте пустой
+Netlify project и добавьте в GitHub repository secrets `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID`,
+а также variables `NETLIFY_REPORT_URL=https://<project-name>.netlify.app/` и
+`NETLIFY_ENABLED=true`. После генерации CI отправляет готовый HTML в Netlify через ZIP Deploy API;
+доступ Netlify к GitHub repository не нужен. Пока флаг не включён, наружу ничего не публикуется.
+
+Allure содержит screenshots, videos и traces с данными CRM. Перед включением публикации задайте
+в Netlify Project configuration → General → Visitor access → Project visibility значение Private
+или Password. Возможности доступа зависят от тарифного плана Netlify.
 
 Nightly-прогон сам по себе ничего не публикует в DoQA. Для публикации запустите workflow вручную
 с параметром `publish_to_doqa=true`. Job публикации использует GitHub Environment

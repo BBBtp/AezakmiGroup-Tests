@@ -202,8 +202,7 @@ jobs:
     timeout-minutes: 15
     env:
       ALLURE_RESULTS_DIR: collected-results/allure-results
-      ALLURE_PAGES_ENABLED: ${{ vars.ALLURE_PAGES_ENABLED }}
-      ALLURE_PAGES_URL: https://bbbtp.github.io/AezakmiGroup-Tests/
+      ALLURE_REPORT_URL: ${{ vars.NETLIFY_REPORT_URL }}
       DOQA_BRIDGE_PIPELINE_ID: ${{ inputs.bridge_pipeline_id }}
       GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
@@ -255,33 +254,25 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Configure GitHub Pages
-        if: vars.ALLURE_PAGES_ENABLED == 'true'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: vars.ALLURE_PAGES_ENABLED == 'true'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: allure-report
-
-  deploy-allure:
-    name: Publish Allure website
-    if: vars.ALLURE_PAGES_ENABLED == 'true'
-    needs: allure-report
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy Allure report to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish Allure report to Netlify
+        if: vars.NETLIFY_ENABLED == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN"
+          test -n "$NETLIFY_SITE_ID"
+          (cd allure-report && zip -qr ../allure-report.zip .)
+          deploy_response="$(curl --fail-with-body --silent --show-error \
+            -H 'Content-Type: application/zip' \
+            -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+            --data-binary @allure-report.zip \
+            "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/deploys")"
+          deploy_id="$(jq -er '.id' <<<"$deploy_response")"
+          deploy_url="$(jq -er '.ssl_url // .url' <<<"$deploy_response")"
+          echo "### Allure report" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published to [$deploy_url]($deploy_url)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Netlify deploy: \`$deploy_id\`" >> "$GITHUB_STEP_SUMMARY"
 
   bug-drafts:
     name: Prepare bug drafts
@@ -362,8 +353,7 @@ jobs:
       DOQA_TOKEN: ${{ secrets.DOQA_TOKEN }}
       DOQA_AUTOTEST_TOKEN: ${{ secrets.DOQA_AUTOTEST_TOKEN }}
       DOQA_RUN_TITLE: 'Regression #${{ github.run_number }} (${{ github.sha }})'
-      ALLURE_PAGES_ENABLED: ${{ vars.ALLURE_PAGES_ENABLED }}
-      ALLURE_PAGES_URL: https://bbbtp.github.io/AezakmiGroup-Tests/
+      ALLURE_REPORT_URL: ${{ vars.NETLIFY_REPORT_URL }}
       DOQA_BRIDGE_PIPELINE_ID: ${{ inputs.bridge_pipeline_id }}
       GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
