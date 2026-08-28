@@ -261,6 +261,25 @@ export class AbTestsComponent extends UiObject {
     );
   }
 
+  async searchByApplicationName(query: string): Promise<void> {
+    await this.actions.fill(
+      'Поиск A/B-тестов: название приложения',
+      this.locate.within(this.root).css(`input[placeholder="${productLocators.abTests.searchPlaceholder}"]`),
+      query,
+    );
+  }
+
+  async expectApplicationNameHighlighted(appName: string, query: string): Promise<void> {
+    const appNameNode = this.locate
+      .within(this.appLinks.first())
+      .css(productLocators.abTests.row.appNameFromAppLink);
+    await this.expectations.text('Поиск A/B-тестов: найдено нужное приложение', appNameNode, appName);
+    await this.expectations.visible(
+      'Поиск A/B-тестов: совпавшая часть названия выделена',
+      this.locate.within(appNameNode).text(query, { exact: true }),
+    );
+  }
+
   async openFirstApplication(): Promise<void> {
     await this.actions.click('A/B tests: open first application', this.appLinks.first());
     await this.expectations.url('A/B tests: linked application URL', productLocators.apps.detailUrl);

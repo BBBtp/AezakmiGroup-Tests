@@ -86,6 +86,7 @@ export const productLocators = {
       // The frontend exposes no row test id or accessible names for the three icon actions.
       // Anchor on the stable application link and move to the owning row until semantic ids exist.
       rootFromAppLink: 'xpath=../../../../..',
+      appNameFromAppLink: 'xpath=../p',
       commentActionIndex: 0,
       menuActionIndex: 1,
       expandActionIndex: 2,
