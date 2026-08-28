@@ -116,8 +116,9 @@ runner'ах с labels `Linux`, `X64`, `crm`, `playwright`. После них о�
 
 DoQA нативно запускает GitLab pipeline, поэтому `.gitlab-ci.yml` используется как relay: он
 вызывает `workflow_dispatch` для GitHub Actions, ждёт завершения трёх runner'ов, скачивает единый
-artifact `allure-results-<run-id>` и загружает его в исходный DoQA pipeline через `doqa-cli`.
-GitLab сам тесты не выполняет.
+artifact `allure-results-<run-id>` и распаковывает raw results под запущенным `doqa-cli watch`.
+`DOQA_PIPELINE_ID` связывает результаты с уже созданным прогоном, поэтому отдельный прогон через
+`doqa-cli report` не создаётся. GitLab сам тесты не выполняет.
 
 1. Импортируйте или зеркалируйте этот репозиторий в отдельный GitLab project и подключите project
    в DoQA как CI/CD integration.
@@ -127,6 +128,14 @@ GitLab сам тесты не выполняет.
 3. Запустите автотесты из DoQA: bridge передаст выбранную ветку в GitHub, а после завершения
    вернёт raw Allure results. Переменные `CI_PIPELINE_ID`, `CI_PROJECT_ID` и
    `CI_COMMIT_REF_NAME` предоставляет GitLab.
+
+Опциональная pipeline variable `TEST_GREP` передаётся в Playwright как `--grep`. Пустое значение
+запускает полный regression на трёх self-hosted runner'ах. Непустой фильтр запускает один shard
+на одном runner'е, после чего тем же фильтром последовательно проверяет serial KPI Settings.
+Например: `TEST_GREP=TC-967`, `TEST_GREP=niches` или `TEST_GREP=TC-(967|995)`. Если тесты
+содержат нативный тег Playwright, можно передать `TEST_GREP=@niches`. Jobs используют
+`--pass-with-no-tests`, потому что фильтр может относиться только к read-only либо только к KPI
+Settings; в итоговый Allure попадают только реально выбранные сценарии.
 
 Собственный runner разворачивается из `infra/gitlab-runner/compose.yaml`, регистрируется как
 Project Runner с shell executor и tag `doqa-bridge`. Контейнер не получает Docker socket и не

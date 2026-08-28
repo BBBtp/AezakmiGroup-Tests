@@ -1,6 +1,11 @@
 stages:
   - regression
 
+variables:
+  TEST_GREP:
+    value: ''
+    description: 'Optional Playwright grep, for example TC-967, niches or TC-(967|995)'
+
 doqa_github_regression:
   stage: regression
   tags:
@@ -9,18 +14,20 @@ doqa_github_regression:
   variables:
     GITHUB_REPOSITORY: BBBtp/AezakmiGroup-Tests
     GITHUB_WORKFLOW: nightly-regression.yml
+    DOQA_PIPELINE_ID: '$CI_PIPELINE_ID'
+    DOQA_TOKEN: '$DOQA_AUTOTEST_TOKEN'
+    CI_BRANCH: '$CI_COMMIT_REF_NAME'
     BRIDGE_REPORT_PATH: allure-results.zip
     BRIDGE_RESULT_PATH: bridge-result.json
   script:
-    - node scripts/github-actions-bridge.mjs
     - curl --fail --show-error --silent --location https://doqa.app/downloads/doqa-cli --output doqa-cli
     - chmod +x doqa-cli
-    - ./doqa-cli report "$DOQA_ENDPOINT/api/autotests/report" "$DOQA_SPACE_ID" "$DOQA_AUTOTEST_TOKEN" "$BRIDGE_REPORT_PATH" allure
-    - node scripts/github-actions-bridge.mjs --assert-success
+    - ./doqa-cli watch -- node scripts/github-actions-bridge.mjs --assert-success-after-collect
   artifacts:
     when: always
     paths:
       - bridge-result.json
+      - allure-results/
     expire_in: 14 days
   rules:
     - if: '$CI_PIPELINE_SOURCE == "api" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "web"'

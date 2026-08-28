@@ -65,7 +65,14 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - Raw Allure results всех jobs объединяются, после чего CI сохраняет единый HTML artifact
   `allure-report-<run-id>` и bridge artifact `allure-results-<run-id>` на 14 дней.
 - `.gitlab-ci.yml` не запускает браузерные тесты: он передаёт DoQA/GitLab pipeline в GitHub
-  Actions, ждёт workflow и возвращает объединённый raw Allure archive через `doqa-cli report`.
+  Actions, ждёт workflow и распаковывает объединённые raw Allure results под `doqa-cli watch`.
+  Переменные `DOQA_PIPELINE_ID`, `CI_PROJECT_ID` и `CI_BRANCH` привязывают результаты к исходному
+  прогону DoQA; `doqa-cli report` здесь не используется, потому что создаёт новый прогон.
+- Опциональная GitLab pipeline variable `TEST_GREP` передаётся как GitHub workflow input и
+  применяется к Playwright через `--grep`. Без фильтра read-only/auth regression делится на три
+  shards. С фильтром создаётся один shard, поэтому точечный запуск занимает только один
+  self-hosted runner; serial KPI Settings затем выполняется с тем же фильтром и
+  `--pass-with-no-tests`.
 - Netlify deployment включается только repository variable `NETLIFY_ENABLED=true`. Для него нужны
   secrets `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` и variable `NETLIFY_REPORT_URL`. Готовый HTML
   отправляется через ZIP Deploy API, поэтому Netlify не получает доступ к repository.
@@ -105,7 +112,8 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
 - MCP публикует только файл из `DOQA_REPORT_DIR`, без произвольных путей.
 - Не удалять `[AUTO]` кейсы при очистке дублей.
 - Не менять ограничения обычного пользователя без отдельного согласования.
-- Пустой DoQA run считать техническим артефактом, а не успешным отчётом.
+- Пустой DoQA run после завершения связанного CI pipeline считать ошибкой bridge, а не успешным
+  отчётом.
 - Не публиковать незавершённый или некорректный отчёт; продуктовые failed/broken результаты
   являются допустимым preflight.
 - После загрузки обязательно проверять `counts.tests`, `progress`, элементы и ID через API.
