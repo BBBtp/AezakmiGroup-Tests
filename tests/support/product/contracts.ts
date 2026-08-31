@@ -14,6 +14,7 @@ const imageUrl = (name: string) =>
 
 export function abTestListResponse(options: {
   name: string;
+  appName?: string;
   nicheId?: string | null;
   screenshotCount?: number;
   pValues?: number | null;
@@ -65,7 +66,7 @@ export function abTestListResponse(options: {
         updated_at: '2025-06-30T17:29:55.976372',
         apphud_app_data: {
           id: '00000000-0000-4000-8000-000000001049',
-          name: 'ID 153 Test application',
+          name: options.appName ?? 'ID 153 Test application',
           icon_url: imageUrl('app-logo'),
           apple_id: '6444708950',
           from_our_dash: true,

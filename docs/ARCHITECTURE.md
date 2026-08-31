@@ -31,7 +31,9 @@ flowchart TD
   Allure --> Html[Allure HTML artifact]
   Html -->|explicit public flag| Pages[GitHub Pages]
   Allure --> GitLabBridge
-  Allure --> Upload[POST /api/autotests/report]
+  GitLabBridge --> Watch[doqa-cli watch: pipeline correlation]
+  Watch --> DoQA
+  Allure --> Upload[Explicit/manual POST /api/autotests/report]
   Upload --> DoQA
   DoQA --> Triage[Failed run triage]
   Triage -->|confirmed product| Draft[Read-only bug draft]

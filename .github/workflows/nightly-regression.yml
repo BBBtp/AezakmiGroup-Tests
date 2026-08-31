@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: ''
+      test_grep:
+        description: Optional Playwright grep; filtered runs use one self-hosted runner
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -41,6 +46,7 @@ jobs:
     timeout-minutes: 10
     env:
       E2E_BASE_URL: http://127.0.0.1
+      TEST_GREP: ${{ inputs.test_grep }}
 
     steps:
       - name: Checkout
@@ -61,17 +67,23 @@ jobs:
       - name: Verify regression discovery
         run: npx playwright test --config=playwright.regression.config.ts --list
 
+      - name: Verify filtered regression discovery
+        if: inputs.test_grep != ''
+        run: npx playwright test --config=playwright.regression.config.ts --list --grep "$TEST_GREP"
+
   regression-shards:
-    name: Regression · shard ${{ matrix.shard }}/3
+    name: Regression · shard ${{ matrix.shard }}/${{ inputs.test_grep != '' && 1 || 3 }}
     needs: static
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: ${{ fromJSON(inputs.test_grep != '' && '[1]' || '[1,2,3]') }}
     runs-on: [self-hosted, Linux, X64, crm, playwright]
     timeout-minutes: 90
     env:
       ALLURE_RESULTS_DIR: allure-results/shard-${{ matrix.shard }}
+      REGRESSION_SHARD_TOTAL: ${{ inputs.test_grep != '' && 1 || 3 }}
+      TEST_GREP: ${{ inputs.test_grep }}
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -97,11 +109,22 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run regression shard
-        run: npm run test:regression:shard -- --shard=${{ matrix.shard }}/3
+        shell: bash
+        run: |
+          args=(--pass-with-no-tests)
+          if [[ -n "$TEST_GREP" ]]; then
+            args+=(--grep "$TEST_GREP")
+          fi
+          if [[ "$REGRESSION_SHARD_TOTAL" -gt 1 ]]; then
+            args+=(--shard="${{ matrix.shard }}/$REGRESSION_SHARD_TOTAL")
+          fi
+          npm run test:regression:shard -- "${args[@]}"
 
       - name: Detect flaky retries and write summary
         if: always()
-        run: npm run check:flaky -- --label="Regression · shard ${{ matrix.shard }}/3"
+        run: >-
+          npm run check:flaky --
+          --label="Regression · shard ${{ matrix.shard }}/${{ inputs.test_grep != '' && 1 || 3 }}"
 
       - name: Upload raw Allure results
         if: always()
@@ -135,6 +158,7 @@ jobs:
     timeout-minutes: 60
     env:
       ALLURE_RESULTS_DIR: allure-results/settings
+      TEST_GREP: ${{ inputs.test_grep }}
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -160,7 +184,13 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run shared-settings regression
-        run: npm run test:regression:settings
+        shell: bash
+        run: |
+          args=(--pass-with-no-tests)
+          if [[ -n "$TEST_GREP" ]]; then
+            args+=(--grep "$TEST_GREP")
+          fi
+          npm run test:regression:settings -- "${args[@]}"
 
       - name: Detect flaky retries and write summary
         if: always()

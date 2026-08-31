@@ -91,11 +91,11 @@ test.describe('Product / A/B tests', () => {
     });
   });
 
-  test('[TC-1048] галерея A/B-теста переключает изображения стрелками клавиатуры', async ({
+  test('[TC-1090] галерея A/B-теста переключает изображения стрелками клавиатуры', async ({
     network,
     productPage,
   }) => {
-    await allure.allureId('1048');
+    await allure.allureId('1090');
     await network.mockJson(
       abTestsApi.list,
       'GET',
@@ -105,11 +105,11 @@ test.describe('Product / A/B tests', () => {
     await productPage.abTests.expectGalleryKeyboardNavigation();
   });
 
-  test('[TC-1049] отсутствующие P-value старого внутреннего теста не отображаются как null', async ({
+  test('[TC-1091] отсутствующие P-value старого внутреннего теста не отображаются как null', async ({
     network,
     productPage,
   }) => {
-    await allure.allureId('1049');
+    await allure.allureId('1091');
     await network.mockJson(
       abTestsApi.list,
       'GET',
@@ -117,6 +117,28 @@ test.describe('Product / A/B tests', () => {
     );
     await productPage.openAbTests();
     await productPage.abTests.expectMissingPValuesRenderedWithoutTechnicalValues();
+  });
+
+  test('[TC-1095] поиск по названию приложения выделяет совпавший текст', async ({
+    network,
+    productPage,
+  }) => {
+    await allure.allureId('1095');
+    const appName = 'ID 9250 Universal Search Application';
+    await network.mockJson(
+      abTestsApi.list,
+      'GET',
+      abTestListResponse({ name: 'FRONTINC-6 search', appName }),
+    );
+    await productPage.openAbTests();
+
+    const { response } = await network.waitForResponseWhile(
+      { url: abTestsApi.list, method: 'GET', status: 200 },
+      () => productPage.abTests.searchByApplicationName('9250'),
+    );
+
+    await scenarioCheck.contains('Поиск передаёт часть названия приложения', response.url(), '9250');
+    await productPage.abTests.expectApplicationNameHighlighted(appName, '9250');
   });
 
   test('[TC-622] список тестов показывает приложения и пагинацию', async ({ productPage }) => {

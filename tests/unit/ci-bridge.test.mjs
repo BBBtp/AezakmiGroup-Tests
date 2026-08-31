@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -12,6 +12,7 @@ test('dispatchAndCollect waits for GitHub and downloads the combined Allure arti
   t.after(() => rm(root, { recursive: true, force: true }));
   const resultPath = path.join(root, 'bridge-result.json');
   const reportPath = path.join(root, 'allure-results.zip');
+  const extractedArchives = [];
   const requests = [];
   const responses = [
     jsonResponse({ workflow_run_id: 456, html_url: 'https://github.test/actions/runs/456' }),
@@ -39,17 +40,35 @@ test('dispatchAndCollect waits for GitHub and downloads the combined Allure arti
       CI_PIPELINE_ID: '100',
       CI_PROJECT_ID: '200',
       CI_COMMIT_REF_NAME: 'main',
+      TEST_GREP: '@niches',
       BRIDGE_RESULT_PATH: resultPath,
       BRIDGE_REPORT_PATH: reportPath,
+      BRIDGE_WORKSPACE_PATH: root,
     },
     fetchImpl,
+    extractArchive: async (archivePath, destinationPath) => {
+      extractedArchives.push({ archivePath, destinationPath });
+      const resultsPath = path.join(destinationPath, 'allure-results');
+      await mkdir(resultsPath, { recursive: true });
+      await writeFile(path.join(resultsPath, 'example-result.json'), '{}');
+    },
     wait: async () => {},
   });
 
   assert.equal(result.conclusion, 'success');
   assert.equal(await readFile(reportPath, 'utf8'), 'allure archive');
+  assert.deepEqual(extractedArchives, [{ archivePath: reportPath, destinationPath: root }]);
+  assert.equal(result.resultsPath, path.join(root, 'allure-results'));
   assert.equal((await assertBridgeSuccess(resultPath)).runId, 456);
   assert.equal(requests[0].init.headers.Authorization, 'Bearer masked-token');
+  assert.deepEqual(JSON.parse(requests[0].init.body).inputs, {
+    publish_to_doqa: false,
+    bridge_pipeline_id: '100',
+    bridge_project_id: '200',
+    bridge_branch: 'main',
+    test_grep: '@niches',
+  });
+  assert.equal(result.testGrep, '@niches');
   assert.doesNotMatch(JSON.stringify(await readFile(resultPath, 'utf8')), /masked-token/);
 });
 
@@ -70,6 +89,18 @@ test('writeAllureMetadata records the stable report URL without credentials', as
   const environment = await readFile(path.join(root, 'environment.properties'), 'utf8');
   assert.equal(executor.reportUrl, 'https://owner.github.io/repository/');
   assert.match(environment, /doqa\.bridge\.pipeline\.id=100/);
+});
+
+test('nightly regression uses one shard for filtered runs and three shards otherwise', async () => {
+  const workflow = await readFile(
+    new URL('../../.github/workflows/nightly-regression.yml', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(workflow, /test_grep:/);
+  assert.match(workflow, /fromJSON\(inputs\.test_grep != '' && '\[1\]' \|\| '\[1,2,3\]'\)/);
+  assert.match(workflow, /REGRESSION_SHARD_TOTAL:.*inputs\.test_grep != '' && 1 \|\| 3/);
+  assert.match(workflow, /args\+=\(--grep "\$TEST_GREP"\)/);
 });
 
 function jsonResponse(value, status = 200) {

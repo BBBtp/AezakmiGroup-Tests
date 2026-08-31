@@ -32,12 +32,12 @@ test.describe('Statistics → Subscriptions — design coverage', () => {
   const alphaTable = subscriptionTableResponse(alpha);
   const chart = subscriptionChartResponse();
 
-  test('[TC-1050] Daily сравнивает выбранную дату с предыдущим днём и показывает частичные данные', async ({
+  test('[TC-1092] Daily сравнивает выбранную дату с предыдущим днём и показывает частичные данные', async ({
     dashboardPage,
     network,
     subscriptionsPage,
   }) => {
-    await allure.allureId('1050');
+    await allure.allureId('1092');
     await subscriptionsPage.setFixedTime('2026-08-24T05:00:00.000Z');
     await network.fulfillNextJson('**/api/v1/subscriptions/filters*', 'GET', filtersResponse);
     await network.fulfillNextJson(

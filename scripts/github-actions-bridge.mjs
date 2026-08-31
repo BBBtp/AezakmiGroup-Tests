@@ -1,12 +1,16 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promisify } from 'node:util';
 
 const githubApiVersion = '2026-03-10';
+const execFileAsync = promisify(execFile);
 
 export async function dispatchAndCollect({
   env = process.env,
   fetchImpl = fetch,
+  extractArchive = extractAllureArtifact,
   wait = delay,
   now = Date.now,
 } = {}) {
@@ -17,10 +21,13 @@ export async function dispatchAndCollect({
   const pipelineId = required(env, 'CI_PIPELINE_ID');
   const projectId = required(env, 'CI_PROJECT_ID');
   const branch = env.CI_COMMIT_REF_NAME?.trim() || ref;
+  const testGrep = env.TEST_GREP?.trim() || '';
   const timeoutMs = positiveNumber(env.BRIDGE_TIMEOUT_MS, 4 * 60 * 60 * 1000);
   const pollIntervalMs = positiveNumber(env.BRIDGE_POLL_INTERVAL_MS, 15_000);
   const outputPath = path.resolve(env.BRIDGE_RESULT_PATH?.trim() || 'bridge-result.json');
   const reportPath = path.resolve(env.BRIDGE_REPORT_PATH?.trim() || 'allure-results.zip');
+  const workspacePath = path.resolve(env.BRIDGE_WORKSPACE_PATH?.trim() || '.');
+  const resultsPath = path.join(workspacePath, 'allure-results');
   const apiBase = `https://api.github.com/repos/${repository}`;
 
   const dispatchResponse = await githubRequest(
@@ -36,6 +43,7 @@ export async function dispatchAndCollect({
           bridge_pipeline_id: pipelineId,
           bridge_project_id: projectId,
           bridge_branch: branch,
+          test_grep: testGrep,
         },
       }),
     },
@@ -75,17 +83,26 @@ export async function dispatchAndCollect({
     throw new Error(`GitHub artifact download failed with HTTP ${archiveResponse.status}`);
   }
   await writeFile(reportPath, Buffer.from(await archiveResponse.arrayBuffer()));
+  await extractArchive(reportPath, workspacePath);
+  await assertAllureResultsPresent(resultsPath);
 
   const result = {
     runId,
     runUrl,
     conclusion: run.conclusion,
     reportPath,
+    resultsPath,
     artifactName,
+    testGrep,
   };
   await writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
   console.log(`GitHub regression completed with conclusion: ${run.conclusion}`);
   return result;
+}
+
+export async function extractAllureArtifact(archivePath, destinationPath) {
+  await mkdir(destinationPath, { recursive: true });
+  await execFileAsync('unzip', ['-q', '-o', archivePath, '-d', destinationPath]);
 }
 
 export async function assertBridgeSuccess(
@@ -96,6 +113,21 @@ export async function assertBridgeSuccess(
     throw new Error(`GitHub regression ${result.runId} finished with conclusion: ${result.conclusion}`);
   }
   return result;
+}
+
+async function assertAllureResultsPresent(resultsPath) {
+  let entries;
+  try {
+    entries = await readdir(resultsPath, { recursive: true });
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      throw new Error(`GitHub artifact does not contain ${resultsPath}`);
+    }
+    throw error;
+  }
+  if (!entries.some((entry) => entry.endsWith('-result.json'))) {
+    throw new Error(`GitHub artifact does not contain Allure result files in ${resultsPath}`);
+  }
 }
 
 async function githubRequest(fetchImpl, url, token, init = {}) {
@@ -144,7 +176,12 @@ function delay(milliseconds) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     if (process.argv.includes('--assert-success')) await assertBridgeSuccess();
-    else await dispatchAndCollect();
+    else {
+      const result = await dispatchAndCollect();
+      if (process.argv.includes('--assert-success-after-collect') && result.conclusion !== 'success') {
+        throw new Error(`GitHub regression ${result.runId} finished with conclusion: ${result.conclusion}`);
+      }
+    }
   } catch (error) {
     console.error(`DoQA GitHub bridge failed: ${error.message}`);
     process.exitCode = 1;

@@ -25,4 +25,10 @@ export class PerformancePage extends BasePage {
       new RegExp(`/performance\\?from=${from}&to=${to}$`),
     );
   }
+
+  async setFixedTime(value: string): Promise<void> {
+    await this.actions.run('evaluate', 'Performance: зафиксировать время браузера', this.content.root, () =>
+      this.page.clock.setFixedTime(new Date(value)),
+    );
+  }
 }

@@ -51,6 +51,26 @@ export class DateRangeCalendarComponent extends UiObject {
     await this.expectations.disabled('Date range: Apply disabled', this.applyButton);
   }
 
+  async expectLatestAvailableDay(options: {
+    latestAvailableLabel: string;
+    todayUnavailableLabel: string;
+    futureUnavailableLabel: string;
+  }): Promise<void> {
+    await this.expectations.enabled(
+      'Календарь периода: вчерашний день доступен',
+      this.locate.role('option', { name: options.latestAvailableLabel, exact: true }),
+    );
+    for (const [target, label] of [
+      ['сегодняшний день недоступен', options.todayUnavailableLabel],
+      ['будущий день недоступен', options.futureUnavailableLabel],
+    ] as const) {
+      await this.expectations.disabled(
+        `Календарь периода: ${target}`,
+        this.locate.role('option', { name: label, exact: true }),
+      );
+    }
+  }
+
   async close(): Promise<void> {
     await this.actions.press('Date range: close', this.startInput, 'Escape');
     await this.expectations.hidden('Date range: closed', this.startInput);

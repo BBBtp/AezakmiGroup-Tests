@@ -1,6 +1,8 @@
 import { allure } from 'allure-playwright';
 
+import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
+import { performanceApi } from '@support/asa/contracts';
 
 test.describe('ASA Performance → calendar', () => {
   test.beforeEach('ПОДГОТОВКА · Подготовить предусловия сценария', async ({ dashboardPage }) => {
@@ -50,6 +52,44 @@ test.describe('ASA Performance → calendar', () => {
     await performancePage.content.calendar.fill('02.08.2026', '09.08.2026');
     await performancePage.content.calendar.apply();
     await performancePage.content.expectBusinessBlocks();
+  });
+
+  test('[TC-1093] ограничивает запросы Performance вчерашним днем', async ({ network, performancePage }) => {
+    await allure.allureId('1093');
+    await performancePage.setFixedTime('2026-08-27T05:00:00.000Z');
+    const requests = network.captureRequests(
+      (request) => request.method() === 'GET' && performanceApi.datedRequests.test(request.url()),
+    );
+
+    await performancePage.openFromSidebar();
+
+    await requests.expectCount(3, 'Performance отправляет три запроса данных');
+    const urls = requests.urls.map((value) => new URL(value));
+    await scenarioCheck.deepEqual(
+      'Performance запрашивает все обязательные ресурсы',
+      urls.map((url) => url.pathname).sort(),
+      [...performanceApi.expectedDatedRequestPaths].sort(),
+    );
+    for (const url of urls) {
+      await scenarioCheck.equal(
+        `${url.pathname} ограничен вчерашним днем`,
+        url.searchParams.get('to_date'),
+        '2026-08-26',
+      );
+    }
+    requests.stop();
+  });
+
+  test('[TC-1094] запрещает выбирать сегодня и будущие даты', async ({ performancePage }) => {
+    await allure.allureId('1094');
+    await performancePage.setFixedTime('2026-08-27T05:00:00.000Z');
+    await performancePage.openFromSidebar();
+    await performancePage.content.openCalendar();
+    await performancePage.content.calendar.expectLatestAvailableDay({
+      latestAvailableLabel: 'Choose Wednesday, August 26th, 2026',
+      todayUnavailableLabel: 'Not available Thursday, August 27th, 2026',
+      futureUnavailableLabel: 'Not available Friday, August 28th, 2026',
+    });
   });
 });
 
