@@ -83,12 +83,26 @@ test('writeAllureMetadata records the stable report URL without credentials', as
     runId: '456',
     runNumber: '12',
     bridgePipelineId: '100',
+    branch: 'main',
+    commit: 'abc123',
+    runnerOs: 'Linux',
+    runnerArch: 'X64',
+    browser: 'Chromium 140',
+    nodeVersion: 'v20.19.0',
   });
 
   const executor = JSON.parse(await readFile(path.join(root, 'executor.json'), 'utf8'));
   const environment = await readFile(path.join(root, 'environment.properties'), 'utf8');
   assert.equal(executor.reportUrl, 'https://owner.github.io/repository/');
   assert.match(environment, /doqa\.bridge\.pipeline\.id=100/);
+  assert.match(environment, /git\.branch=main/);
+  assert.match(environment, /git\.commit=abc123/);
+  assert.match(environment, /runner\.os=Linux/);
+  assert.match(environment, /browser=Chromium 140/);
+  assert.deepEqual(
+    JSON.parse(await readFile(path.join(root, 'categories.json'), 'utf8')).map(({ name }) => name),
+    ['Инфраструктурные проблемы', 'Проблемы автотеста', 'Дефекты продукта — требуется triage'],
+  );
 });
 
 test('nightly regression uses one shard for filtered runs and three shards otherwise', async () => {
@@ -101,6 +115,10 @@ test('nightly regression uses one shard for filtered runs and three shards other
   assert.match(workflow, /fromJSON\(inputs\.test_grep != '' && '\[1\]' \|\| '\[1,2,3\]'\)/);
   assert.match(workflow, /REGRESSION_SHARD_TOTAL:.*inputs\.test_grep != '' && 1 \|\| 3/);
   assert.match(workflow, /args\+=\(--grep "\$TEST_GREP"\)/);
+  assert.match(workflow, /actions\/cache\/restore@v4/);
+  assert.match(workflow, /npm run allure:history:restore/);
+  assert.match(workflow, /npm run allure:history:stage/);
+  assert.match(workflow, /actions\/cache\/save@v4/);
 });
 
 function jsonResponse(value, status = 200) {

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Инфраструктурные проблемы",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*(ECONNRESET|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|ERR_NAME_NOT_RESOLVED|net::ERR_|socket hang up|HTTP request timed out|Failed to resolve action download info|browserType\\.launch|Target page, context or browser has been closed|502 Bad Gateway|503 Service Unavailable|504 Gateway Timeout).*"
+  },
+  {
+    "name": "Проблемы автотеста",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*(strict mode violation|locator\\.(click|fill|press|hover|check|innerText)|element\\(s\\) not found|waiting for (getBy|locator)|Test timeout of).*"
+  },
+  {
+    "name": "Дефекты продукта — требуется triage",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*(expect\\(|Expected:|Received:|AssertionError|scenario check).*"
+  }
+]

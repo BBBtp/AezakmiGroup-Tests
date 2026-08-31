@@ -30,6 +30,8 @@
     "quality": "npm run test:types && npm run lint && npm run format:check && npm run check:allure-ids && npm run check:skills && npm run check:architecture && npm run test:unit",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:metadata": "node scripts/allure-metadata.mjs",
+    "allure:history:restore": "node scripts/allure-history.mjs restore",
+    "allure:history:stage": "node scripts/allure-history.mjs stage",
     "allure:open": "allure open allure-report",
     "bridge:github": "node scripts/github-actions-bridge.mjs",
     "bridge:check": "node scripts/github-actions-bridge.mjs --assert-success",
