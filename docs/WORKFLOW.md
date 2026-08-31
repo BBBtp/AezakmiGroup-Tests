@@ -79,6 +79,13 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
   shards. С фильтром создаётся один shard, поэтому точечный запуск занимает только один
   self-hosted runner; serial KPI Settings затем выполняется с тем же фильтром и
   `--pass-with-no-tests`.
+- Ручной GitHub запуск поддерживает функциональную категорию (`test_category`) и список точных
+  ID (`test_ids`, например `610,TC-845`). Приоритет фильтров: `test_ids`, затем расширенный
+  `test_grep`, затем категория. Любой фильтр использует один runner; значение категории `all` и
+  пустые фильтры запускают полный regression на трёх runners.
+- Ручной GitLab pipeline предоставляет те же фильтры как `TEST_CATEGORY`, `TEST_IDS` и
+  `TEST_GREP`. Bridge проверяет их и передаёт в одноимённые inputs GitHub workflow; старые
+  DoQA-запуски без новых переменных продолжают запускать `all` или переданный `TEST_GREP`.
 - Netlify deployment включается только repository variable `NETLIFY_ENABLED=true`. Для него нужны
   secrets `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` и variable `NETLIFY_REPORT_URL`. Готовый HTML
   отправляется через ZIP Deploy API, поэтому Netlify не получает доступ к repository.

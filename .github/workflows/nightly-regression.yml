@@ -26,8 +26,29 @@ on:
         required: false
         type: string
         default: ''
+      test_category:
+        description: Functional category; ignored when TC IDs or grep are supplied
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - authorization
+          - keywords
+          - product
+          - asa
+          - statistics
+          - kpi
+          - employees
+          - push-reviews
+          - task-generator
+      test_ids:
+        description: Optional TC IDs, for example 610,611 or TC-845
+        required: false
+        type: string
+        default: ''
       test_grep:
-        description: Optional Playwright grep; filtered runs use one self-hosted runner
+        description: Advanced Playwright grep; ignored when TC IDs are supplied
         required: false
         type: string
         default: ''
@@ -47,6 +68,8 @@ jobs:
     env:
       E2E_BASE_URL: http://127.0.0.1
       TEST_GREP: ${{ inputs.test_grep }}
+      TEST_IDS: ${{ inputs.test_ids }}
+      TEST_CATEGORY: ${{ inputs.test_category }}
 
     steps:
       - name: Checkout
@@ -64,26 +87,42 @@ jobs:
       - name: Run quality gate
         run: npm run quality
 
-      - name: Verify regression discovery
-        run: npx playwright test --config=playwright.regression.config.ts --list
+      - name: Resolve requested test selection
+        id: selection
+        run: npm run ci:test-selection
 
-      - name: Verify filtered regression discovery
-        if: inputs.test_grep != ''
-        run: npx playwright test --config=playwright.regression.config.ts --list --grep "$TEST_GREP"
+      - name: Verify regression discovery
+        env:
+          SELECTED_FILES: ${{ steps.selection.outputs.files }}
+          SELECTED_GREP: ${{ steps.selection.outputs.grep }}
+          SELECTION_MODE: ${{ steps.selection.outputs.mode }}
+        shell: bash
+        run: |
+          read -ra files <<< "$SELECTED_FILES"
+          args=()
+          if [[ -n "$SELECTED_GREP" ]]; then
+            args+=(--grep "$SELECTED_GREP")
+          fi
+          if [[ "$SELECTION_MODE" == "test-ids" ]]; then
+            npx playwright test --project=smoke-auth --project=smoke --list "${args[@]}"
+          fi
+          npx playwright test --config=playwright.regression.config.ts --list "${files[@]}" "${args[@]}"
 
   regression-shards:
-    name: Regression · shard ${{ matrix.shard }}/${{ inputs.test_grep != '' && 1 || 3 }}
+    name: Regression · shard ${{ matrix.shard }}/${{ (inputs.test_ids != '' || inputs.test_grep != '' || (inputs.test_category != '' && inputs.test_category != 'all')) && 1 || 3 }}
     needs: static
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(inputs.test_grep != '' && '[1]' || '[1,2,3]') }}
+        shard: ${{ fromJSON((inputs.test_ids != '' || inputs.test_grep != '' || (inputs.test_category != '' && inputs.test_category != 'all')) && '[1]' || '[1,2,3]') }}
     runs-on: [self-hosted, Linux, X64, crm, playwright]
     timeout-minutes: 90
     env:
       ALLURE_RESULTS_DIR: allure-results/shard-${{ matrix.shard }}
-      REGRESSION_SHARD_TOTAL: ${{ inputs.test_grep != '' && 1 || 3 }}
+      REGRESSION_SHARD_TOTAL: ${{ (inputs.test_ids != '' || inputs.test_grep != '' || (inputs.test_category != '' && inputs.test_category != 'all')) && 1 || 3 }}
       TEST_GREP: ${{ inputs.test_grep }}
+      TEST_IDS: ${{ inputs.test_ids }}
+      TEST_CATEGORY: ${{ inputs.test_category }}
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -108,23 +147,35 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
 
+      - name: Resolve requested test selection
+        id: selection
+        run: npm run ci:test-selection
+
       - name: Run regression shard
+        env:
+          SELECTED_FILES: ${{ steps.selection.outputs.files }}
+          SELECTED_GREP: ${{ steps.selection.outputs.grep }}
+          SELECTION_MODE: ${{ steps.selection.outputs.mode }}
         shell: bash
         run: |
+          read -ra files <<< "$SELECTED_FILES"
           args=(--pass-with-no-tests)
-          if [[ -n "$TEST_GREP" ]]; then
-            args+=(--grep "$TEST_GREP")
+          if [[ -n "$SELECTED_GREP" ]]; then
+            args+=(--grep "$SELECTED_GREP")
+          fi
+          if [[ "$SELECTION_MODE" == "test-ids" ]]; then
+            npx playwright test --project=smoke-auth --project=smoke "${args[@]}"
           fi
           if [[ "$REGRESSION_SHARD_TOTAL" -gt 1 ]]; then
             args+=(--shard="${{ matrix.shard }}/$REGRESSION_SHARD_TOTAL")
           fi
-          npm run test:regression:shard -- "${args[@]}"
+          npm run test:regression:shard -- "${files[@]}" "${args[@]}"
 
       - name: Detect flaky retries and write summary
         if: always()
         run: >-
           npm run check:flaky --
-          --label="Regression · shard ${{ matrix.shard }}/${{ inputs.test_grep != '' && 1 || 3 }}"
+          --label="Regression · shard ${{ matrix.shard }}/${{ (inputs.test_ids != '' || inputs.test_grep != '' || (inputs.test_category != '' && inputs.test_category != 'all')) && 1 || 3 }}"
 
       - name: Upload raw Allure results
         if: always()
@@ -159,6 +210,8 @@ jobs:
     env:
       ALLURE_RESULTS_DIR: allure-results/settings
       TEST_GREP: ${{ inputs.test_grep }}
+      TEST_IDS: ${{ inputs.test_ids }}
+      TEST_CATEGORY: ${{ inputs.test_category }}
       E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
       E2E_ADMIN_USERNAME: ${{ secrets.E2E_ADMIN_USERNAME }}
       E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
@@ -183,14 +236,22 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
 
+      - name: Resolve requested test selection
+        id: selection
+        run: npm run ci:test-selection
+
       - name: Run shared-settings regression
+        env:
+          SELECTED_FILES: ${{ steps.selection.outputs.files }}
+          SELECTED_GREP: ${{ steps.selection.outputs.grep }}
         shell: bash
         run: |
+          read -ra files <<< "$SELECTED_FILES"
           args=(--pass-with-no-tests)
-          if [[ -n "$TEST_GREP" ]]; then
-            args+=(--grep "$TEST_GREP")
+          if [[ -n "$SELECTED_GREP" ]]; then
+            args+=(--grep "$SELECTED_GREP")
           fi
-          npm run test:regression:settings -- "${args[@]}"
+          npm run test:regression:settings -- "${files[@]}" "${args[@]}"
 
       - name: Detect flaky retries and write summary
         if: always()

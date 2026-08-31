@@ -32,6 +32,7 @@
     "allure:metadata": "node scripts/allure-metadata.mjs",
     "allure:history:restore": "node scripts/allure-history.mjs restore",
     "allure:history:stage": "node scripts/allure-history.mjs stage",
+    "ci:test-selection": "node scripts/resolve-test-selection.mjs",
     "allure:open": "allure open allure-report",
     "bridge:github": "node scripts/github-actions-bridge.mjs",
     "bridge:check": "node scripts/github-actions-bridge.mjs --assert-success",
