@@ -12,7 +12,7 @@ export class ReadOnlySectionComponent extends UiObject {
 
   constructor(page: Page) {
     super(page);
-    this.root = this.locate.role(readOnlySectionLocators.pageRole);
+    this.root = this.locate.role(readOnlySectionLocators.pageRole).first();
   }
 
   async expectHealthy(section: ReadOnlySection): Promise<void> {

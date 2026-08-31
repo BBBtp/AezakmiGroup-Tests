@@ -53,6 +53,15 @@ export const readOnlySectionLocators = {
       ],
       collection: { role: 'button', name: 'Edit' },
     },
+    taskGenerator: {
+      label: 'Task generator',
+      href: '/task-generator',
+      controls: [
+        { role: 'button', name: 'Settings' },
+        { role: 'button', name: 'Generate' },
+        { role: 'button', name: 'Date' },
+      ],
+    },
   },
 } as const;
 

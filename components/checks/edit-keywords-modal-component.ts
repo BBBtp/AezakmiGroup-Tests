@@ -64,6 +64,33 @@ export class EditKeywordsModalComponent extends UiObject {
     await this.expectations.hidden('Edit keywords modal', this.root);
   }
 
+  async expectValidationAndCancel(): Promise<void> {
+    await this.openAddForm();
+    await this.expectations.disabled('сохранение пустого keyword', this.submitButton);
+    await this.actions.fill('невалидный keyword из спецсимволов', this.keywordInput, '!!!');
+    await this.expectations.disabled('сохранение невалидного keyword', this.submitButton);
+    await this.actions.fill('валидный keyword', this.keywordInput, 'automation keyword');
+    await this.actions.click('страна валидного keyword', this.countrySelectTrigger);
+    await this.actions.click(
+      'страна GB для валидного keyword',
+      this.locate.testId(checksTestIds.countryOption('GB')),
+    );
+    await this.expectations.enabled('сохранение валидного keyword после заполнения', this.submitButton);
+    await this.close();
+  }
+
+  async expectDraftDiscarded(keyword: string): Promise<void> {
+    await this.openAddForm();
+    await this.actions.fill('несохранённый черновик keyword', this.keywordInput, keyword);
+    await this.close();
+  }
+
+  async expectEmptyDraft(): Promise<void> {
+    await this.openAddForm();
+    await this.expectations.value('пустой keyword после повторного открытия', this.keywordInput, '');
+    await this.close();
+  }
+
   async expectKeywordTracked(keyword: string): Promise<void> {
     await this.expectations.visible(`tracked keyword ${keyword}`, this.keywordItem(keyword));
   }

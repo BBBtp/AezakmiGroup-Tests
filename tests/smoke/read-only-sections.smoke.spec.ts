@@ -54,4 +54,16 @@ test.describe('Read-only разделы CRM', () => {
 
     consoleErrors.expectNoErrors();
   });
+
+  test('[TC-610] Task generator открывается и показывает ключевые контролы', async ({
+    browserDiagnostics,
+    readOnlySectionsPage,
+  }) => {
+    await allure.allureId('610');
+    const consoleErrors = browserDiagnostics.captureConsoleErrors('открытие Task generator');
+
+    await readOnlySectionsPage.openFromSidebar('taskGenerator');
+
+    consoleErrors.expectNoErrors();
+  });
 });

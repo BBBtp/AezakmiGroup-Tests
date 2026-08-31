@@ -1,0 +1,1 @@
+export { taskGeneratorApi } from './contracts';
