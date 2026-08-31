@@ -2,9 +2,26 @@ stages:
   - regression
 
 variables:
+  TEST_CATEGORY:
+    value: 'all'
+    options:
+      - 'all'
+      - 'authorization'
+      - 'keywords'
+      - 'product'
+      - 'asa'
+      - 'statistics'
+      - 'kpi'
+      - 'employees'
+      - 'push-reviews'
+      - 'task-generator'
+    description: 'Functional regression category; ignored when TEST_IDS or TEST_GREP is set'
+  TEST_IDS:
+    value: ''
+    description: 'Optional TC IDs, for example 610,611 or TC-845'
   TEST_GREP:
     value: ''
-    description: 'Optional Playwright grep, for example TC-967, niches or TC-(967|995)'
+    description: 'Advanced Playwright grep; ignored when TEST_IDS is set'
 
 doqa_github_regression:
   stage: regression

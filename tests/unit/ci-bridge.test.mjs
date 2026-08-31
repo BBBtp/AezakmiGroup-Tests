@@ -40,6 +40,8 @@ test('dispatchAndCollect waits for GitHub and downloads the combined Allure arti
       CI_PIPELINE_ID: '100',
       CI_PROJECT_ID: '200',
       CI_COMMIT_REF_NAME: 'main',
+      TEST_CATEGORY: 'keywords',
+      TEST_IDS: '610,611',
       TEST_GREP: '@niches',
       BRIDGE_RESULT_PATH: resultPath,
       BRIDGE_REPORT_PATH: reportPath,
@@ -66,8 +68,12 @@ test('dispatchAndCollect waits for GitHub and downloads the combined Allure arti
     bridge_pipeline_id: '100',
     bridge_project_id: '200',
     bridge_branch: 'main',
+    test_category: 'keywords',
+    test_ids: '610,611',
     test_grep: '@niches',
   });
+  assert.equal(result.testCategory, 'keywords');
+  assert.equal(result.testIds, '610,611');
   assert.equal(result.testGrep, '@niches');
   assert.doesNotMatch(JSON.stringify(await readFile(resultPath, 'utf8')), /masked-token/);
 });
@@ -112,9 +118,14 @@ test('nightly regression uses one shard for filtered runs and three shards other
   );
 
   assert.match(workflow, /test_grep:/);
-  assert.match(workflow, /fromJSON\(inputs\.test_grep != '' && '\[1\]' \|\| '\[1,2,3\]'\)/);
-  assert.match(workflow, /REGRESSION_SHARD_TOTAL:.*inputs\.test_grep != '' && 1 \|\| 3/);
-  assert.match(workflow, /args\+=\(--grep "\$TEST_GREP"\)/);
+  assert.match(workflow, /test_category:/);
+  assert.match(workflow, /test_ids:/);
+  assert.match(workflow, /fromJSON\(\(inputs\.test_ids != '' \|\| inputs\.test_grep != ''/);
+  assert.match(workflow, /REGRESSION_SHARD_TOTAL:.*inputs\.test_ids != ''/);
+  assert.match(workflow, /npm run ci:test-selection/);
+  assert.match(workflow, /args\+=\(--grep "\$SELECTED_GREP"\)/);
+  assert.match(workflow, /--project=smoke-auth --project=smoke/);
+  assert.match(workflow, /"\$\{files\[@\]\}" "\$\{args\[@\]\}"/);
   assert.match(workflow, /actions\/cache\/restore@v4/);
   assert.match(workflow, /npm run allure:history:restore/);
   assert.match(workflow, /npm run allure:history:stage/);

@@ -4,6 +4,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 
+import { resolveTestSelection } from './resolve-test-selection.mjs';
+
 const githubApiVersion = '2026-03-10';
 const execFileAsync = promisify(execFile);
 
@@ -21,7 +23,10 @@ export async function dispatchAndCollect({
   const pipelineId = required(env, 'CI_PIPELINE_ID');
   const projectId = required(env, 'CI_PROJECT_ID');
   const branch = env.CI_COMMIT_REF_NAME?.trim() || ref;
+  const testCategory = env.TEST_CATEGORY?.trim() || 'all';
+  const testIds = env.TEST_IDS?.trim() || '';
   const testGrep = env.TEST_GREP?.trim() || '';
+  resolveTestSelection({ category: testCategory, testIds, testGrep });
   const timeoutMs = positiveNumber(env.BRIDGE_TIMEOUT_MS, 4 * 60 * 60 * 1000);
   const pollIntervalMs = positiveNumber(env.BRIDGE_POLL_INTERVAL_MS, 15_000);
   const outputPath = path.resolve(env.BRIDGE_RESULT_PATH?.trim() || 'bridge-result.json');
@@ -43,6 +48,8 @@ export async function dispatchAndCollect({
           bridge_pipeline_id: pipelineId,
           bridge_project_id: projectId,
           bridge_branch: branch,
+          test_category: testCategory,
+          test_ids: testIds,
           test_grep: testGrep,
         },
       }),
@@ -93,6 +100,8 @@ export async function dispatchAndCollect({
     reportPath,
     resultsPath,
     artifactName,
+    testCategory,
+    testIds,
     testGrep,
   };
   await writeFile(outputPath, `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
