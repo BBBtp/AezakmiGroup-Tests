@@ -22,6 +22,11 @@ export class ChecksPage extends BasePage {
     await this.expectLoaded();
   }
 
+  async navigateWithoutContentWait(): Promise<void> {
+    await this.navigateTo('/checks');
+    await this.expectations.visible('страница Checks', this.overview.root);
+  }
+
   async openFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Checks', '/checks', 'Keywords');
     await this.expectLoaded();
@@ -46,5 +51,16 @@ export class ChecksPage extends BasePage {
     await this.overview.openArchive();
     await this.shell.openSidebarDestination('Checks', '/checks', 'Keywords');
     await this.expectLoaded();
+  }
+
+  async expectInvalidDetailHandled(): Promise<void> {
+    await this.navigateTo('/checks/not-existing-autotest');
+    await this.expectations.url('страница 404 для невалидного Checks URL', /\/404$/);
+    await this.navigate();
+  }
+
+  async expectAccessBlocked(): Promise<void> {
+    await this.navigateTo('/checks');
+    await this.expectations.url('страница входа вместо недоступного раздела Checks', /\/login$/);
   }
 }

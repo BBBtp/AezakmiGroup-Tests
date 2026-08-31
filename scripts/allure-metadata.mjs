@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -9,6 +9,13 @@ export async function writeAllureMetadata({
   runId,
   runNumber,
   bridgePipelineId,
+  branch = process.env.GITHUB_REF_NAME,
+  commit = process.env.GITHUB_SHA,
+  runnerOs = process.env.RUNNER_OS,
+  runnerArch = process.env.RUNNER_ARCH,
+  browser = 'Chromium',
+  nodeVersion = process.version,
+  categoriesFile = path.resolve('config/allure/categories.json'),
 }) {
   if (!resultsDir?.trim()) throw new Error('Allure results directory is required');
   if (!runUrl?.trim()) throw new Error('GitHub run URL is required');
@@ -24,7 +31,15 @@ export async function writeAllureMetadata({
     reportUrl,
   };
   await writeFile(path.join(outputDir, 'executor.json'), `${JSON.stringify(executor, null, 2)}\n`);
+  await copyFile(categoriesFile, path.join(outputDir, 'categories.json'));
   const properties = [
+    'environment=CRM S1',
+    `browser=${escapeProperty(browser)}`,
+    `node.version=${escapeProperty(nodeVersion)}`,
+    runnerOs ? `runner.os=${escapeProperty(runnerOs)}` : null,
+    runnerArch ? `runner.arch=${escapeProperty(runnerArch)}` : null,
+    branch ? `git.branch=${escapeProperty(branch)}` : null,
+    commit ? `git.commit=${escapeProperty(commit)}` : null,
     `github.run.url=${escapeProperty(runUrl)}`,
     `allure.report.url=${escapeProperty(reportUrl)}`,
     bridgePipelineId ? `doqa.bridge.pipeline.id=${escapeProperty(bridgePipelineId)}` : null,

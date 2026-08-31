@@ -175,6 +175,26 @@ export const performanceLocators = {
   chartTitle: 'Dynamics of indicators',
   tableTitle: 'Apps statistics',
   search: 'input[placeholder="Search"]',
+  filtersButton: 'Filters',
+  filterTrigger: 'undefined__trigger',
+  filterNames: ['App status', 'App', 'GEO', 'Team'],
+  applyFiltersButton: 'Apply',
+  chartMetrics: ['Spend', 'Installs', 'Cohort Proceeds', 'Cohort ROAS', 'Proceeds'],
+  chartViewport: 'undefined__viewport',
+  tableHeaders: ['App', 'GEO', 'Spend', 'Installs', 'Cohort Proceeds', 'Cohort ROAS', 'Proceeds'],
+  tableRows: 'tbody tr',
+  tableBody: 'tbody',
+  rowToggle: 'button',
+  applicationLink: 'a',
+  totalRow: 'tr:has-text("Total")',
+  pagination: {
+    rows: 'undefined-trigger',
+    twentyRows: '20 rows',
+    current: 'undefined__cur-page',
+    total: 'undefined__total-pages',
+    previous: 'undefined__prev-btn',
+    next: 'undefined__next-btn',
+  },
 } as const;
 
 export const dateRangeCalendarLocators = {

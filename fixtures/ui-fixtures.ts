@@ -16,6 +16,7 @@ import { ReviewsPage } from '@modules/reviews';
 import { StatisticsPage } from '@modules/statistics';
 import { SubscriptionsPage } from '@modules/subscriptions';
 import { SuggestsPage } from '@modules/suggests';
+import { TaskGeneratorPage } from '@modules/task-generator';
 import { coreTest, type CoreFixtures } from './core-fixtures';
 
 export type UiFixtures = {
@@ -37,6 +38,7 @@ export type UiFixtures = {
   statisticsPage: StatisticsPage;
   subscriptionsPage: SubscriptionsPage;
   suggestsPage: SuggestsPage;
+  taskGeneratorPage: TaskGeneratorPage;
   applicationShell: ApplicationShellComponent;
   dashboardPage: DashboardPage;
   readOnlySectionsPage: ReadOnlySectionsPage;
@@ -114,6 +116,10 @@ export const uiTest = coreTest.extend<UiFixtures>({
 
   suggestsPage: async ({ page }, use) => {
     await use(new SuggestsPage(page));
+  },
+
+  taskGeneratorPage: async ({ page }, use) => {
+    await use(new TaskGeneratorPage(page));
   },
 
   applicationShell: async ({ page }, use) => {

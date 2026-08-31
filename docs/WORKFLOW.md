@@ -64,6 +64,12 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
   настройки CRM.
 - Raw Allure results всех jobs объединяются, после чего CI сохраняет единый HTML artifact
   `allure-report-<run-id>` и bridge artifact `allure-results-<run-id>` на 14 дней.
+- Перед генерацией HTML job восстанавливает предыдущую папку Allure `history` из GitHub Actions
+  cache, а после генерации сохраняет обновлённую историю под ключом текущего run. Благодаря этому
+  в опубликованном отчёте работают History, Status/Duration/Categories trends и Retries trend.
+- В raw results добавляются `categories.json`, `executor.json` и `environment.properties`:
+  падения группируются на инфраструктурные, тестовые и требующие triage продуктовые; executor
+  ведёт в GitHub Actions; environment показывает ветку, commit, runner, Node и браузер.
 - `.gitlab-ci.yml` не запускает браузерные тесты: он передаёт DoQA/GitLab pipeline в GitHub
   Actions, ждёт workflow и распаковывает объединённые raw Allure results под `doqa-cli watch`.
   Переменные `DOQA_PIPELINE_ID`, `CI_PROJECT_ID` и `CI_BRANCH` привязывают результаты к исходному

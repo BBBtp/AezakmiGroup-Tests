@@ -232,6 +232,8 @@ jobs:
     timeout-minutes: 15
     env:
       ALLURE_RESULTS_DIR: collected-results/allure-results
+      ALLURE_REPORT_DIR: allure-report
+      ALLURE_HISTORY_DIR: .allure-history
       ALLURE_REPORT_URL: ${{ vars.NETLIFY_REPORT_URL }}
       DOQA_BRIDGE_PIPELINE_ID: ${{ inputs.bridge_pipeline_id }}
       GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -262,11 +264,32 @@ jobs:
           path: collected-results/allure-results
           merge-multiple: true
 
+      - name: Restore cached Allure history
+        id: allure-history-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .allure-history
+          key: allure-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            allure-history-${{ github.ref_name }}-
+
+      - name: Add previous run to Allure results
+        run: npm run allure:history:restore
+
       - name: Add report and bridge metadata
         run: npm run allure:metadata
 
       - name: Generate Allure HTML report
         run: npx allure generate collected-results/allure-results --clean -o allure-report
+
+      - name: Validate and stage Allure history
+        run: npm run allure:history:stage
+
+      - name: Save Allure history
+        uses: actions/cache/save@v4
+        with:
+          path: .allure-history
+          key: allure-history-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Upload combined raw Allure results for the bridge
         uses: actions/upload-artifact@v7
