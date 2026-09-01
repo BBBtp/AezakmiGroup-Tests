@@ -65,6 +65,10 @@ export const kpiTestIds = {
       lastModified: `employees-table__last-modified-${index}`,
     }),
   },
+  scoreHistory: {
+    pageButtonSelector: 'main button',
+    otherActionOption: 'history-score-changes__add-points-form__action-type-select_option-Other',
+  },
 } as const;
 
 export const kpiManagerText = {
@@ -73,4 +77,16 @@ export const kpiManagerText = {
   vacationTitle: 'Vacation and KPI score',
   vacationDescription: 'Impact of employee vacation on minimum rating.',
   settingsHeaders: ['Month', 'Starting score', 'Minimal score', 'Sufficient score', 'Vacation'],
+  scoreHistory: 'History of score changes',
+  addPoints: 'Add points',
+  addPointsDialog: 'Adding points',
+  actionType: 'Select action type',
+  otherAction: 'Other',
+  addedPoints: 'Added',
+  subtractedPoints: 'Subtracted',
+  pointsInput: 'Number of points',
+  pointsInputPlaceholder: 'Enter value',
+  commentPlaceholder: 'Enter your comments on the points',
+  zeroValidation: 'The value cannot be equal to 0',
+  submitPoints: 'Add',
 } as const;

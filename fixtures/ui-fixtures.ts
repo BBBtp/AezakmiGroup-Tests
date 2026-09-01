@@ -17,6 +17,7 @@ import { StatisticsPage } from '@modules/statistics';
 import { SubscriptionsPage } from '@modules/subscriptions';
 import { SuggestsPage } from '@modules/suggests';
 import { TaskGeneratorPage } from '@modules/task-generator';
+import { VacationSchedulePage } from '@modules/vacation';
 import { coreTest, type CoreFixtures } from './core-fixtures';
 
 export type UiFixtures = {
@@ -39,6 +40,7 @@ export type UiFixtures = {
   subscriptionsPage: SubscriptionsPage;
   suggestsPage: SuggestsPage;
   taskGeneratorPage: TaskGeneratorPage;
+  vacationSchedulePage: VacationSchedulePage;
   applicationShell: ApplicationShellComponent;
   dashboardPage: DashboardPage;
   readOnlySectionsPage: ReadOnlySectionsPage;
@@ -120,6 +122,10 @@ export const uiTest = coreTest.extend<UiFixtures>({
 
   taskGeneratorPage: async ({ page }, use) => {
     await use(new TaskGeneratorPage(page));
+  },
+
+  vacationSchedulePage: async ({ page }, use) => {
+    await use(new VacationSchedulePage(page));
   },
 
   applicationShell: async ({ page }, use) => {
