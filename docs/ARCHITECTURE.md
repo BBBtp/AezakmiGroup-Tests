@@ -77,7 +77,10 @@ Subscriptions использует отдельный доменный моду�
 `SubscriptionsMetricsComponent` связывает карточки и таблицу с контролируемым API-контрактом.
 Домен Niches разделён по фактическим маршрутам интерфейса: `NichesOverviewComponent` владеет
 страницей `Niche list`, а `SortedAppsOverviewComponent` — страницей `Sorted by apps` и её
-контролами. Создание ASO Mobile расположено в `AsoMobileCreateComponent`: компонент владеет
+контролами. Новый маршрут `/niche-research` опубликован через тот же доменный модуль:
+`NicheResearchOverviewComponent` владеет вкладками и таблицей Research, а
+`NicheResearchCreateComponent` — локальным поведением формы создания исследуемой ниши.
+Создание ASO Mobile расположено в `AsoMobileCreateComponent`: компонент владеет
 формой, loading/error/success состояниями и повторным открытием после отмены SSE.
 Top-3000 следует той же границе: `TopKeywordsOverviewComponent` владеет фильтрами, региональными
 вкладками, таблицей, пагинацией, переводом и модальным окном Top Apps, а `TopKeywordsPage`

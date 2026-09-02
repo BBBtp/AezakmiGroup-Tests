@@ -53,6 +53,16 @@ export const regressionCategories = {
     'tests/regression/reviews.regression.spec.ts',
   ],
   'task-generator': ['tests/regression/task-generator.regression.spec.ts'],
+  'niche-research': [
+    'tests/regression/niche-research-access.regression.spec.ts',
+    'tests/regression/niche-research-controls.regression.spec.ts',
+    'tests/regression/niche-research-crud.regression.spec.ts',
+    'tests/regression/niche-research-integration.regression.spec.ts',
+    'tests/regression/niche-research-researched.regression.spec.ts',
+    'tests/regression/niche-research-states.regression.spec.ts',
+    'tests/regression/niche-research-table.regression.spec.ts',
+    'tests/regression/niche-research-visual.regression.spec.ts',
+  ],
 };
 
 export function resolveTestSelection({ category = 'all', testIds = '', testGrep = '' }) {
