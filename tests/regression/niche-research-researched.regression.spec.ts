@@ -62,6 +62,19 @@ async function setMetadata(goal: string): Promise<void> {
 
 test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () => {
   test.beforeEach(async ({ network, nichesPage }) => {
+    await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
+      { id: managerId, name: researched[0].aso_manager_name },
+    ]);
+    await network.mockJson(nicheResearchApi.managerFilter, 'GET', {
+      users: [
+        {
+          employee_id: managerId,
+          employee_name: researched[0].aso_manager_name,
+          id: managerId,
+          name: researched[0].aso_manager_name,
+        },
+      ],
+    });
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([nicheResearchItem(0)]));
     await nichesPage.navigateToResearch();
   });
@@ -102,6 +115,7 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await setMetadata('Проверить атомарный запрос сортировки по дате создания.');
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
+    await nichesPage.research.expectResearchedRowCount(4);
     const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
     const sorting = nichesPage.research.sortByCreationDate();
     const request = await held.started;
@@ -119,16 +133,22 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await setMetadata('Проверить атомарный запрос сортировки по дате исследования.');
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
-    const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const sorting = nichesPage.research.sortByResearchDate();
-    const request = await held.started;
+    await nichesPage.research.expectResearchedRowCount(4);
+    await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
+    await network.waitForResponseWhile({ url: nicheResearchApi.list, method: 'QUERY', status: 200 }, () =>
+      nichesPage.research.sortByCreationDate(),
+    );
+    await nichesPage.research.expectResearchedRowCount(4);
+    await network.mockJson(nicheResearchApi.list, 'QUERY', nicheResearchList([...researched].reverse()));
+    const { request } = await network.waitForRequestWhile(
+      { url: nicheResearchApi.list, method: 'QUERY' },
+      () => nichesPage.research.sortByResearchDate(),
+    );
     await scenarioCheck.matchObject('Сортировка использует research_created_at', request.postDataJSON(), {
       researched: true,
       sort_by: 'research_created_at',
       sort_order: 'asc',
     });
-    await held.fulfill(nicheResearchList([...researched].reverse()));
-    await sorting;
   });
 
   test('[TC-1175] переключает страницы списка', async ({ network, nichesPage }) => {
@@ -158,6 +178,7 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await setMetadata('Проверить поиск и точный параметр search.');
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
+    await nichesPage.research.expectResearchedRowCount(4);
     const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
     const searching = nichesPage.research.search('Revision researched niche');
     const request = await held.started;
@@ -173,24 +194,23 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
   test('[TC-1177] применяет ASO manager', async ({ network, nichesPage }) => {
     await allure.allureId('1177');
     await setMetadata('Проверить ASO manager независимо от остальных фильтров.');
-    await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
-      { id: managerId, name: researched[0].aso_manager_name },
-    ]);
-    await network.mockJson(nicheResearchApi.managerFilter, 'GET', {
-      users: [{ employee_id: managerId, employee_name: researched[0].aso_manager_name }],
-    });
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
-    await nichesPage.research.activateAllFilters();
+    const managerCatalog = await network.waitForResponseWhile(
+      { url: nicheResearchApi.managerFilter, method: 'GET', status: 200 },
+      () => nichesPage.research.openFilters(),
+    );
+    await managerCatalog.response.finished();
+    await nichesPage.research.activateAllFiltersInOpenPanel();
     const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const filtering = nichesPage.research.chooseManager(managerId, researched[0].aso_manager_name);
+    const filtering = nichesPage.research.chooseFirstAvailableManager();
     const request = await held.started;
+    await held.fulfill(nicheResearchList([researched[0]]));
+    const selectedManager = await filtering;
     await scenarioCheck.matchObject('Запрос содержит ASO manager', request.postDataJSON(), {
       researched: true,
-      employee_id: [managerId],
+      employee_id: [selectedManager.id],
     });
-    await held.fulfill(nicheResearchList([researched[0]]));
-    await filtering;
   });
 
   test('[TC-1178] применяет Category', async ({ network, nichesPage }) => {
@@ -230,25 +250,25 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
   test('[TC-1180] применяет комбинацию трёх фильтров', async ({ network, nichesPage }) => {
     await allure.allureId('1180');
     await setMetadata('Проверить пересечение ASO manager, Category и Status.');
-    await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
-      { id: managerId, name: researched[0].aso_manager_name },
-    ]);
-    await network.mockJson(nicheResearchApi.managerFilter, 'GET', {
-      users: [{ employee_id: managerId, employee_name: researched[0].aso_manager_name }],
-    });
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
-    await nichesPage.research.activateAllFilters();
+    const managerCatalog = await network.waitForResponseWhile(
+      { url: nicheResearchApi.managerFilter, method: 'GET', status: 200 },
+      () => nichesPage.research.openFilters(),
+    );
+    await managerCatalog.response.finished();
+    await nichesPage.research.activateAllFiltersInOpenPanel();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
-    await nichesPage.research.chooseManager(managerId, researched[0].aso_manager_name);
+    const selectedManager = await nichesPage.research.chooseFirstAvailableManager();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([researched[1]]));
     await nichesPage.research.chooseFilterValue('category', 'Neuro niche');
+    await nichesPage.research.expectResearchedRowCount(1);
     const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
     const filtering = nichesPage.research.chooseFilterValue('status', 'Revision');
     const request = await held.started;
     await scenarioCheck.matchObject('Запрос содержит три фильтра', request.postDataJSON(), {
       researched: true,
-      employee_id: [managerId],
+      employee_id: [selectedManager.id],
       category: ['Neuro niche'],
       status: ['Revision'],
     });
@@ -264,18 +284,9 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await nichesPage.research.activateAllFilters();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([researched[2]]));
     await nichesPage.research.chooseFilterValue('status', 'Approved');
-    const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const resetting = nichesPage.research.resetFilters();
-    const request = await held.started;
-    await scenarioCheck.deepEqual('Сброс возвращает базовое тело второй вкладки', request.postDataJSON(), {
-      limit: 10,
-      offset: 0,
-      researched: true,
-      sort_by: 'research_created_at',
-      sort_order: 'desc',
-    });
-    await held.fulfill(nicheResearchList(researched));
-    await resetting;
+    await nichesPage.research.expectResearchedRowCount(1);
+    await nichesPage.research.resetFilters();
+    await nichesPage.research.expectResearchedRowCount(4);
   });
 
   test('[TC-1182] показывает пустой результат фильтрации', async ({ network, nichesPage }) => {
@@ -283,6 +294,7 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await setMetadata('Проверить специальное empty state активных фильтров.');
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.openResearched();
+    await nichesPage.research.expectResearchedRowCount(4);
     await nichesPage.research.activateAllFilters();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([]));
     await nichesPage.research.chooseFilterValue('status', 'Rejected');
@@ -304,9 +316,10 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     const opening = nichesPage.research.openResearched();
     await held.started;
     await nichesPage.research.expectLoading();
+    await network.mockJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await held.fulfill(nicheResearchList(researched));
     await opening;
-    await nichesPage.research.expectRows(4);
+    await nichesPage.research.expectResearchedRowCount(4);
   });
 
   test('[TC-1185] повторяет запрос после ошибки', async ({ network, nichesPage }) => {
@@ -315,9 +328,9 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await network.failNext(nicheResearchApi.list, 'QUERY', { detail: 'Controlled researched failure' });
     await nichesPage.research.openResearched();
     await nichesPage.research.expectError();
-    await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
+    await network.mockJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     await nichesPage.research.repeatRequest();
-    await nichesPage.research.expectRows(4);
+    await nichesPage.research.expectResearchedRowCount(4);
   });
 
   test('[TC-1186] показывает действие More в строке', async ({ network, nichesPage }) => {

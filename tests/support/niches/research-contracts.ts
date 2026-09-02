@@ -16,7 +16,7 @@ export const nicheResearchApi = {
   create: /\/master\/api\/v1\/niche-template$/,
   item: /\/master\/api\/v1\/niche-template\/[0-9a-f-]+$/,
   checkName: /\/master\/api\/v1\/niche-template\/check_name\//,
-  managerFilter: /\/master\/api\/v1\/niche-template\/manager_filter$/,
+  managerFilter: /\/master\/api\/v1\/niche-template\/manager_filter(?:\?.*)?$/,
   asoManagers: /\/staff\/api\/v1\/employees\/get_aso_managers$/,
 } as const;
 

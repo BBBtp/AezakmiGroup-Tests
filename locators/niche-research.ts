@@ -24,7 +24,12 @@ export const nicheResearchTestIds = {
   managerFilter: {
     notAssigned: 'undefined-manager__option-not-assigned__checkbox-checkbox',
     apply: 'undefined-manager__apply-button',
+    option: (managerId: string) => `undefined-manager__option-${managerId}__checkbox-checkbox`,
+    anyAssignedOption: /^undefined-manager__option-(?!(?:all|not-assigned)(?:__|$)).+__checkbox-checkbox$/,
   },
+  filterOption: (kind: 'category' | 'status', value: string) =>
+    `undefined-${kind}__option-${value}__checkbox-checkbox`,
+  filterApply: (kind: 'category' | 'status') => `undefined-${kind}__apply-button`,
   table: 'niche-research-table',
   tableHeader: 'niche-research-table-header',
   tableTitle: 'niche-research-table-header__title',

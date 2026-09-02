@@ -207,8 +207,14 @@ export class NicheResearchOverviewComponent extends UiObject {
       this.locate.text('ASO manager', { exact: true }),
       2,
     );
-    await this.expectations.visible('Фильтр Category', this.locate.text('Category', { exact: true }));
-    await this.expectations.visible('Фильтр Status', this.locate.text('Status', { exact: true }));
+    await this.expectations.visible(
+      'Фильтр Category',
+      this.locate.testId(nicheResearchTestIds.filtersCatalog.category),
+    );
+    await this.expectations.visible(
+      'Фильтр Status',
+      this.locate.testId(nicheResearchTestIds.filtersCatalog.status),
+    );
     await this.expectations.visible(
       'Применение фильтров исследуемых ниш',
       this.locate.role('button', { name: 'Apply', exact: true }),
@@ -217,6 +223,10 @@ export class NicheResearchOverviewComponent extends UiObject {
 
   async activateAllFilters(): Promise<void> {
     await this.openFilters();
+    await this.activateAllFiltersInOpenPanel();
+  }
+
+  async activateAllFiltersInOpenPanel(): Promise<void> {
     await this.openFilterCatalog();
     await this.actions.click(
       'Добавление фильтра ASO manager',
@@ -238,13 +248,9 @@ export class NicheResearchOverviewComponent extends UiObject {
 
   async chooseManager(managerId: string, name: string): Promise<void> {
     const trigger = this.locate.role('button', { name: 'ASO manager', exact: true });
-    if (!(await this.locate.testId(`undefined-manager__option-${managerId}`).isVisible())) {
-      await this.actions.click('Открытие фильтра ASO manager', trigger);
-    }
-    await this.actions.click(
-      `Выбор ASO manager ${name}`,
-      this.locate.testId(`undefined-manager__option-${managerId}__checkbox-checkbox`),
-    );
+    const option = this.locate.testId(nicheResearchTestIds.managerFilter.option(managerId));
+    if (!(await option.isVisible())) await this.actions.click('Открытие фильтра ASO manager', trigger);
+    await this.actions.click(`Выбор ASO manager ${name}`, option);
     await this.actions.click(
       'Применение фильтра ASO manager',
       this.locate.testId(nicheResearchTestIds.managerFilter.apply),
@@ -253,12 +259,10 @@ export class NicheResearchOverviewComponent extends UiObject {
 
   async chooseFirstAvailableManager(): Promise<{ id: string; name: string }> {
     const trigger = this.locate.role('button', { name: 'ASO manager', exact: true });
-    const option = this.locate
-      .testId(/^undefined-manager__option-[0-9a-f]{8}-[0-9a-f-]+__checkbox-checkbox$/)
-      .first();
+    const option = this.locate.testId(nicheResearchTestIds.managerFilter.anyAssignedOption).first();
     if (!(await option.isVisible())) await this.actions.click('Открытие фильтра ASO manager', trigger);
     const testId = await option.getAttribute('data-testid');
-    const id = testId?.replace('undefined-manager__option-', '').replace('__checkbox-checkbox', '');
+    const id = testId?.replace(/^undefined-manager__option-/, '').replace(/__checkbox-checkbox$/, '');
     if (!id) throw new Error('Не удалось определить ID доступного ASO manager');
     const name = (await option.textContent())?.trim() ?? '';
     await this.chooseManager(id, name);
@@ -281,10 +285,13 @@ export class NicheResearchOverviewComponent extends UiObject {
       `Открытие фильтра ${kind}`,
       this.locate.testId(nicheResearchTestIds.activeFilters[kind]),
     );
-    await this.actions.click(`Выбор ${kind} ${value}`, this.locate.text(value, { exact: true }));
+    await this.actions.click(
+      `Выбор ${kind} ${value}`,
+      this.locate.testId(nicheResearchTestIds.filterOption(kind, value)),
+    );
     await this.actions.click(
       `Применение фильтра ${kind}`,
-      this.locate.testId(`undefined-${kind}__apply-button`),
+      this.locate.testId(nicheResearchTestIds.filterApply(kind)),
     );
   }
 
@@ -387,7 +394,7 @@ export class NicheResearchOverviewComponent extends UiObject {
   async expectFilteredEmpty(): Promise<void> {
     await this.expectations.visible(
       'Сообщение об отсутствии ниш по фильтрам',
-      this.locate.text('Nothing in the specified filters', { exact: true }),
+      this.locate.text('Nothing fits the specified filters', { exact: true }),
     );
     await this.expectations.visible(
       'Сброс фильтров пустого результата',
