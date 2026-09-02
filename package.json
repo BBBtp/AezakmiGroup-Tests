@@ -14,6 +14,7 @@
     "test:regression:statistics": "playwright test tests/regression/statistics.regression.spec.ts --project=regression --workers=1",
     "test:regression:top-keywords": "playwright test tests/regression/top-keywords.regression.spec.ts --project=regression --workers=1",
     "test:regression:kpi-settings": "playwright test tests/regression/kpi-settings-ui.regression.spec.ts tests/regression/kpi-settings.regression.spec.ts --project=regression",
+    "test:regression:niche-research": "playwright test --grep @niche-research --project=regression --project=regression-auth",
     "test:auth": "playwright test tests/smoke/auth.smoke.spec.ts tests/regression/auth-ui.regression.spec.ts tests/regression/functionality.regression.spec.ts tests/regression/validation.regression.spec.ts tests/regression/session.regression.spec.ts tests/regression/access-control.regression.spec.ts --project=smoke-auth --project=regression-auth --project=regression",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",

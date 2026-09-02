@@ -1,12 +1,14 @@
 import { type Locator, type Page } from '@playwright/test';
 import { kpiManagerText, kpiTestIds } from '@locators/kpi';
 import { BasePage } from '../base-page';
+import { KpiScoreHistoryComponent } from '../../components/kpi/kpi-score-history-component';
 
 export class KpiManagerPage extends BasePage {
   readonly settingsLink: Locator;
   readonly settingsRows: Locator;
   readonly errorContent: Locator;
   readonly vacationTitle: Locator;
+  readonly scoreHistory: KpiScoreHistoryComponent;
 
   constructor(
     page: Page,
@@ -20,6 +22,7 @@ export class KpiManagerPage extends BasePage {
     this.settingsRows = this.locate.role('row');
     this.errorContent = this.locate.testId(kpiTestIds.errorContent);
     this.vacationTitle = this.locate.text(kpiManagerText.vacationTitle, { exact: true });
+    this.scoreHistory = new KpiScoreHistoryComponent(page);
   }
 
   async navigate(): Promise<void> {

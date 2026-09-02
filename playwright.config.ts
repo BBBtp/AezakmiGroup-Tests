@@ -12,6 +12,7 @@ const unauthenticatedRegressionFiles = [
   '**/auth-ui.regression.spec.ts',
   '**/functionality.regression.spec.ts',
   '**/validation.regression.spec.ts',
+  '**/niche-research-access.regression.spec.ts',
 ];
 
 const baseReporters: any[] = [

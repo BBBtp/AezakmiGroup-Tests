@@ -6,6 +6,7 @@ import { NichesOverviewComponent } from '../../components/niches/niches-overview
 import { NicheCreateComponent } from '../../components/niches/niche-create-component';
 import { NicheDetailComponent } from '../../components/niches/niche-detail-component';
 import { NicheEditComponent } from '../../components/niches/niche-edit-component';
+import { NicheResearchOverviewComponent } from '../../components/niches/niche-research-overview-component';
 import { SortedAppsOverviewComponent } from '../../components/niches/sorted-apps-overview-component';
 import { BasePage } from '../base-page';
 
@@ -17,6 +18,7 @@ export class NichesPage extends BasePage {
   readonly create: NicheCreateComponent;
   readonly edit: NicheEditComponent;
   readonly detail: NicheDetailComponent;
+  readonly research: NicheResearchOverviewComponent;
 
   constructor(page: Page) {
     super(page);
@@ -27,6 +29,7 @@ export class NichesPage extends BasePage {
     this.create = new NicheCreateComponent(page);
     this.edit = new NicheEditComponent(page);
     this.detail = new NicheDetailComponent(page);
+    this.research = new NicheResearchOverviewComponent(page);
   }
 
   async openFromSidebar(): Promise<void> {
@@ -67,6 +70,21 @@ export class NichesPage extends BasePage {
   async openSortedAppsFromSidebar(): Promise<void> {
     await this.shell.openSidebarDestination('Sorted by apps', '/sorted-apps', 'Niches');
     await this.sortedApps.expectBusinessControls();
+  }
+
+  async openResearchFromSidebar(): Promise<void> {
+    await this.shell.openSidebarDestination('Research', '/niche-research', 'Niches');
+    await this.research.expectLoaded();
+  }
+
+  async navigateToResearch(): Promise<void> {
+    await this.navigateToResearchRoute();
+    await this.research.expectLoaded();
+  }
+
+  async navigateToResearchRoute(): Promise<void> {
+    await this.navigateTo('/niche-research');
+    await this.expectations.url('URL страницы исследования ниш', /\/niche-research$/);
   }
 
   openAsoMobileCreate(): Promise<void> {

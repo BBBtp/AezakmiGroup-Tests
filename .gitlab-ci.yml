@@ -15,6 +15,7 @@ variables:
       - 'employees'
       - 'push-reviews'
       - 'task-generator'
+      - 'niche-research'
     description: 'Functional regression category; ignored when TEST_IDS or TEST_GREP is set'
   TEST_IDS:
     value: ''

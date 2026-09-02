@@ -83,6 +83,8 @@ npm run doqa:run -- tests/regression/example.regression.spec.ts --project=regres
   ID (`test_ids`, например `610,TC-845`). Приоритет фильтров: `test_ids`, затем расширенный
   `test_grep`, затем категория. Любой фильтр использует один runner; значение категории `all` и
   пустые фильтры запускают полный regression на трёх runners.
+- Категория `niche-research` доступна в ручных запусках GitHub Actions и GitLab и выбирает только
+  файлы раздела с тегом `@niche-research`; локальный эквивалент — `npm run test:regression:niche-research`.
 - Ручной GitLab pipeline предоставляет те же фильтры как `TEST_CATEGORY`, `TEST_IDS` и
   `TEST_GREP`. Bridge проверяет их и передаёт в одноимённые inputs GitHub workflow; старые
   DoQA-запуски без новых переменных продолжают запускать `all` или переданный `TEST_GREP`.

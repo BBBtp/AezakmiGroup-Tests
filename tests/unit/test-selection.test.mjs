@@ -35,6 +35,14 @@ test('category selection resolves to concrete regression files', () => {
   assert.equal(selection.grep, '');
 });
 
+test('niche-research category selects only the tagged section files', () => {
+  const selection = resolveTestSelection({ category: 'niche-research' });
+  assert.equal(selection.mode, 'category');
+  assert.equal(selection.filtered, true);
+  assert.deepEqual(selection.files, regressionCategories['niche-research']);
+  assert.ok(selection.files.every((file) => file.includes('niche-research')));
+});
+
 test('all selection keeps the three-shard full regression', () => {
   assert.deepEqual(resolveTestSelection({}), {
     mode: 'all',

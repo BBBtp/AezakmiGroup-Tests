@@ -42,6 +42,7 @@ on:
           - employees
           - push-reviews
           - task-generator
+          - niche-research
       test_ids:
         description: Optional TC IDs, for example 610,611 or TC-845
         required: false
