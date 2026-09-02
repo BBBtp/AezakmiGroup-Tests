@@ -35,6 +35,18 @@ export class AdministrationComponent extends UiObject {
     );
   }
 
+  async expectParametersUnavailable(): Promise<void> {
+    const within = this.locate.within(this.root);
+    await this.expectations.hidden(
+      'заголовок закрытой страницы Parameters',
+      within.role('heading', { name: administrationLocators.parameters.title, exact: true }),
+    );
+    await this.expectations.hidden(
+      'описание закрытой страницы Parameters',
+      within.text(administrationLocators.parameters.description, { exact: true }),
+    );
+  }
+
   async openFirstEdit(): Promise<void> {
     await this.actions.click(
       'Parameters: edit first value',
