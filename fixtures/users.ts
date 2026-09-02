@@ -22,6 +22,13 @@ export interface UserCredentials {
   permissions: string[];
 }
 
+export interface ParameterAccessUser extends UserCredentials {
+  label: 'ASO admin' | 'ASO viewer' | 'Web View admin' | 'Web View viewer';
+  module: 'ASO' | 'Web View';
+  accessLevel: 'admin' | 'viewer';
+  canAccessParameters: boolean;
+}
+
 /** Функция, создающая объект с тестовыми пользователями из env */
 const getTestUsers = (): Record<string, UserCredentials> => ({
   admin: {
@@ -39,6 +46,53 @@ const getTestUsers = (): Record<string, UserCredentials> => ({
     permissions: ['read', 'write_own'],
   },
 });
+
+export const getParameterAccessUsers = (): ParameterAccessUser[] => [
+  {
+    label: 'ASO admin',
+    module: 'ASO',
+    accessLevel: 'admin',
+    canAccessParameters: true,
+    username: getEnv('E2E_ASO_ADMIN_EMAIL'),
+    email: getEnv('E2E_ASO_ADMIN_EMAIL'),
+    password: getEnv('E2E_ASO_ADMIN_PASSWORD'),
+    role: 'admin',
+    permissions: ['parameters:read', 'parameters:write'],
+  },
+  {
+    label: 'ASO viewer',
+    module: 'ASO',
+    accessLevel: 'viewer',
+    canAccessParameters: false,
+    username: getEnv('E2E_ASO_VIEWER_EMAIL'),
+    email: getEnv('E2E_ASO_VIEWER_EMAIL'),
+    password: getEnv('E2E_ASO_VIEWER_PASSWORD'),
+    role: 'user',
+    permissions: [],
+  },
+  {
+    label: 'Web View admin',
+    module: 'Web View',
+    accessLevel: 'admin',
+    canAccessParameters: false,
+    username: getEnv('E2E_WEB_VIEW_ADMIN_EMAIL'),
+    email: getEnv('E2E_WEB_VIEW_ADMIN_EMAIL'),
+    password: getEnv('E2E_WEB_VIEW_ADMIN_PASSWORD'),
+    role: 'admin',
+    permissions: [],
+  },
+  {
+    label: 'Web View viewer',
+    module: 'Web View',
+    accessLevel: 'viewer',
+    canAccessParameters: false,
+    username: getEnv('E2E_WEB_VIEW_VIEWER_EMAIL'),
+    email: getEnv('E2E_WEB_VIEW_VIEWER_EMAIL'),
+    password: getEnv('E2E_WEB_VIEW_VIEWER_PASSWORD'),
+    role: 'user',
+    permissions: [],
+  },
+];
 
 /** Прокси для динамического получения тестовых пользователей */
 export const testUsers = new Proxy({} as Record<string, UserCredentials>, {

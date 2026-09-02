@@ -24,6 +24,13 @@ export class AdministrationPage extends BasePage {
     await this.content.expectParameters();
   }
 
+  async expectParametersAccessBlocked(): Promise<void> {
+    await this.navigateTo('/parameters');
+    await this.expectations.url('URL страницы входа после запрета доступа к Parameters', /\/login$/);
+    await this.content.expectParametersUnavailable();
+    await this.shell.expectDangerousActionsHidden();
+  }
+
   async openEmployees(): Promise<void> {
     await this.navigateTo('/employees');
     await this.content.expectEmployees();
