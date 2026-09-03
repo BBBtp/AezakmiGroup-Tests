@@ -283,19 +283,31 @@ test.describe('FRONT-98 → управление Niches for research', { tag: '@
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([newNiche]));
     const selectedManager = await nichesPage.research.chooseFirstAvailableManager();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([newNiche]));
-    await nichesPage.research.chooseFilterValue('category', 'Neuro niche');
+    const categoryResponse = await network.waitForResponseWhile(
+      { url: nicheResearchApi.list, method: 'QUERY', status: 200 },
+      () => nichesPage.research.chooseFilterValue('category', 'Neuro niche'),
+    );
+    await categoryResponse.response.finished();
     await nichesPage.research.expectRowCount(1);
 
-    const combined = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const selecting = nichesPage.research.chooseFilterValue('status', 'New');
-    const request = await combined.started;
+    await network.mockJson(nicheResearchApi.list, 'QUERY', nicheResearchList([newNiche]));
+    const statusRequest = network.waitForRequest({
+      url: nicheResearchApi.list,
+      method: 'QUERY',
+      timeout: 10_000,
+      matches: (request) => {
+        if (!nicheResearchApi.list.test(request.url()) || request.method() !== 'QUERY') return false;
+        const body = request.postDataJSON() as { status?: string[] };
+        return body.status?.includes('New') ?? false;
+      },
+    });
+    await nichesPage.research.chooseFilterValue('status', 'New');
+    const request = await statusRequest;
     await scenarioCheck.matchObject('Запрос содержит полную комбинацию фильтров', request.postDataJSON(), {
       employee_id: [selectedManager.id],
       category: ['Neuro niche'],
       status: ['New'],
     });
-    await combined.fulfill(nicheResearchList([newNiche]));
-    await selecting;
     await nichesPage.research.expectRowCount(1);
   });
 
