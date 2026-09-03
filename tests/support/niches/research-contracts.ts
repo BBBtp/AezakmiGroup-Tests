@@ -45,3 +45,12 @@ export const nicheResearchList = (items: NicheResearchItem[]) => ({
   limit: 10,
   offset: 0,
 });
+
+export const asoManagerCatalog = (id: string, name: string) => {
+  const manager = {
+    employee_id: id,
+    employee_name: name,
+  };
+
+  return { users: [manager] };
+};

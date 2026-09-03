@@ -2,7 +2,7 @@ import { allure } from 'allure-playwright';
 
 import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
-import { nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
+import { asoManagerCatalog, nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
 
 const managerId = '00000000-0000-4000-8000-900000000002';
 const newNiche = nicheResearchItem(0, { name: 'Alpha research niche' });
@@ -34,16 +34,11 @@ test.describe('FRONT-98 → управление Niches for research', { tag: '@
     await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
       { id: managerId, name: assignedNiche.aso_manager_name },
     ]);
-    await network.mockJson(nicheResearchApi.managerFilter, 'GET', {
-      users: [
-        {
-          employee_id: managerId,
-          employee_name: assignedNiche.aso_manager_name,
-          id: managerId,
-          name: assignedNiche.aso_manager_name,
-        },
-      ],
-    });
+    await network.mockJson(
+      nicheResearchApi.managerFilter,
+      'GET',
+      asoManagerCatalog(managerId, assignedNiche.aso_manager_name),
+    );
     await network.fulfillNextJson(
       nicheResearchApi.list,
       'QUERY',

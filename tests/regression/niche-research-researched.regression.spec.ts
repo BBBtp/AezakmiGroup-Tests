@@ -2,7 +2,7 @@ import { allure } from 'allure-playwright';
 
 import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
-import { nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
+import { asoManagerCatalog, nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
 
 const managerId = '00000000-0000-4000-8000-910000000001';
 const researched = [
@@ -65,16 +65,11 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
       { id: managerId, name: researched[0].aso_manager_name },
     ]);
-    await network.mockJson(nicheResearchApi.managerFilter, 'GET', {
-      users: [
-        {
-          employee_id: managerId,
-          employee_name: researched[0].aso_manager_name,
-          id: managerId,
-          name: researched[0].aso_manager_name,
-        },
-      ],
-    });
+    await network.mockJson(
+      nicheResearchApi.managerFilter,
+      'GET',
+      asoManagerCatalog(managerId, researched[0].aso_manager_name),
+    );
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([nicheResearchItem(0)]));
     await nichesPage.navigateToResearch();
   });
@@ -261,19 +256,31 @@ test.describe('FRONT-98 → Researched niches', { tag: '@niche-research' }, () =
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList(researched));
     const selectedManager = await nichesPage.research.chooseFirstAvailableManager();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([researched[1]]));
-    await nichesPage.research.chooseFilterValue('category', 'Neuro niche');
+    const categoryResponse = await network.waitForResponseWhile(
+      { url: nicheResearchApi.list, method: 'QUERY', status: 200 },
+      () => nichesPage.research.chooseFilterValue('category', 'Neuro niche'),
+    );
+    await categoryResponse.response.finished();
     await nichesPage.research.expectResearchedRowCount(1);
-    const held = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const filtering = nichesPage.research.chooseFilterValue('status', 'Revision');
-    const request = await held.started;
+    await network.mockJson(nicheResearchApi.list, 'QUERY', nicheResearchList([researched[1]]));
+    const statusRequest = network.waitForRequest({
+      url: nicheResearchApi.list,
+      method: 'QUERY',
+      timeout: 10_000,
+      matches: (request) => {
+        if (!nicheResearchApi.list.test(request.url()) || request.method() !== 'QUERY') return false;
+        const body = request.postDataJSON() as { status?: string[] };
+        return body.status?.includes('Revision') ?? false;
+      },
+    });
+    await nichesPage.research.chooseFilterValue('status', 'Revision');
+    const request = await statusRequest;
     await scenarioCheck.matchObject('Запрос содержит три фильтра', request.postDataJSON(), {
       researched: true,
       employee_id: [selectedManager.id],
       category: ['Neuro niche'],
       status: ['Revision'],
     });
-    await held.fulfill(nicheResearchList([researched[1]]));
-    await filtering;
   });
 
   test('[TC-1181] сбрасывает активные фильтры', async ({ network, nichesPage }) => {

@@ -246,10 +246,16 @@ export class NicheResearchOverviewComponent extends UiObject {
     );
   }
 
+  private async openManagerOptions(trigger: Locator, option: Locator): Promise<void> {
+    if (await option.isVisible()) return;
+    if ((await trigger.getAttribute('aria-expanded')) === 'true') return;
+    await this.actions.click('Открытие фильтра ASO manager', trigger);
+  }
+
   async chooseManager(managerId: string, name: string): Promise<void> {
-    const trigger = this.locate.role('button', { name: 'ASO manager', exact: true });
+    const trigger = this.locate.testId(nicheResearchTestIds.activeFilters.manager);
     const option = this.locate.testId(nicheResearchTestIds.managerFilter.option(managerId));
-    if (!(await option.isVisible())) await this.actions.click('Открытие фильтра ASO manager', trigger);
+    await this.openManagerOptions(trigger, option);
     await this.actions.click(`Выбор ASO manager ${name}`, option);
     await this.actions.click(
       'Применение фильтра ASO manager',
@@ -258,9 +264,9 @@ export class NicheResearchOverviewComponent extends UiObject {
   }
 
   async chooseFirstAvailableManager(): Promise<{ id: string; name: string }> {
-    const trigger = this.locate.role('button', { name: 'ASO manager', exact: true });
+    const trigger = this.locate.testId(nicheResearchTestIds.activeFilters.manager);
     const option = this.locate.testId(nicheResearchTestIds.managerFilter.anyAssignedOption).first();
-    if (!(await option.isVisible())) await this.actions.click('Открытие фильтра ASO manager', trigger);
+    await this.openManagerOptions(trigger, option);
     const testId = await option.getAttribute('data-testid');
     const id = testId?.replace(/^undefined-manager__option-/, '').replace(/__checkbox-checkbox$/, '');
     if (!id) throw new Error('Не удалось определить ID доступного ASO manager');
@@ -270,9 +276,9 @@ export class NicheResearchOverviewComponent extends UiObject {
   }
 
   async chooseNotAssignedManager(): Promise<void> {
-    const trigger = this.locate.role('button', { name: 'ASO manager', exact: true });
+    const trigger = this.locate.testId(nicheResearchTestIds.activeFilters.manager);
     const option = this.locate.testId(nicheResearchTestIds.managerFilter.notAssigned);
-    if (!(await option.isVisible())) await this.actions.click('Открытие фильтра ASO manager', trigger);
+    await this.openManagerOptions(trigger, option);
     await this.actions.click('Выбор неназначенного ASO manager', option);
     await this.actions.click(
       'Применение фильтра ASO manager',
