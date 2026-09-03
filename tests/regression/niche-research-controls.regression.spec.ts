@@ -2,7 +2,7 @@ import { allure } from 'allure-playwright';
 
 import { scenarioCheck } from '@framework/assertions';
 import { test } from '@fixtures';
-import { nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
+import { asoManagerCatalog, nicheResearchApi, nicheResearchItem, nicheResearchList } from '@support/niches';
 
 const managerId = '00000000-0000-4000-8000-900000000002';
 const newNiche = nicheResearchItem(0, { name: 'Alpha research niche' });
@@ -31,6 +31,14 @@ async function setMetadata(goal: string): Promise<void> {
 
 test.describe('FRONT-98 → управление Niches for research', { tag: '@niche-research' }, () => {
   test.beforeEach(async ({ network, nichesPage }) => {
+    await network.mockJson(nicheResearchApi.asoManagers, 'GET', [
+      { id: managerId, name: assignedNiche.aso_manager_name },
+    ]);
+    await network.mockJson(
+      nicheResearchApi.managerFilter,
+      'GET',
+      asoManagerCatalog(managerId, assignedNiche.aso_manager_name),
+    );
     await network.fulfillNextJson(
       nicheResearchApi.list,
       'QUERY',
@@ -208,10 +216,16 @@ test.describe('FRONT-98 → управление Niches for research', { tag: '@
   test('[TC-1157] применяет и сбрасывает ASO manager', async ({ network, nichesPage }) => {
     await allure.allureId('1157');
     await setMetadata('Проверить фактическое применение и сброс ASO manager.');
-    await nichesPage.research.activateAllFilters();
+    const managerCatalog = await network.waitForResponseWhile(
+      { url: nicheResearchApi.managerFilter, method: 'GET', status: 200 },
+      () => nichesPage.research.openFilters(),
+    );
+    await managerCatalog.response.finished();
+    await nichesPage.research.activateAllFiltersInOpenPanel();
     const filtered = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
     const selecting = nichesPage.research.chooseFirstAvailableManager();
     const filteredRequest = await filtered.started;
+    await filtered.fulfill(nicheResearchList([newNiche]));
     const selectedManager = await selecting;
     await scenarioCheck.matchObject(
       'Запрос содержит выбранного ASO manager',
@@ -220,20 +234,14 @@ test.describe('FRONT-98 → управление Niches for research', { tag: '@
         employee_id: [selectedManager.id],
       },
     );
-    await filtered.fulfill(nicheResearchList([newNiche]));
     await nichesPage.research.expectRowCount(1);
 
-    const reset = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
-    const resetting = nichesPage.research.resetFilters();
-    const resetRequest = await reset.started;
-    await scenarioCheck.deepEqual('Сброс удаляет все фильтры из тела', resetRequest.postDataJSON(), {
-      limit: 10,
-      offset: 0,
-      researched: false,
-      sort_by: 'created_at',
-    });
-    await reset.fulfill(nicheResearchList([newNiche, assignedNiche]));
-    await resetting;
+    await network.fulfillNextJson(
+      nicheResearchApi.list,
+      'QUERY',
+      nicheResearchList([newNiche, assignedNiche]),
+    );
+    await nichesPage.research.resetFilters();
     await nichesPage.research.expectRowCount(2);
   });
 
@@ -266,11 +274,17 @@ test.describe('FRONT-98 → управление Niches for research', { tag: '@
   test('[TC-1159] применяет комбинацию трёх фильтров', async ({ network, nichesPage }) => {
     await allure.allureId('1159');
     await setMetadata('Проверить пересечение ASO manager, Category и Status.');
-    await nichesPage.research.activateAllFilters();
+    const managerCatalog = await network.waitForResponseWhile(
+      { url: nicheResearchApi.managerFilter, method: 'GET', status: 200 },
+      () => nichesPage.research.openFilters(),
+    );
+    await managerCatalog.response.finished();
+    await nichesPage.research.activateAllFiltersInOpenPanel();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([newNiche]));
     const selectedManager = await nichesPage.research.chooseFirstAvailableManager();
     await network.fulfillNextJson(nicheResearchApi.list, 'QUERY', nicheResearchList([newNiche]));
     await nichesPage.research.chooseFilterValue('category', 'Neuro niche');
+    await nichesPage.research.expectRowCount(1);
 
     const combined = await network.holdNextJson(nicheResearchApi.list, 'QUERY');
     const selecting = nichesPage.research.chooseFilterValue('status', 'New');

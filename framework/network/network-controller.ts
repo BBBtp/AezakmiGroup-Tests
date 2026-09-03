@@ -13,6 +13,10 @@ export type ResponseCriteria = {
   timeout?: number;
 };
 
+export type RequestCriteria = Pick<ResponseCriteria, 'url' | 'method' | 'timeout'> & {
+  matches?: (request: Request) => boolean;
+};
+
 export type RequestCapture = {
   readonly urls: string[];
   readonly count: number;
@@ -71,10 +75,12 @@ export class NetworkController {
     );
   }
 
-  waitForRequest(criteria: Pick<ResponseCriteria, 'url' | 'method' | 'timeout'>): Promise<Request> {
+  waitForRequest(criteria: RequestCriteria): Promise<Request> {
     return this.page.waitForRequest(
       (request) =>
-        matchesUrl(request.url(), criteria.url) && (!criteria.method || request.method() === criteria.method),
+        matchesUrl(request.url(), criteria.url) &&
+        (!criteria.method || request.method() === criteria.method) &&
+        (!criteria.matches || criteria.matches(request)),
       { timeout: criteria.timeout },
     );
   }
