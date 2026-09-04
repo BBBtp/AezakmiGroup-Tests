@@ -15,6 +15,8 @@ export const commonComponentSelectors = {
       absoluteValue: `${base}__abs`,
       percentageValue: `${base}__percentage-value`,
       period: `${base}__period`,
+      tooltipButton: 'button',
+      tooltipPopup: '[data-radix-popper-content-wrapper]:visible',
     };
   },
   modal: (value: string) => ({

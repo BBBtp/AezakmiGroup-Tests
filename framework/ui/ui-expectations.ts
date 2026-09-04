@@ -98,6 +98,14 @@ export class UiExpectations {
     );
   }
 
+  widthAtMost(target: string, locator: Locator, maximum: number): Promise<void> {
+    return loggedExpectation(this.page, target, locator, `ширина не больше ${maximum}px`, () =>
+      expect
+        .poll(async () => (await locator.boundingBox())?.width ?? Number.POSITIVE_INFINITY)
+        .toBeLessThanOrEqual(maximum),
+    );
+  }
+
   url(target: string, value: string | RegExp, options?: { timeout?: number }): Promise<void> {
     const body = this.page.locator('body');
     return loggedExpectation(this.page, target, body, `URL соответствует ${String(value)}`, () =>

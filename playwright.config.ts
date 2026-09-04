@@ -7,6 +7,7 @@ const desktopChrome = {
   ...devices['Desktop Chrome'],
   viewport: { width: 1920, height: 1080 },
 };
+const slowMo = process.env.PW_SLOW_MO ? Number(process.env.PW_SLOW_MO) : undefined;
 const unauthenticatedRegressionFiles = [
   '**/access-control.regression.spec.ts',
   '**/auth-ui.regression.spec.ts',
@@ -49,6 +50,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    launchOptions: slowMo === undefined ? undefined : { slowMo },
     actionTimeout: 10000,
     navigationTimeout: process.env.CI ? 60000 : 30000,
     viewport: { width: 1280, height: 720 },

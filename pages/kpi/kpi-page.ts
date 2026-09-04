@@ -97,6 +97,16 @@ export class KpiPage extends BasePage {
     return settingsPage;
   }
 
+  async openFirstEmployee(): Promise<KpiManagerPage> {
+    await this.employeesTable.openFirstEmployee();
+    const employeeId = this.page.url().match(/\/kpi\/([^/?#]+)/)?.[1];
+    if (!employeeId) throw new Error('KPI employee URL with a valid employee ID is required');
+
+    const managerPage = this.manager(employeeId);
+    await managerPage.expectations.url('KPI employee details URL', new RegExp(`/kpi/${employeeId}$`));
+    return managerPage;
+  }
+
   manager(employeeId: string): KpiManagerPage {
     return new KpiManagerPage(this.page, employeeId);
   }

@@ -50,6 +50,17 @@ export const employeeListLocators = {
   technicalValue: /\b(?:error-content|undefined|NaN|null)\b|\[object Object\]/i,
 } as const;
 
+export const employeeDetailsLocators = {
+  detailsButton: 'Details',
+  vacationBreadcrumb: 'Vacation',
+  vacationHistory: {
+    title: 'Vacation history',
+    editAction: 'Edit',
+    deleteAction: 'Delete',
+    row: 'tbody tr',
+  },
+} as const;
+
 export const employeeCityGroups = [
   {
     country: 'Russia',
