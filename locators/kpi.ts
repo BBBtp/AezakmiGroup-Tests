@@ -42,10 +42,10 @@ export const kpiTestIds = {
     }),
   },
   employeesTable: {
-    root: 'employees-table__main',
+    root: 'employees-table',
     rowsSelector: 'tbody tr',
     headerSelector: 'thead tr',
-    openActionSelector: 'button:has-text("Open"), a:has-text("Open"), [role="button"]:has-text("Open")',
+    openActionSelector: 'a:has-text("Open"), button:has-text("Open"), [role="button"]:has-text("Open")',
     headers: {
       Score: 'employees-table__header-score',
       MRR: 'employees-table__header-mrr',

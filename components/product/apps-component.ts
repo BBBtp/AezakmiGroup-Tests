@@ -2,16 +2,19 @@ import type { Locator, Page } from '@playwright/test';
 
 import { UiObject } from '@framework/ui';
 import { productLocators } from '@locators/product';
+import { AppParametersComponent } from './app-parameters-component';
 import { AppMetricDetailsModalComponent } from './app-metric-details-modal-component';
 
 export class AppsComponent extends UiObject {
   readonly root: Locator;
   readonly metricDetails: AppMetricDetailsModalComponent;
+  readonly parameters: AppParametersComponent;
 
   constructor(page: Page) {
     super(page);
     this.root = this.locate.role('main');
     this.metricDetails = new AppMetricDetailsModalComponent(page);
+    this.parameters = new AppParametersComponent(page);
   }
 
   async expectLoaded(): Promise<void> {
@@ -72,6 +75,15 @@ export class AppsComponent extends UiObject {
     await this.actions.click('Apps: open first application', first);
     await this.expectations.url('Apps: detail URL', productLocators.apps.detailUrl);
     return label;
+  }
+
+  async openFirstAppParameters(): Promise<AppParametersComponent> {
+    const first = this.appLinks.first();
+    await this.expectations.nonEmpty('приложения в списке Apps', this.appLinks);
+    await this.actions.click('Apps: открыть первое приложение', first);
+    await this.expectations.url('URL detail приложения', productLocators.apps.detailUrl);
+    await this.parameters.open();
+    return this.parameters;
   }
 
   async expectDetail(): Promise<void> {

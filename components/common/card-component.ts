@@ -48,6 +48,8 @@ export class CardComponent extends UiObject {
    * Период, за который отображаются данные
    */
   readonly period: Locator;
+  readonly tooltipTrigger: Locator;
+  readonly tooltipPopup: Locator;
 
   /**
    * @param page Экземпляр страницы Playwright
@@ -74,6 +76,8 @@ export class CardComponent extends UiObject {
     this.absValue = card.testId(selectors.absoluteValue);
     this.percentValue = card.testId(selectors.percentageValue);
     this.period = card.testId(selectors.period);
+    this.tooltipTrigger = card.css(selectors.tooltipButton).first();
+    this.tooltipPopup = this.locate.css(selectors.tooltipPopup);
   }
 
   /**
@@ -95,5 +99,22 @@ export class CardComponent extends UiObject {
     await this.expectations.visible(`${cardTitle} KPI card absolute value`, this.absValue);
     await this.expectations.visible(`${cardTitle} KPI card percentage`, this.percentValue);
     await this.expectations.visible(`${cardTitle} KPI card period`, this.period);
+  }
+
+  async hoverTooltip(): Promise<void> {
+    await this.actions.hover('информационная подсказка карточки', this.tooltipTrigger);
+    await this.expectations.visible('информационная подсказка карточки', this.tooltipPopup);
+  }
+
+  async expectTooltipText(value: string): Promise<void> {
+    await this.expectations.containsText('текст информационной подсказки карточки', this.tooltipPopup, value);
+  }
+
+  async expectTooltipWidthAtMost(maximum: number): Promise<void> {
+    await this.expectations.widthAtMost(
+      'максимальная ширина информационной подсказки карточки',
+      this.tooltipPopup,
+      maximum,
+    );
   }
 }

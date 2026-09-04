@@ -25,6 +25,16 @@ export const productLocators = {
       optionCheckbox: (value: string) => `undefined__option-${value}__checkbox-checkbox`,
       applyButton: 'undefined__apply-button',
     },
+    detail: {
+      editParameters: 'Edit parameters',
+      staff: 'Staff',
+      parameter: 'Parameter',
+      value: 'Value',
+      contacts: 'Contacts',
+      staffCard: 'xpath=ancestor::*[.//*[normalize-space(.)="Contacts"]][1]',
+      appHeader: 'xpath=ancestor::*[.//button][1]',
+      selectValue: '[data-testid$="trigger-value"]',
+    },
   },
   abTests: {
     title: 'A/B tests',
